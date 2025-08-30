@@ -1,0 +1,251 @@
+@{
+    ViewData["Title"] = "Registro de Asistencia";
+    ViewData["Subtitle"] = $"Escaneaste correctamente el QR de la Clase {ViewBag.ClaseId}";
+}
+
+<div class="scan-container">
+    <div class="scan-card">
+        <div class="scan-header">
+            <div class="qr-success-icon">✅</div>
+            <h2>¡QR Escaneado Correctamente!</h2>
+            <p class="clase-info">Clase ID: <strong>@ViewBag.ClaseId</strong></p>
+            <div class="loading-info" id="loadingClaseInfo">
+                <div class="spinner-mini"></div>
+                Cargando información de la clase...
+            </div>
+            <div class="clase-details" id="claseDetails" style="display: none;"></div>
+        </div>
+
+        <div class="scan-form">
+            <form id="asistenciaForm">
+                <div class="form-group">
+                    <label class="form-label" for="alumnoId">Tu ID de Alumno</label>
+                    <input type="number" id="alumnoId" name="alumnoId" class="form-input scan-input" 
+                           min="1" required placeholder="Ejemplo: 1" autofocus>
+                    <small class="form-hint">Ingresa tu número de ID de alumno</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-scan" id="submitBtn">
+                    <span class="btn-text">Registrar Mi Asistencia</span>
+                    <span class="btn-loading" style="display: none;">
+                        <div class="spinner-mini"></div>
+                        Registrando...
+                    </span>
+                </button>
+            </form>
+        </div>
+
+        <div id="mensaje" class="message-area"></div>
+
+        <div class="scan-footer">
+            <div class="security-info">
+                <span class="security-icon">🔒</span>
+                <small>Conexión segura • Token único por clase</small>
+            </div>
+            
+            <div class="help-section">
+                <details>
+                    <summary>¿Necesitas ayuda?</summary>
+                    <div class="help-content">
+                        <p><strong>IDs de prueba disponibles:</strong></p>
+                        <ul>
+                            <li>ID 1: Juan Pérez</li>
+                            <li>ID 2: María García</li>
+                            <li>ID 3: Carlos López</li>
+                        </ul>
+                        <p>Si no conoces tu ID, contacta a tu profesor.</p>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let currentNonce = "@ViewBag.Nonce";
+    const claseId = @ViewBag.ClaseId;
+    let claseInfo = null;
+    let isSubmitting = false;
+
+    // Cargar información de la clase
+    async function cargarInfoClase() {
+        try {
+            const response = await fetch(`/api/clases/${claseId}`);
+            if (response.ok) {
+                claseInfo = await response.json();
+                mostrarInfoClase();
+            } else {
+                document.getElementById('loadingClaseInfo').innerHTML = 
+                    '<span style="color: #dc2626;">⚠️ No se pudo cargar la información de la clase</span>';
+            }
+        } catch (error) {
+            document.getElementById('loadingClaseInfo').innerHTML = 
+                '<span style="color: #dc2626;">⚠️ Error de conexión</span>';
+        }
+    }
+
+    function mostrarInfoClase() {
+        const loadingDiv = document.getElementById('loadingClaseInfo');
+        const detailsDiv = document.getElementById('claseDetails');
+        
+        if (claseInfo) {
+            loadingDiv.style.display = 'none';
+            detailsDiv.style.display = 'block';
+            detailsDiv.innerHTML = `
+                <div class="clase-info-card">
+                    <h3>${claseInfo.asignatura}</h3>
+                    <p><strong>Inicio:</strong> ${new Date(claseInfo.inicioUtc).toLocaleString('es-ES')}</p>
+                    <p><strong>Estado:</strong> <span class="status-active">Activa</span></p>
+                </div>
+            `;
+        }
+    }
+
+    // Renovar nonce si es necesario
+    async function renovarNonce() {
+        try {
+            const response = await fetch(`/api/clases/${claseId}/qr`);
+            if (!response.ok) throw new Error('No se pudo renovar token');
+            const data = await response.json();
+            const parts = (data.url || '').split('nonce=');
+            if (parts.length < 2) throw new Error('URL sin nonce');
+            currentNonce = parts[1];
+            console.log('🔄 Nonce renovado:', currentNonce);
+            return data;
+        } catch (error) {
+            console.error('❌ Error renovando nonce:', error);
+            throw error;
+        }
+    }
+
+    // Función principal para marcar asistencia
+    async function marcarAsistencia(reintentado = false) {
+        if (isSubmitting) return;
+        
+        const alumnoId = document.getElementById('alumnoId').value;
+        const mensajeDiv = document.getElementById('mensaje');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoading = submitBtn.querySelector('.btn-loading');
+        
+        if (!alumnoId) {
+            mostrarMensaje('Por favor ingresa tu ID de alumno', 'error');
+            return;
+        }
+
+        // Mostrar estado de carga
+        isSubmitting = true;
+        submitBtn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline-flex';
+
+        try {
+            console.log('🎯 Enviando registro - AlumnoId:', alumnoId, 'ClaseId:', claseId, 'Nonce:', currentNonce);
+            
+            const response = await fetch('/api/asistencias/alumno-scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    alumnoId: parseInt(alumnoId),
+                    claseId: claseId,
+                    nonce: currentNonce
+                })
+            });
+
+            const result = await response.json();
+            
+            if (response.ok) {
+                mostrarMensaje(result.mensaje || 'Asistencia registrada exitosamente', 'success');
+                document.getElementById('asistenciaForm').reset();
+                
+                // Animar el éxito
+                submitBtn.innerHTML = '✅ ¡Registrado!';
+                setTimeout(() => {
+                    submitBtn.innerHTML = '<span class="btn-text">Registrar Mi Asistencia</span>';
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                }, 3000);
+                
+            } else {
+                throw new Error(result.mensaje || result.message || 'Error al registrar asistencia');
+            }
+            
+        } catch (error) {
+            console.error('💥 Error en registro:', error);
+            
+            // Reintento automático si el token expiró
+            if (!reintentado && /nonce|token/i.test(error.message)) {
+                console.log('🔄 Reintentando con nuevo token...');
+                try {
+                    await renovarNonce();
+                    // Resetear estado y reintentar
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
+                    await marcarAsistencia(true);
+                    return;
+                } catch {
+                    mostrarMensaje('El QR expiró. Por favor escanea nuevamente el código QR de la clase.', 'error');
+                }
+            } else {
+                mostrarMensaje(`Error: ${error.message}`, 'error');
+            }
+        } finally {
+            isSubmitting = false;
+            submitBtn.disabled = false;
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+        }
+    }
+
+    function mostrarMensaje(mensaje, tipo) {
+        const mensajeDiv = document.getElementById('mensaje');
+        const iconos = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️'
+        };
+        
+        mensajeDiv.innerHTML = `
+            <div class="status status-${tipo} message-animate">
+                <span class="status-icon">${iconos[tipo]}</span>
+                ${mensaje}
+            </div>
+        `;
+        
+        // Auto-scroll al mensaje
+        mensajeDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Event listeners
+    document.getElementById('asistenciaForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        marcarAsistencia(false);
+    });
+
+    // Enter key para submit rápido
+    document.getElementById('alumnoId').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            marcarAsistencia(false);
+        }
+    });
+
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarInfoClase();
+        
+        // Renovar nonce preventivamente
+        setTimeout(async () => {
+            try {
+                await renovarNonce();
+            } catch (error) {
+                console.warn('⚠️ No se pudo renovar nonce preventivamente:', error);
+            }
+        }, 1000);
+    });
+</script>
+}
+

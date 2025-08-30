@@ -1,0 +1,342 @@
+@{
+    ViewData["Title"] = "Escáner Docente";
+    ViewData["Subtitle"] = "Escanea los códigos QR de los estudiantes para registrar su asistencia";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="~/css/styles.css" rel="stylesheet" />
+    <!-- QR Scanner Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>@ViewData["Title"]</h1>
+            <p class="subtitle">@ViewData["Subtitle"]</p>
+        </div>
+
+        <div class="scanner-container">
+            <div class="scanner-card">
+                <div class="scanner-header">
+                    <div class="scanner-icon">👨‍🏫📱</div>
+                    <h2>Escáner de QR - Docente</h2>
+                    <p>Apunta la cámara hacia el código QR del estudiante</p>
+                </div>
+
+                <!-- Selector de Clase -->
+                <div class="clase-selector">
+                    <label class="form-label">Clase Activa:</label>
+                    <select id="claseSelect" class="form-input">
+                        <option value="">Selecciona una clase...</option>
+                    </select>
+                </div>
+
+                <!-- Video de la Cámara -->
+                <div class="video-container">
+                    <video id="qr-video" muted playsinline></video>
+                    <div class="scanner-overlay"></div>
+                    <div id="camera-off" class="camera-off">
+                        <div class="scanner-icon">📷</div>
+                        <p>Cámara desactivada</p>
+                        <button class="btn btn-primary" onclick="startCamera()">Activar Cámara</button>
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <div class="controls">
+                    <button id="start-btn" class="btn btn-primary btn-large" onclick="startCamera()">
+                        📷 Iniciar Escáner
+                    </button>
+                    <button id="stop-btn" class="btn btn-secondary btn-large" onclick="stopCamera()" style="display: none;">
+                        ⏹️ Detener Escáner
+                    </button>
+                </div>
+
+                <!-- Área de Resultados -->
+                <div id="result-area" class="result-area"></div>
+
+                <!-- Input Manual (Fallback) -->
+                <div class="manual-input">
+                    <h4>📝 Registro Manual</h4>
+                    <p>Si el escáner no funciona, ingresa manualmente el ID del alumno:</p>
+                    <div class="form-group">
+                        <input type="number" id="manual-alumno-id" class="form-input" placeholder="ID del Alumno (ej: 1)" min="1">
+                    </div>
+                    <button class="btn btn-warning" onclick="registrarManual()">Registrar Manualmente</button>
+                </div>
+
+                <!-- Historial de Escaneos -->
+                <div class="scan-history">
+                    <h4>📋 Asistencias Registradas Hoy</h4>
+                    <div id="scan-history-list">
+                        <p class="text-center text-secondary">No hay registros aún</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let qrScanner = null;
+        let currentClase = null;
+        let scanHistory = [];
+
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarClases();
+            loadScanHistory();
+        });
+
+        // Cargar clases disponibles
+        async function cargarClases() {
+            try {
+                const response = await fetch('/api/clases');
+                const clases = await response.json();
+                const select = document.getElementById('claseSelect');
+                
+                select.innerHTML = '<option value="">Selecciona una clase...</option>';
+                
+                clases.filter(c => c.activa).forEach(clase => {
+                    const option = document.createElement('option');
+                    option.value = clase.id;
+                    option.textContent = `${clase.asignatura} (ID: ${clase.id})`;
+                    select.appendChild(option);
+                });
+
+                select.addEventListener('change', function() {
+                    currentClase = this.value;
+                    if (currentClase) {
+                        showMessage(`Clase seleccionada: ${this.options[this.selectedIndex].text}`, 'success');
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error cargando clases:', error);
+                showMessage('Error al cargar clases', 'error');
+            }
+        }
+
+        // Iniciar cámara y escáner
+        async function startCamera() {
+            if (!currentClase) {
+                showMessage('Por favor selecciona una clase primero', 'error');
+                return;
+            }
+
+            try {
+                const videoElement = document.getElementById('qr-video');
+                const cameraOff = document.getElementById('camera-off');
+                const startBtn = document.getElementById('start-btn');
+                const stopBtn = document.getElementById('stop-btn');
+
+                // Configurar escáner
+                qrScanner = new QrScanner(videoElement, result => {
+                    handleQRResult(result.data);
+                }, {
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
+                    maxScansPerSecond: 1
+                });
+
+                await qrScanner.start();
+
+                // Actualizar UI
+                videoElement.style.display = 'block';
+                cameraOff.style.display = 'none';
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+
+                showMessage('Escáner activo. Apunta hacia el QR del estudiante', 'success');
+
+            } catch (error) {
+                console.error('Error iniciando cámara:', error);
+                showMessage('Error al acceder a la cámara. Usa el registro manual.', 'error');
+                document.getElementById('camera-off').style.display = 'block';
+            }
+        }
+
+        // Detener cámara
+        function stopCamera() {
+            if (qrScanner) {
+                qrScanner.stop();
+                qrScanner.destroy();
+                qrScanner = null;
+            }
+
+            const videoElement = document.getElementById('qr-video');
+            const cameraOff = document.getElementById('camera-off');
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
+            videoElement.style.display = 'none';
+            cameraOff.style.display = 'block';
+            startBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+
+            showMessage('Escáner detenido', 'warning');
+        }
+
+        // Manejar resultado del QR
+        async function handleQRResult(qrData) {
+            console.log('QR escaneado:', qrData);
+
+            // Extraer ID del alumno del QR (formato: "alumno:1")
+            const match = qrData.match(/alumno:(\d+)/);
+            if (!match) {
+                showMessage('QR inválido. Debe ser un QR de estudiante.', 'error');
+                return;
+            }
+
+            const alumnoId = parseInt(match[1]);
+            await registrarAsistencia(alumnoId);
+        }
+
+        // Registrar asistencia
+        async function registrarAsistencia(alumnoId) {
+            if (!currentClase) {
+                showMessage('Selecciona una clase primero', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Registrando asistencia...', 'info');
+
+                const response = await fetch('/api/asistencias/profesor-scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        alumnoId: alumnoId,
+                        claseId: parseInt(currentClase)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Obtener info del alumno
+                    const alumnoResponse = await fetch(`/api/alumnos/${alumnoId}`);
+                    const alumno = alumnoResponse.ok ? await alumnoResponse.json() : null;
+
+                    const studentName = alumno ? `${alumno.nombre} (${alumno.codigo})` : `Alumno ID: ${alumnoId}`;
+                    
+                    showMessage(`✅ ${result.mensaje} - ${studentName}`, 'success');
+                    
+                    // Agregar al historial
+                    addToHistory(studentName, alumnoId);
+                    
+                    // Vibrar si es móvil
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+
+                } else {
+                    throw new Error(result.mensaje || 'Error al registrar');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(`❌ Error: ${error.message}`, 'error');
+                
+                // Vibrar error si es móvil
+                if (navigator.vibrate) {
+                    navigator.vibrate([200, 100, 200, 100, 200]);
+                }
+            }
+        }
+
+        // Registro manual
+        async function registrarManual() {
+            const alumnoId = document.getElementById('manual-alumno-id').value;
+            
+            if (!alumnoId) {
+                showMessage('Ingresa el ID del alumno', 'error');
+                return;
+            }
+
+            await registrarAsistencia(parseInt(alumnoId));
+            document.getElementById('manual-alumno-id').value = '';
+        }
+
+        // Agregar al historial
+        function addToHistory(studentName, alumnoId) {
+            const now = new Date();
+            scanHistory.unshift({
+                name: studentName,
+                id: alumnoId,
+                time: now.toLocaleTimeString('es-ES')
+            });
+
+            // Limitar a 10 registros
+            if (scanHistory.length > 10) {
+                scanHistory = scanHistory.slice(0, 10);
+            }
+
+            updateHistoryDisplay();
+            localStorage.setItem('docente_scan_history', JSON.stringify(scanHistory));
+        }
+
+        // Actualizar display del historial
+        function updateHistoryDisplay() {
+            const historyDiv = document.getElementById('scan-history-list');
+            
+            if (scanHistory.length === 0) {
+                historyDiv.innerHTML = '<p class="text-center text-secondary">No hay registros aún</p>';
+                return;
+            }
+
+            historyDiv.innerHTML = scanHistory.map(item => `
+                <div class="scan-item">
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>ID: ${item.id}</small>
+                    </div>
+                    <div class="scan-time">${item.time}</div>
+                </div>
+            `).join('');
+        }
+
+        // Cargar historial del localStorage
+        function loadScanHistory() {
+            const saved = localStorage.getItem('docente_scan_history');
+            if (saved) {
+                scanHistory = JSON.parse(saved);
+                updateHistoryDisplay();
+            }
+        }
+
+        // Mostrar mensaje
+        function showMessage(text, type) {
+            const resultArea = document.getElementById('result-area');
+            const typeClass = type === 'info' ? 'status-warning' : `status-${type}`;
+            
+            resultArea.innerHTML = `
+                <div class="status ${typeClass} message-animate">
+                    ${text}
+                </div>
+            `;
+
+            // Auto-clear después de 5 segundos para mensajes de éxito
+            if (type === 'success') {
+                setTimeout(() => {
+                    resultArea.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Limpiar al salir
+        window.addEventListener('beforeunload', function() {
+            if (qrScanner) {
+                qrScanner.stop();
+                qrScanner.destroy();
+            }
+        });
+    </script>
+</body>
+</html>

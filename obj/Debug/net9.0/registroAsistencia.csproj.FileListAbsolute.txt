@@ -34,3 +34,8 @@ E:\csharp\registroAsistencia\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.
 E:\csharp\registroAsistencia\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 E:\csharp\registroAsistencia\obj\Debug\net9.0\registroAsistencia.MvcApplicationPartsAssemblyInfo.cs
 E:\csharp\registroAsistencia\obj\Debug\net9.0\registro.05BF999A.Up2Date
+E:\csharp\registroAsistencia\obj\Debug\net9.0\registroAsistencia.RazorAssemblyInfo.cache
+E:\csharp\registroAsistencia\obj\Debug\net9.0\registroAsistencia.RazorAssemblyInfo.cs
+E:\csharp\registroAsistencia\bin\Debug\net9.0\registroAsistencia.staticwebassets.runtime.json
+E:\csharp\registroAsistencia\obj\Debug\net9.0\compressed\jtn4fv8qdp-vn5pb6dxjl.gz
+E:\csharp\registroAsistencia\obj\Debug\net9.0\compressed\n57h8i515h-wm5qlu612i.gz

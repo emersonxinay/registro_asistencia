@@ -1,0 +1,203 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["Subtitle"] = "Sistema de registro de asistencia con códigos QR";
+}
+
+<div class="grid grid-3">
+    <!-- Crear Alumno -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Gestión de Alumnos</h2>
+            <p class="card-description">Registra nuevos alumnos y genera sus códigos QR</p>
+        </div>
+        
+        <form id="alumnoForm">
+            <div class="form-group">
+                <label class="form-label" for="codigo">Código del Alumno</label>
+                <input type="text" id="codigo" name="codigo" class="form-input" required placeholder="Ej: EST001">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="nombre">Nombre Completo</label>
+                <input type="text" id="nombre" name="nombre" class="form-input" required placeholder="Ej: Juan Pérez">
+            </div>
+            <button type="submit" class="btn btn-primary">Crear Alumno</button>
+        </form>
+        
+        <div id="alumnoStatus" class="mt-4"></div>
+    </div>
+
+    <!-- Crear Clase -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Gestión de Clases</h2>
+            <p class="card-description">Crea nuevas clases para registro de asistencia</p>
+        </div>
+        
+        <form id="claseForm">
+            <div class="form-group">
+                <label class="form-label" for="asignatura">Asignatura</label>
+                <input type="text" id="asignatura" name="asignatura" class="form-input" required placeholder="Ej: Matemáticas I">
+            </div>
+            <button type="submit" class="btn btn-primary">Crear Clase</button>
+        </form>
+        
+        <div id="claseStatus" class="mt-4"></div>
+    </div>
+
+    <!-- QR de Clase -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">QR de Clase</h2>
+            <p class="card-description">Genera QR dinámico para registro de asistencias</p>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="claseIdQr">Seleccionar Clase</label>
+            <select id="claseIdQr" class="form-input">
+                <option value="">Selecciona una clase...</option>
+            </select>
+        </div>
+        <button type="button" class="btn btn-primary" id="btnGenerarQr" disabled onclick="generarQrClase()">Generar QR</button>
+        
+        <div class="qr-instructions" style="display: none;" id="qrInstructions">
+            <div class="alert-info">
+                <strong>📱 Instrucciones:</strong>
+                <ol>
+                    <li>Los estudiantes deben escanear este QR con su móvil</li>
+                    <li>Se abrirá automáticamente la página de registro</li>
+                    <li>Solo necesitan ingresar su ID de alumno</li>
+                    <li>El QR se renueva automáticamente cada 5 minutos</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div id="qrContainer" class="qr-display" style="display: none;">
+            <!-- QR se cargará aquí -->
+        </div>
+    </div>
+</div>
+
+<!-- Listados -->
+<div class="grid grid-2 mt-4">
+    <!-- Lista de Alumnos -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Alumnos Registrados</h2>
+            <p class="card-description">Lista de todos los alumnos en el sistema</p>
+        </div>
+        <div id="alumnosList">
+            <div class="loading"><span class="spinner"></span>Cargando alumnos...</div>
+        </div>
+    </div>
+
+    <!-- Lista de Clases -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">Clases Activas</h2>
+            <p class="card-description">Gestiona tus clases y genera códigos QR</p>
+        </div>
+        <div id="clasesList">
+            <div class="loading"><span class="spinner"></span>Cargando clases...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Enlaces rápidos -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h2 class="card-title">Enlaces Rápidos</h2>
+    </div>
+    <div class="flex gap-4">
+        <a href="/asistencias" class="btn btn-secondary">Ver Todas las Asistencias</a>
+        <a href="/api/asistencias/csv" class="btn btn-success">Descargar CSV Global</a>
+        <a href="/docente/scanner" class="btn btn-primary">👨‍🏫 Escáner Docente</a>
+        <a href="/swagger" class="btn btn-secondary" target="_blank">Documentación API</a>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Cargar clases en el selector
+    async function cargarClasesEnSelector() {
+        try {
+            const clases = await Utils.request('/api/clases');
+            const select = document.getElementById('claseIdQr');
+            const btn = document.getElementById('btnGenerarQr');
+            
+            select.innerHTML = '<option value="">Selecciona una clase...</option>';
+            
+            clases.forEach(clase => {
+                if (clase.activa) {
+                    const option = document.createElement('option');
+                    option.value = clase.id;
+                    option.textContent = `${clase.asignatura} (ID: ${clase.id})`;
+                    select.appendChild(option);
+                }
+            });
+            
+            // Habilitar botón cuando se seleccione una clase
+            select.addEventListener('change', () => {
+                btn.disabled = !select.value;
+            });
+            
+        } catch (error) {
+            console.error('Error cargando clases:', error);
+        }
+    }
+
+    async function generarQrClase() {
+        const claseId = document.getElementById('claseIdQr').value;
+        if (!claseId) {
+            alert('Por favor selecciona una clase');
+            return;
+        }
+
+        const container = document.getElementById('qrContainer');
+        const instructions = document.getElementById('qrInstructions');
+        
+        container.style.display = 'block';
+        instructions.style.display = 'block';
+        
+        // Usar el QR manager
+        window.qrManager.currentClassId = claseId;
+        await window.qrManager.loadQr();
+        window.qrManager.startAutoRefresh();
+        
+        // Scroll al QR
+        container.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Cargar clases al inicializar
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(cargarClasesEnSelector, 500);
+    });
+</script>
+
+<style>
+.alert-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+}
+
+.alert-info ol {
+    margin: 0.5rem 0 0 0;
+    padding-left: 1.25rem;
+}
+
+.alert-info li {
+    margin-bottom: 0.25rem;
+}
+
+.qr-display {
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1rem;
+    background: #fafafa;
+}
+</style>
+}

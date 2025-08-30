@@ -1,12 +1,702 @@
 {
   "Version": 1,
-  "Hash": "DnF54WJuj+1eBwIunbvN9cc+monZweM53GT2oX1E8GQ=",
+  "Hash": "jk9+FGVdtA6r77dUqoUxGIEaP1Tfx4iBnxFOmWMTLCo=",
   "Source": "registroAsistencia",
   "BasePath": "_content/registroAsistencia",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "registroAsistencia\\wwwroot",
+      "Source": "registroAsistencia",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\wwwroot\\",
+      "BasePath": "_content/registroAsistencia",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\jtn4fv8qdp-vn5pb6dxjl.gz",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "js/app#[.{fingerprint=vn5pb6dxjl}]?.js.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "E:\\csharp\\registroAsistencia\\wwwroot\\js\\app.js",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "j76s26o93k",
+      "Integrity": "b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "E:\\csharp\\registroAsistencia\\wwwroot\\js\\app.js"
+    },
+    {
+      "Identity": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-wm5qlu612i.gz",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "css/styles#[.{fingerprint=wm5qlu612i}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "gi83nff8jo",
+      "Integrity": "KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css"
+    },
+    {
+      "Identity": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\wwwroot\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "css/styles#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "wm5qlu612i",
+      "Integrity": "CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\styles.css"
+    },
+    {
+      "Identity": "E:\\csharp\\registroAsistencia\\wwwroot\\js\\app.js",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\wwwroot\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "js/app#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "vn5pb6dxjl",
+      "Integrity": "67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\app.js"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "css/styles.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-wm5qlu612i.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000326904217"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3058"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "12660"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.css.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-wm5qlu612i.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3058"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.wm5qlu612i.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-wm5qlu612i.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000326904217"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3058"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "wm5qlu612i"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.wm5qlu612i.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "12660"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "wm5qlu612i"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-CKy+46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.wm5qlu612i.css.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-wm5qlu612i.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3058"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 22:37:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "wm5qlu612i"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-KK+pP7+OsAGKXkOI68T8vlJlLNtrtvtbVtjpD7UCb38="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.js",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\jtn4fv8qdp-vn5pb6dxjl.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000283205891"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3530"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.js",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\js\\app.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "18791"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.js.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\jtn4fv8qdp-vn5pb6dxjl.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3530"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.vn5pb6dxjl.js",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\jtn4fv8qdp-vn5pb6dxjl.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000283205891"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3530"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vn5pb6dxjl"
+        },
+        {
+          "Name": "label",
+          "Value": "js/app.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.vn5pb6dxjl.js",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\js\\app.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "18791"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vn5pb6dxjl"
+        },
+        {
+          "Name": "label",
+          "Value": "js/app.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="
+        }
+      ]
+    },
+    {
+      "Route": "js/app.vn5pb6dxjl.js.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\jtn4fv8qdp-vn5pb6dxjl.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3530"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sat, 30 Aug 2025 21:07:15 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "vn5pb6dxjl"
+        },
+        {
+          "Name": "label",
+          "Value": "js/app.js.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-b+jjPLSkvEcHU6BuzMiCeVT/4k4APIjTmJdFCEY9Kjs="
+        }
+      ]
+    }
+  ]
 }

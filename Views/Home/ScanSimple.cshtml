@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia - Clase @ViewBag.ClaseId</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f0f2f5; 
+            padding: 20px; 
+            line-height: 1.6; 
+        }
+        .container { 
+            max-width: 400px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #2c3e50; 
+        }
+        .success-icon { 
+            font-size: 48px; 
+            color: #27ae60; 
+            margin-bottom: 10px; 
+        }
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        .form-label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: bold; 
+            color: #34495e; 
+        }
+        .form-input { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #bdc3c7; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            text-align: center; 
+        }
+        .form-input:focus { 
+            border-color: #3498db; 
+            outline: none; 
+        }
+        .btn { 
+            width: 100%; 
+            padding: 15px; 
+            background: #3498db; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 10px; 
+        }
+        .btn:hover { 
+            background: #2980b9; 
+        }
+        .btn:disabled { 
+            background: #95a5a6; 
+            cursor: not-allowed; 
+        }
+        .message { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: bold; 
+        }
+        .message.success { 
+            background: #d5f4e6; 
+            color: #27ae60; 
+            border: 1px solid #27ae60; 
+        }
+        .message.error { 
+            background: #fadbd8; 
+            color: #e74c3c; 
+            border: 1px solid #e74c3c; 
+        }
+        .help { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: #ecf0f1; 
+            border-radius: 8px; 
+            font-size: 14px; 
+        }
+        .help h4 { 
+            margin-bottom: 10px; 
+            color: #2c3e50; 
+        }
+        .loading { 
+            display: none; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h2>¡QR Escaneado!</h2>
+            <p>Clase ID: <strong>@ViewBag.ClaseId</strong></p>
+        </div>
+
+        <form id="scanForm">
+            <div class="form-group">
+                <label class="form-label">Tu ID de Alumno:</label>
+                <input type="number" id="alumnoId" class="form-input" min="1" required placeholder="Ejemplo: 1" autofocus>
+            </div>
+            <button type="submit" class="btn" id="submitBtn">Registrar Asistencia</button>
+            <button type="button" class="btn loading" id="loadingBtn" disabled>Registrando...</button>
+        </form>
+
+        <div id="mensaje"></div>
+
+        <div class="help">
+            <h4>💡 IDs de Prueba:</h4>
+            <p><strong>ID 1:</strong> Juan Pérez</p>
+            <p><strong>ID 2:</strong> María García</p>
+            <p><strong>ID 3:</strong> Carlos López</p>
+        </div>
+    </div>
+
+    <script>
+        const claseId = @ViewBag.ClaseId;
+        let currentNonce = '@ViewBag.Nonce';
+        let isSubmitting = false;
+
+        const form = document.getElementById('scanForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingBtn = document.getElementById('loadingBtn');
+        const mensajeDiv = document.getElementById('mensaje');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (isSubmitting) return;
+            
+            const alumnoId = document.getElementById('alumnoId').value;
+            if (!alumnoId) {
+                showMessage('Por favor ingresa tu ID de alumno', 'error');
+                return;
+            }
+
+            isSubmitting = true;
+            submitBtn.style.display = 'none';
+            loadingBtn.style.display = 'block';
+
+            try {
+                console.log('Enviando registro:', { alumnoId, claseId, nonce: currentNonce });
+                
+                const response = await fetch('/api/asistencias/alumno-scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        alumnoId: parseInt(alumnoId),
+                        claseId: claseId,
+                        nonce: currentNonce
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage(result.mensaje || '¡Asistencia registrada exitosamente!', 'success');
+                    form.reset();
+                } else {
+                    throw new Error(result.mensaje || 'Error al registrar');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error: ' + error.message, 'error');
+            } finally {
+                isSubmitting = false;
+                submitBtn.style.display = 'block';
+                loadingBtn.style.display = 'none';
+            }
+        });
+
+        function showMessage(text, type) {
+            mensajeDiv.innerHTML = '<div class="message ' + type + '">' + text + '</div>';
+        }
+
+        // Log inicial
+        console.log('Página de scan cargada - Clase:', claseId, 'Nonce:', currentNonce);
+    </script>
+</body>
+</html>

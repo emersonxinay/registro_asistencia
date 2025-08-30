@@ -1,0 +1,28 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-CKy\u002B46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"12660"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022CKy\u002B46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 30 Aug 2025 22:37:39 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.wm5qlu612i.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"wm5qlu612i"},{"Name":"integrity","Value":"sha256-CKy\u002B46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM="},{"Name":"label","Value":"_content/registroAsistencia/css/styles.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"12660"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022CKy\u002B46WI/Zc7hoSMLzBCrBkKDoLFadqLFl1V0R7T0yM=\u0022"},{"Name":"Last-Modified","Value":"Sat, 30 Aug 2025 22:37:39 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/js/app.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\app.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"18791"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u002267vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\u0022"},{"Name":"Last-Modified","Value":"Sat, 30 Aug 2025 21:07:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/js/app.vn5pb6dxjl.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\app.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"vn5pb6dxjl"},{"Name":"integrity","Value":"sha256-67vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw="},{"Name":"label","Value":"_content/registroAsistencia/js/app.js"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"18791"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u002267vsduaqxc99WqSfCqHrpeWaQAU/gqH/A2KLGznxngw=\u0022"},{"Name":"Last-Modified","Value":"Sat, 30 Aug 2025 21:07:15 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>
