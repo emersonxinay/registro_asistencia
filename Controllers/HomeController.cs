@@ -49,4 +49,20 @@ public class HomeController : Controller
         
         return View("DocenteScanner");
     }
+
+    [Route("alumnos")]
+    public IActionResult Alumnos()
+    {
+        ViewData["Title"] = "Gestión de Estudiantes";
+        ViewData["Subtitle"] = "Administra estudiantes, genera códigos QR y controla registros";
+        return View();
+    }
+
+    [Route("clases")]
+    public IActionResult Clases()
+    {
+        ViewData["Title"] = "Gestión de Clases";
+        ViewData["Subtitle"] = "Crea y administra clases, controla asistencias y genera reportes";
+        return View();
+    }
 }

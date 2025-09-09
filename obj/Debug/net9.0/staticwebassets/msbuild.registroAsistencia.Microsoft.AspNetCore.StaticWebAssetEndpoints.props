@@ -1,16 +1,16 @@
 ﻿<Project>
   <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.a08qgwynw6.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"a08qgwynw6"},{"Name":"integrity","Value":"sha256-ChuBGCwGS4YgRZZSoaMvG9\u002BPSYXODIIhso\u002BcvQfU3Es="},{"Name":"label","Value":"_content/registroAsistencia/css/styles.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"72893"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022ChuBGCwGS4YgRZZSoaMvG9\u002BPSYXODIIhso\u002BcvQfU3Es=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 14:58:39 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-PwOf4MhxXTB5u1gCAeS0cn61jbGcSFhQ6XC1PZ3arjc="}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"67467"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022PwOf4MhxXTB5u1gCAeS0cn61jbGcSFhQ6XC1PZ3arjc=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 14:23:32 GMT"}]]]></ResponseHeaders>
-    </StaticWebAssetEndpoint>
-    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.v4tfykxmtc.css">
-      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
-      <Selectors><![CDATA[[]]]></Selectors>
-      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"v4tfykxmtc"},{"Name":"integrity","Value":"sha256-PwOf4MhxXTB5u1gCAeS0cn61jbGcSFhQ6XC1PZ3arjc="},{"Name":"label","Value":"_content/registroAsistencia/css/styles.css"}]]]></EndpointProperties>
-      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"67467"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022PwOf4MhxXTB5u1gCAeS0cn61jbGcSFhQ6XC1PZ3arjc=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 14:23:32 GMT"}]]]></ResponseHeaders>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-ChuBGCwGS4YgRZZSoaMvG9\u002BPSYXODIIhso\u002BcvQfU3Es="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"72893"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022ChuBGCwGS4YgRZZSoaMvG9\u002BPSYXODIIhso\u002BcvQfU3Es=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 14:58:39 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/registroAsistencia/js/app.js">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\js\app.js'))</AssetFile>

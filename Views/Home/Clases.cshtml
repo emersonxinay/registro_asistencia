@@ -1,0 +1,592 @@
+@{
+    ViewData["Title"] = "Gestión de Clases";
+    ViewData["Subtitle"] = "Crea y administra clases, controla asistencias y genera reportes";
+}
+
+<!-- Classes Management Section -->
+<section class="management-grid mb-4">
+    <!-- Class Creation Panel -->
+    <div class="quantum-card creation-panel">
+        <div class="card-header">
+            <div class="card-icon success-gradient">
+                <i data-lucide="plus-circle"></i>
+            </div>
+            <h3 class="card-title">Crear Nueva Clase</h3>
+            <p class="card-subtitle">Programa una clase y genera códigos QR automáticamente</p>
+        </div>
+        
+        <form id="classCreateForm" class="quantum-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label required" for="classSubject">
+                        <i data-lucide="book-open"></i>
+                        Asignatura
+                    </label>
+                    <input type="text" id="classSubject" name="asignatura" class="quantum-input" 
+                           placeholder="Ej: Matemáticas Avanzadas" required autocomplete="off">
+                    <div class="form-hint">Nombre de la materia o asignatura</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="classDescription">
+                        <i data-lucide="file-text"></i>
+                        Descripción (Opcional)
+                    </label>
+                    <textarea id="classDescription" name="descripcion" class="quantum-input" 
+                              placeholder="Descripción adicional de la clase" rows="3"></textarea>
+                    <div class="form-hint">Información adicional sobre la clase</div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="quantum-btn btn-success btn-lg">
+                    <i data-lucide="plus-circle"></i>
+                    Crear Clase
+                    <div class="btn-loader hidden">
+                        <div class="spinner-ring"></div>
+                    </div>
+                </button>
+                <button type="reset" class="quantum-btn btn-secondary">
+                    <i data-lucide="refresh-cw"></i>
+                    Limpiar Formulario
+                </button>
+            </div>
+        </form>
+        
+        <div id="classCreateStatus" class="mt-3"></div>
+    </div>
+
+    <!-- Class Analytics Panel -->
+    <div class="quantum-card analytics-panel">
+        <div class="card-header">
+            <div class="card-icon warning-gradient">
+                <i data-lucide="bar-chart-3"></i>
+            </div>
+            <h3 class="card-title">Resumen de Clases</h3>
+            <p class="card-subtitle">Estadísticas y métricas importantes</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card active-stat">
+                <div class="stat-icon">
+                    <i data-lucide="play-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeClassesCount">0</div>
+                    <div class="stat-label">Clases Activas</div>
+                </div>
+            </div>
+            
+            <div class="stat-card closed-stat">
+                <div class="stat-icon">
+                    <i data-lucide="pause-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="closedClassesCount">0</div>
+                    <div class="stat-label">Clases Cerradas</div>
+                </div>
+            </div>
+            
+            <div class="stat-card attendance-stat">
+                <div class="stat-icon">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="totalAttendanceCount">0</div>
+                    <div class="stat-label">Total Asistencias</div>
+                </div>
+            </div>
+            
+            <div class="stat-card qr-stat">
+                <div class="stat-icon">
+                    <i data-lucide="qr-code"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value" id="activeQRsCount">0</div>
+                    <div class="stat-label">QRs Activos</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="analytics-actions">
+            <button class="quantum-btn btn-primary" id="generateReportBtn">
+                <i data-lucide="file-text"></i>
+                Generar Reporte
+            </button>
+            <button class="quantum-btn btn-secondary" id="exportDataBtn">
+                <i data-lucide="download"></i>
+                Exportar Datos
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Classes Table Section -->
+<section class="quantum-card table-section">
+    <div class="card-header">
+        <div class="header-content">
+            <div class="header-main">
+                <h3 class="card-title">Lista de Clases</h3>
+                <p class="card-subtitle">Gestiona y controla todas las clases programadas</p>
+            </div>
+            <div class="header-actions">
+                <div class="filter-controls">
+                    <select class="quantum-select" id="statusFilter">
+                        <option value="">Todas las clases</option>
+                        <option value="active">Solo Activas</option>
+                        <option value="closed">Solo Cerradas</option>
+                    </select>
+                    <div class="search-input">
+                        <i data-lucide="search"></i>
+                        <input type="text" placeholder="Buscar clases..." id="classSearchInput">
+                    </div>
+                </div>
+                <button class="quantum-btn btn-primary" id="refreshClassesBtn">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-container" id="classesTableContainer">
+        <div class="loading-state">
+            <div class="quantum-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p>Cargando clases...</p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+class ClassesManager {
+    constructor() {
+        this.classes = [];
+        this.currentFilter = '';
+        this.init();
+    }
+
+    async init() {
+        console.log('📖 Classes Manager initializing...');
+        
+        await this.loadClasses();
+        this.setupEventListeners();
+        this.setupFilters();
+        this.updateAnalytics();
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        console.log('✅ Classes Manager initialized');
+    }
+
+    async loadClasses() {
+        const container = document.getElementById('classesTableContainer');
+        
+        try {
+            const classes = await fetch('/api/clases').then(r => r.json());
+            this.classes = Array.isArray(classes) ? classes : [];
+            this.renderClassesTable();
+            this.updateAnalytics();
+        } catch (error) {
+            console.error('Error loading classes:', error);
+            container.innerHTML = `
+                <div class="error-state">
+                    <i data-lucide="alert-circle"></i>
+                    <h3>Error al cargar clases</h3>
+                    <p>${error.message}</p>
+                    <button class="quantum-btn btn-primary" onclick="classesManager.loadClasses()">
+                        <i data-lucide="refresh-cw"></i>
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    renderClassesTable() {
+        const container = document.getElementById('classesTableContainer');
+        
+        if (this.classes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <h3>No hay clases programadas</h3>
+                    <p>Comienza creando tu primera clase usando el formulario arriba</p>
+                    <button class="quantum-btn btn-success" onclick="document.getElementById('classSubject').focus()">
+                        <i data-lucide="plus-circle"></i>
+                        Crear Primera Clase
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const tableHTML = `
+            <div class="classes-grid">
+                ${this.classes.map(clase => `
+                    <div class="class-card ${clase.activa ? 'active-class' : 'closed-class'}" data-id="${clase.id}" data-status="${clase.activa ? 'active' : 'closed'}">
+                        <div class="class-header">
+                            <div class="class-status">
+                                ${clase.activa ? 
+                                    '<span class="status-badge active"><i data-lucide="play-circle"></i> Activa</span>' : 
+                                    '<span class="status-badge closed"><i data-lucide="pause-circle"></i> Cerrada</span>'
+                                }
+                            </div>
+                            <div class="class-actions">
+                                <button class="action-btn" onclick="classesManager.editClass(${clase.id})" title="Editar">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <div class="dropdown">
+                                    <button class="action-btn dropdown-toggle" title="Más opciones">
+                                        <i data-lucide="more-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        ${clase.activa ? `
+                                            <button onclick="classesManager.generateQR(${clase.id})">
+                                                <i data-lucide="qr-code"></i>
+                                                Generar QR
+                                            </button>
+                                            <button onclick="classesManager.closeClass(${clase.id})">
+                                                <i data-lucide="pause-circle"></i>
+                                                Cerrar Clase
+                                            </button>
+                                        ` : `
+                                            <button onclick="classesManager.reopenClass(${clase.id})">
+                                                <i data-lucide="play-circle"></i>
+                                                Reabrir Clase
+                                            </button>
+                                        `}
+                                        <button onclick="classesManager.viewAttendance(${clase.id})">
+                                            <i data-lucide="users"></i>
+                                            Ver Asistencias
+                                        </button>
+                                        <button onclick="classesManager.duplicateClass(${clase.id})">
+                                            <i data-lucide="copy"></i>
+                                            Duplicar
+                                        </button>
+                                        <hr>
+                                        <button onclick="classesManager.deleteClass(${clase.id})" class="danger">
+                                            <i data-lucide="trash-2"></i>
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="class-content">
+                            <h4 class="class-title">${clase.asignatura}</h4>
+                            <div class="class-meta">
+                                <div class="meta-item">
+                                    <i data-lucide="calendar"></i>
+                                    <span>Inicio: ${new Date(clase.inicioUtc).toLocaleString('es-ES', {
+                                        dateStyle: 'short',
+                                        timeStyle: 'short'
+                                    })}</span>
+                                </div>
+                                ${clase.finUtc ? `
+                                    <div class="meta-item">
+                                        <i data-lucide="calendar-x"></i>
+                                        <span>Fin: ${new Date(clase.finUtc).toLocaleString('es-ES', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short'
+                                        })}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="meta-item">
+                                    <i data-lucide="hash"></i>
+                                    <span>ID: ${clase.id}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="class-footer">
+                            ${clase.activa ? `
+                                <div class="class-qr">
+                                    <button class="qr-generate-btn" onclick="classesManager.generateQR(${clase.id})">
+                                        <i data-lucide="qr-code"></i>
+                                        Generar QR
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="class-summary">
+                                    <span class="summary-text">Clase finalizada</span>
+                                </div>
+                            `}
+                            
+                            <div class="class-stats">
+                                <button class="stat-btn" onclick="classesManager.viewAttendance(${clase.id})" title="Ver asistencias">
+                                    <i data-lucide="users"></i>
+                                    <span>0 asistencias</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        
+        container.innerHTML = tableHTML;
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        // Setup dropdown menus
+        this.setupDropdowns();
+    }
+
+    setupDropdowns() {
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = toggle.closest('.dropdown');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                
+                // Close other dropdowns
+                document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                    menu.classList.remove('show');
+                });
+                
+                menu.classList.toggle('show');
+            });
+        });
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        });
+    }
+
+    updateAnalytics() {
+        const activeClasses = this.classes.filter(c => c.activa).length;
+        const closedClasses = this.classes.filter(c => !c.activa).length;
+        
+        document.getElementById('activeClassesCount').textContent = activeClasses;
+        document.getElementById('closedClassesCount').textContent = closedClasses;
+        document.getElementById('totalAttendanceCount').textContent = '0'; // TODO: Calculate from API
+        document.getElementById('activeQRsCount').textContent = activeClasses;
+    }
+
+    setupEventListeners() {
+        // Form submission
+        const form = document.getElementById('classCreateForm');
+        if (form) {
+            form.addEventListener('submit', this.handleSubmit.bind(this));
+        }
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refreshClassesBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.loadClasses());
+        }
+
+        // Analytics actions
+        document.getElementById('generateReportBtn')?.addEventListener('click', () => this.generateReport());
+        document.getElementById('exportDataBtn')?.addEventListener('click', () => this.exportData());
+    }
+
+    setupFilters() {
+        const searchInput = document.getElementById('classSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.filterClasses(e.target.value, this.currentFilter);
+            }, 300));
+        }
+
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                this.currentFilter = e.target.value;
+                const searchTerm = document.getElementById('classSearchInput').value;
+                this.filterClasses(searchTerm, e.target.value);
+            });
+        }
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    filterClasses(searchTerm, status) {
+        const cards = document.querySelectorAll('.class-card');
+        const term = searchTerm.toLowerCase();
+        
+        cards.forEach(card => {
+            const title = card.querySelector('.class-title').textContent.toLowerCase();
+            const cardStatus = card.getAttribute('data-status');
+            
+            const matchesSearch = title.includes(term);
+            const matchesStatus = !status || cardStatus === status;
+            const matches = matchesSearch && matchesStatus;
+            
+            card.style.display = matches ? 'block' : 'none';
+            
+            if (matches && term) {
+                card.classList.add('search-highlight');
+                setTimeout(() => card.classList.remove('search-highlight'), 2000);
+            }
+        });
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('classCreateStatus');
+        
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const response = await fetch('/api/clases', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    asignatura: formData.get('asignatura')
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al crear clase');
+            }
+            
+            const clase = await response.json();
+            
+            status.innerHTML = `
+                <div class="quantum-alert alert-success">
+                    <i data-lucide="check-circle"></i>
+                    <span>✅ Clase creada exitosamente</span>
+                </div>
+            `;
+            
+            form.reset();
+            await this.loadClasses();
+            
+            // Highlight new class
+            setTimeout(() => {
+                const newCard = document.querySelector(`[data-id="${clase.id}"]`);
+                if (newCard) {
+                    newCard.style.background = 'linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent)';
+                    setTimeout(() => newCard.style.background = '', 3000);
+                }
+            }, 500);
+            
+        } catch (error) {
+            status.innerHTML = `
+                <div class="quantum-alert alert-danger">
+                    <i data-lucide="alert-circle"></i>
+                    <span>❌ ${error.message}</span>
+                </div>
+            `;
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            
+            setTimeout(() => {
+                status.innerHTML = '';
+            }, 5000);
+        }
+    }
+
+    generateQR(id) {
+        window.open(`/api/clases/${id}/qr`, '_blank');
+    }
+
+    async closeClass(id) {
+        if (!confirm('¿Cerrar esta clase? No se podrán registrar más asistencias.')) return;
+        
+        try {
+            const response = await fetch(`/api/clases/${id}/cerrar`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error al cerrar clase');
+            }
+            
+            await this.loadClasses();
+            
+        } catch (error) {
+            alert('Error al cerrar clase: ' + error.message);
+        }
+    }
+
+    async reopenClass(id) {
+        alert('Función de reapertura en desarrollo');
+    }
+
+    viewAttendance(id) {
+        window.location.href = `/asistencias/${id}`;
+    }
+
+    editClass(id) {
+        alert('Función de edición en desarrollo');
+    }
+
+    duplicateClass(id) {
+        alert('Función de duplicación en desarrollo');
+    }
+
+    async deleteClass(id) {
+        if (!confirm('¿Estás seguro de eliminar esta clase?')) return;
+        
+        try {
+            const response = await fetch(`/api/clases/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error al eliminar clase');
+            }
+            
+            await this.loadClasses();
+            
+        } catch (error) {
+            alert('Error al eliminar clase: ' + error.message);
+        }
+    }
+
+    generateReport() {
+        alert('Función de reportes en desarrollo');
+    }
+
+    exportData() {
+        window.open('/api/clases/export', '_blank');
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.classesManager = new ClassesManager();
+});
+</script>
+}

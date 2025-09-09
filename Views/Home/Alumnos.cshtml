@@ -1,0 +1,604 @@
+@{
+    ViewData["Title"] = "Gestión de Estudiantes";
+    ViewData["Subtitle"] = "Administra estudiantes, genera códigos QR y controla registros";
+}
+
+<!-- Students Management Section -->
+<section class="management-grid mb-4">
+    <!-- Student Creation Panel -->
+    <div class="quantum-card creation-panel">
+        <div class="card-header">
+            <div class="card-icon primary-gradient">
+                <i data-lucide="user-plus"></i>
+            </div>
+            <h3 class="card-title">Crear Nuevo Estudiante</h3>
+            <p class="card-subtitle">Registra un estudiante y genera su QR automáticamente</p>
+        </div>
+        
+        <form id="studentCreateForm" class="quantum-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label required" for="studentCode">
+                        <i data-lucide="hash"></i>
+                        Código del Estudiante
+                    </label>
+                    <input type="text" id="studentCode" name="codigo" class="quantum-input" 
+                           placeholder="Ej: EST001" required pattern="[A-Za-z0-9]+" autocomplete="off">
+                    <div class="form-hint">Código único alfanumérico</div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label required" for="studentName">
+                        <i data-lucide="user"></i>
+                        Nombre Completo
+                    </label>
+                    <input type="text" id="studentName" name="nombre" class="quantum-input" 
+                           placeholder="Ej: Juan Pérez García" required autocomplete="off">
+                    <div class="form-hint">Nombre completo del estudiante</div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="quantum-btn btn-primary btn-lg">
+                    <i data-lucide="plus-circle"></i>
+                    Crear Estudiante
+                    <div class="btn-loader hidden">
+                        <div class="spinner-ring"></div>
+                    </div>
+                </button>
+                <button type="reset" class="quantum-btn btn-secondary">
+                    <i data-lucide="refresh-cw"></i>
+                    Limpiar Formulario
+                </button>
+            </div>
+        </form>
+        
+        <div id="studentCreateStatus" class="mt-3"></div>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quantum-card actions-panel">
+        <div class="card-header">
+            <div class="card-icon success-gradient">
+                <i data-lucide="zap"></i>
+            </div>
+            <h3 class="card-title">Acciones Rápidas</h3>
+            <p class="card-subtitle">Herramientas útiles para gestión masiva</p>
+        </div>
+        
+        <div class="quick-actions-grid">
+            <button class="action-card" id="bulkImportBtn">
+                <div class="action-icon">
+                    <i data-lucide="upload"></i>
+                </div>
+                <div class="action-content">
+                    <h4>Importar CSV</h4>
+                    <p>Carga múltiples estudiantes desde archivo</p>
+                </div>
+            </button>
+            
+            <button class="action-card" id="exportAllBtn">
+                <div class="action-icon">
+                    <i data-lucide="download"></i>
+                </div>
+                <div class="action-content">
+                    <h4>Exportar Todo</h4>
+                    <p>Descarga lista completa con QRs</p>
+                </div>
+            </button>
+            
+            <button class="action-card" id="printQRsBtn">
+                <div class="action-icon">
+                    <i data-lucide="printer"></i>
+                </div>
+                <div class="action-content">
+                    <h4>Imprimir QRs</h4>
+                    <p>Genera PDF con códigos QR</p>
+                </div>
+            </button>
+            
+            <button class="action-card" id="statsBtn">
+                <div class="action-icon">
+                    <i data-lucide="bar-chart-3"></i>
+                </div>
+                <div class="action-content">
+                    <h4>Estadísticas</h4>
+                    <p>Ver análisis detallado</p>
+                </div>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Students Table Section -->
+<section class="quantum-card table-section">
+    <div class="card-header">
+        <div class="header-content">
+            <div class="header-main">
+                <h3 class="card-title">Lista de Estudiantes</h3>
+                <p class="card-subtitle">Gestiona y visualiza todos los estudiantes registrados</p>
+            </div>
+            <div class="header-actions">
+                <div class="search-controls">
+                    <div class="search-input">
+                        <i data-lucide="search"></i>
+                        <input type="text" placeholder="Buscar estudiantes..." id="studentSearchInput">
+                    </div>
+                    <select class="quantum-select" id="sortSelect">
+                        <option value="nombre">Ordenar por Nombre</option>
+                        <option value="codigo">Ordenar por Código</option>
+                        <option value="fecha">Ordenar por Fecha</option>
+                    </select>
+                </div>
+                <button class="quantum-btn btn-primary" id="refreshStudentsBtn">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-container" id="studentsTableContainer">
+        <div class="loading-state">
+            <div class="quantum-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <p>Cargando estudiantes...</p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+class StudentsManager {
+    constructor() {
+        this.students = [];
+        this.currentSort = 'nombre';
+        this.init();
+    }
+
+    async init() {
+        console.log('📚 Students Manager initializing...');
+        
+        await this.loadStudents();
+        this.setupEventListeners();
+        this.setupSearch();
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        console.log('✅ Students Manager initialized');
+    }
+
+    async loadStudents() {
+        const container = document.getElementById('studentsTableContainer');
+        
+        try {
+            const students = await fetch('/api/alumnos').then(r => r.json());
+            this.students = Array.isArray(students) ? students : [];
+            this.renderStudentsTable();
+        } catch (error) {
+            console.error('Error loading students:', error);
+            container.innerHTML = `
+                <div class="error-state">
+                    <i data-lucide="alert-circle"></i>
+                    <h3>Error al cargar estudiantes</h3>
+                    <p>${error.message}</p>
+                    <button class="quantum-btn btn-primary" onclick="studentsManager.loadStudents()">
+                        <i data-lucide="refresh-cw"></i>
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    renderStudentsTable() {
+        const container = document.getElementById('studentsTableContainer');
+        
+        if (this.students.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <h3>No hay estudiantes registrados</h3>
+                    <p>Comienza agregando tu primer estudiante usando el formulario arriba</p>
+                    <button class="quantum-btn btn-primary" onclick="document.getElementById('studentCode').focus()">
+                        <i data-lucide="user-plus"></i>
+                        Crear Primer Estudiante
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        const tableHTML = `
+            <div class="data-table">
+                <div class="table-header">
+                    <div class="bulk-actions" id="bulkActions" style="display: none;">
+                        <input type="checkbox" id="selectAll" onchange="studentsManager.selectAll(this.checked)">
+                        <span id="selectedCount">0 seleccionados</span>
+                        <div class="bulk-buttons">
+                            <button class="quantum-btn btn-sm btn-secondary" onclick="studentsManager.bulkExport()">
+                                <i data-lucide="download"></i>
+                                Exportar Seleccionados
+                            </button>
+                            <button class="quantum-btn btn-sm btn-danger" onclick="studentsManager.bulkDelete()">
+                                <i data-lucide="trash-2"></i>
+                                Eliminar Seleccionados
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-grid">
+                    ${this.students.map(student => `
+                        <div class="student-card" data-id="${student.id}">
+                            <div class="card-checkbox">
+                                <input type="checkbox" class="student-checkbox" value="${student.id}" 
+                                       onchange="studentsManager.updateBulkActions()">
+                            </div>
+                            
+                            <div class="student-info">
+                                <div class="student-avatar">
+                                    <i data-lucide="user"></i>
+                                </div>
+                                <div class="student-details">
+                                    <h4>${student.nombre}</h4>
+                                    <span class="student-code">${student.codigo}</span>
+                                    <small>ID: ${student.id}</small>
+                                </div>
+                            </div>
+                            
+                            <div class="student-qr">
+                                ${student.qrAlumnoBase64 ? `
+                                    <button class="qr-btn" onclick="studentsManager.showQR(${student.id})" title="Ver QR">
+                                        <i data-lucide="qr-code"></i>
+                                    </button>
+                                ` : `
+                                    <span class="qr-generating">
+                                        <i data-lucide="loader"></i>
+                                        Generando...
+                                    </span>
+                                `}
+                            </div>
+                            
+                            <div class="student-actions">
+                                <button class="action-btn edit-btn" onclick="studentsManager.editStudent(${student.id})" title="Editar">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <button class="action-btn duplicate-btn" onclick="studentsManager.duplicateStudent(${student.id})" title="Duplicar">
+                                    <i data-lucide="copy"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="studentsManager.deleteStudent(${student.id})" title="Eliminar">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="table-footer">
+                    <div class="table-info">
+                        <span>${this.students.length} estudiante${this.students.length !== 1 ? 's' : ''} total${this.students.length !== 1 ? 'es' : ''}</span>
+                    </div>
+                    <div class="table-pagination">
+                        <!-- Pagination controls if needed -->
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = tableHTML;
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    setupEventListeners() {
+        // Form submission
+        const form = document.getElementById('studentCreateForm');
+        if (form) {
+            form.addEventListener('submit', this.handleSubmit.bind(this));
+        }
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refreshStudentsBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => this.loadStudents());
+        }
+
+        // Quick actions
+        document.getElementById('bulkImportBtn')?.addEventListener('click', () => this.bulkImport());
+        document.getElementById('exportAllBtn')?.addEventListener('click', () => this.exportAll());
+        document.getElementById('printQRsBtn')?.addEventListener('click', () => this.printQRs());
+        document.getElementById('statsBtn')?.addEventListener('click', () => this.showStats());
+    }
+
+    setupSearch() {
+        const searchInput = document.getElementById('studentSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', this.debounce((e) => {
+                this.filterStudents(e.target.value);
+            }, 300));
+        }
+
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                this.sortStudents(e.target.value);
+            });
+        }
+    }
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('studentCreateStatus');
+        
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const response = await fetch('/api/alumnos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    codigo: formData.get('codigo'),
+                    nombre: formData.get('nombre')
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al crear estudiante');
+            }
+            
+            const student = await response.json();
+            
+            status.innerHTML = `
+                <div class="quantum-alert alert-success">
+                    <i data-lucide="check-circle"></i>
+                    <span>✅ Estudiante creado exitosamente</span>
+                </div>
+            `;
+            
+            form.reset();
+            await this.loadStudents();
+            
+            // Highlight new student
+            setTimeout(() => {
+                const newCard = document.querySelector(`[data-id="${student.id}"]`);
+                if (newCard) {
+                    newCard.style.background = 'linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent)';
+                    setTimeout(() => newCard.style.background = '', 3000);
+                }
+            }, 500);
+            
+        } catch (error) {
+            status.innerHTML = `
+                <div class="quantum-alert alert-danger">
+                    <i data-lucide="alert-circle"></i>
+                    <span>❌ ${error.message}</span>
+                </div>
+            `;
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            
+            setTimeout(() => {
+                status.innerHTML = '';
+            }, 5000);
+        }
+    }
+
+    filterStudents(searchTerm) {
+        const cards = document.querySelectorAll('.student-card');
+        const term = searchTerm.toLowerCase();
+        
+        cards.forEach(card => {
+            const name = card.querySelector('.student-details h4').textContent.toLowerCase();
+            const code = card.querySelector('.student-code').textContent.toLowerCase();
+            
+            const matches = name.includes(term) || code.includes(term);
+            card.style.display = matches ? 'flex' : 'none';
+            
+            if (matches && term) {
+                card.classList.add('search-highlight');
+                setTimeout(() => card.classList.remove('search-highlight'), 2000);
+            }
+        });
+    }
+
+    sortStudents(sortBy) {
+        this.currentSort = sortBy;
+        
+        this.students.sort((a, b) => {
+            switch (sortBy) {
+                case 'codigo':
+                    return a.codigo.localeCompare(b.codigo);
+                case 'fecha':
+                    return new Date(b.id) - new Date(a.id); // Assuming ID correlates with creation time
+                case 'nombre':
+                default:
+                    return a.nombre.localeCompare(b.nombre);
+            }
+        });
+        
+        this.renderStudentsTable();
+    }
+
+    selectAll(checked) {
+        const checkboxes = document.querySelectorAll('.student-checkbox');
+        checkboxes.forEach(cb => cb.checked = checked);
+        this.updateBulkActions();
+    }
+
+    updateBulkActions() {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        const bulkActions = document.getElementById('bulkActions');
+        const selectedCount = document.getElementById('selectedCount');
+        
+        if (checkboxes.length > 0) {
+            bulkActions.style.display = 'flex';
+            selectedCount.textContent = `${checkboxes.length} seleccionado${checkboxes.length > 1 ? 's' : ''}`;
+        } else {
+            bulkActions.style.display = 'none';
+        }
+    }
+
+    showQR(id) {
+        const student = this.students.find(s => s.id === id);
+        if (!student || !student.qrAlumnoBase64) {
+            alert('QR no disponible para este estudiante');
+            return;
+        }
+        
+        // Create modal to show QR
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>QR de ${student.nombre}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="data:image/png;base64,${student.qrAlumnoBase64}" 
+                         alt="QR de ${student.nombre}" class="qr-image">
+                    <div class="qr-details">
+                        <p><strong>${student.nombre}</strong></p>
+                        <p class="text-muted">Código: ${student.codigo}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="quantum-btn btn-secondary" onclick="studentsManager.downloadQR(${id})">
+                        <i data-lucide="download"></i>
+                        Descargar QR
+                    </button>
+                    <button class="quantum-btn btn-primary" onclick="this.closest('.modal-overlay').remove()">
+                        <i data-lucide="check"></i>
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        modal.querySelector('.modal-close').onclick = () => modal.remove();
+        modal.onclick = (e) => e.target === modal && modal.remove();
+        
+        document.body.appendChild(modal);
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+
+    downloadQR(id) {
+        const student = this.students.find(s => s.id === id);
+        if (!student?.qrAlumnoBase64) return;
+        
+        const link = document.createElement('a');
+        link.download = `QR-${student.codigo}-${student.nombre.replace(/[^a-z0-9]/gi, '_')}.png`;
+        link.href = `data:image/png;base64,${student.qrAlumnoBase64}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    async editStudent(id) {
+        // Implement edit functionality
+        console.log('Edit student:', id);
+    }
+
+    async duplicateStudent(id) {
+        // Implement duplicate functionality
+        console.log('Duplicate student:', id);
+    }
+
+    async deleteStudent(id) {
+        if (!confirm('¿Estás seguro de eliminar este estudiante?')) return;
+        
+        try {
+            const response = await fetch(`/api/alumnos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Error al eliminar estudiante');
+            }
+            
+            await this.loadStudents();
+            
+        } catch (error) {
+            alert('Error al eliminar estudiante: ' + error.message);
+        }
+    }
+
+    bulkImport() {
+        alert('Función de importación masiva en desarrollo');
+    }
+
+    exportAll() {
+        window.open('/api/alumnos/export', '_blank');
+    }
+
+    printQRs() {
+        alert('Función de impresión de QRs en desarrollo');
+    }
+
+    showStats() {
+        alert('Función de estadísticas en desarrollo');
+    }
+
+    bulkExport() {
+        const selected = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+            .map(cb => cb.value);
+        console.log('Bulk export:', selected);
+    }
+
+    bulkDelete() {
+        const selected = Array.from(document.querySelectorAll('.student-checkbox:checked'))
+            .map(cb => cb.value);
+        
+        if (selected.length === 0) return;
+        
+        if (!confirm(`¿Eliminar ${selected.length} estudiantes seleccionados?`)) return;
+        
+        console.log('Bulk delete:', selected);
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.studentsManager = new StudentsManager();
+});
+</script>
+}

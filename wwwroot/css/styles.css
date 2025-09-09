@@ -4,14 +4,34 @@
 
 /* CSS Variables - Dark & Light Theme */
 :root {
-  /* Brand Colors */
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --secondary: #8b5cf6;
-  --accent: #06b6d4;
+  /* Brand Colors - Professional Blue/Teal Scheme */
+  --primary: #0ea5e9; /* Sky Blue */
+  --primary-dark: #0284c7; /* Sky Blue Dark */
+  --secondary: #06b6d4; /* Cyan */
+  --accent: #14b8a6; /* Teal */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
+  
+  /* Modern Gradients */
+  --primary-gradient: linear-gradient(135deg, #0ea5e9, #06b6d4);
+  --secondary-gradient: linear-gradient(135deg, #06b6d4, #14b8a6);
+  --hero-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #14b8a6 100%);
+  --glass-gradient: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(6, 182, 212, 0.1));
+  --button-gradient: linear-gradient(135deg, #0ea5e9, #0284c7);
+  --card-gradient: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(14, 165, 233, 0.02));
+  
+  /* Advanced Animated Gradients */
+  --animated-gradient: linear-gradient(-45deg, #0ea5e9, #06b6d4, #14b8a6, #0891b2);
+  --mesh-gradient: radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.1) 0%, transparent 50%), 
+                   radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                   radial-gradient(circle at 40% 40%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+  --floating-gradient: linear-gradient(135deg, 
+                       rgba(14, 165, 233, 0.8) 0%, 
+                       rgba(6, 182, 212, 0.6) 25%, 
+                       rgba(20, 184, 166, 0.4) 50%, 
+                       rgba(8, 145, 178, 0.6) 75%, 
+                       rgba(14, 165, 233, 0.8) 100%);
   
   /* Light Theme */
   --bg-primary: #ffffff;
@@ -37,8 +57,10 @@
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
   
-  --glow: 0 0 20px rgba(99, 102, 241, 0.3);
-  --glow-strong: 0 0 40px rgba(99, 102, 241, 0.6);
+  --glow: 0 0 20px rgba(14, 165, 233, 0.3);
+  --glow-strong: 0 0 40px rgba(14, 165, 233, 0.6);
+  --glow-cyan: 0 0 30px rgba(6, 182, 212, 0.4);
+  --glow-teal: 0 0 25px rgba(20, 184, 166, 0.3);
   
   /* Glass morphism */
   --glass-bg: rgba(255, 255, 255, 0.05);
@@ -218,11 +240,11 @@ html {
 /* Advanced Animation Keyframes */
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 40px rgba(14, 165, 233, 0.6);
     transform: scale(1.02);
   }
 }
@@ -325,6 +347,56 @@ html {
   }
 }
 
+/* Advanced Gradient Animations */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes gradient-flow {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+@keyframes mesh-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translateY(-20px) rotate(5deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-10px) rotate(-5deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-15px) rotate(3deg);
+    opacity: 0.7;
+  }
+}
+
 .quantum-mesh {
   position: absolute;
   top: 0;
@@ -405,7 +477,7 @@ html {
 .brand-text h1 {
   font-size: 1.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: var(--primary-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -597,7 +669,7 @@ html {
    ================================ */
 
 .quantum-card {
-  background: var(--glass-bg);
+  background: var(--card-gradient);
   backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   border-radius: 24px;
@@ -605,6 +677,7 @@ html {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
 
 .quantum-card::before {
@@ -614,7 +687,7 @@ html {
   left: 0;
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.5), transparent);
   opacity: 0;
   transition: var(--transition);
 }
@@ -744,6 +817,136 @@ html {
   padding: 0.75rem 1.5rem;
   font-size: 0.875rem;
   border-radius: 12px;
+}
+
+/* ================================
+   🎨 EXPERT GRADIENT UTILITIES
+   ================================ */
+
+/* Animated Gradient Backgrounds */
+.gradient-animated {
+  background: var(--animated-gradient);
+  background-size: 400% 400%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.gradient-mesh {
+  position: relative;
+  background: var(--mesh-gradient);
+  animation: mesh-float 8s ease-in-out infinite;
+}
+
+.gradient-flowing {
+  background: var(--floating-gradient);
+  background-size: 300% 300%;
+  animation: gradient-flow 12s linear infinite;
+}
+
+/* Advanced Glass Morphism with Gradients */
+.glass-gradient {
+  background: var(--glass-gradient);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-gradient::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(14, 165, 233, 0.1), transparent, rgba(6, 182, 212, 0.1), transparent);
+  animation: rotate-360 20s linear infinite;
+  pointer-events: none;
+}
+
+/* Gradient Text Effects */
+.text-gradient-primary {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-secondary {
+  background: var(--secondary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-hero {
+  background: var(--hero-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Advanced Hover Effects with Gradients */
+.gradient-hover {
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.gradient-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-gradient);
+  opacity: 0;
+  transition: var(--transition);
+  z-index: -1;
+}
+
+.gradient-hover:hover::before {
+  left: 0;
+  opacity: 0.1;
+}
+
+/* Gradient Borders */
+.border-gradient {
+  position: relative;
+  background: var(--bg-primary);
+  border-radius: 16px;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: var(--primary-gradient);
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+}
+
+/* Expert Shadow Effects */
+.shadow-gradient {
+  box-shadow: 
+    0 0 0 1px rgba(14, 165, 233, 0.1),
+    0 2px 4px rgba(14, 165, 233, 0.1),
+    0 8px 16px rgba(6, 182, 212, 0.1),
+    0 16px 32px rgba(20, 184, 166, 0.05);
+}
+
+.shadow-gradient-strong {
+  box-shadow: 
+    0 0 0 1px rgba(14, 165, 233, 0.2),
+    0 4px 8px rgba(14, 165, 233, 0.15),
+    0 12px 24px rgba(6, 182, 212, 0.15),
+    0 24px 48px rgba(20, 184, 166, 0.1);
 }
 
 /* ================================
@@ -1529,8 +1732,9 @@ html {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: var(--glass-bg);
+  background: var(--primary-gradient);
   backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-xl), var(--glow);
   border-top: 1px solid var(--glass-border);
   padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom));
   display: none;
@@ -1717,10 +1921,11 @@ html {
 
 /* Hero Card */
 .hero-card {
-  background: linear-gradient(135deg, var(--glass-bg), var(--bg-secondary));
+  background: var(--hero-gradient);
   border: 2px solid var(--glass-border);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-xl), var(--glow);
 }
 
 .hero-card::before {
