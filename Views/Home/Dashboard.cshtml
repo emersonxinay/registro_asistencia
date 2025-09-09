@@ -1,203 +1,1773 @@
 @{
     ViewData["Title"] = "Dashboard";
-    ViewData["Subtitle"] = "Sistema de registro de asistencia con códigos QR";
+    ViewData["Subtitle"] = "Sistema de registro de asistencia con tecnología QR avanzada";
 }
 
-<div class="grid grid-3">
-    <!-- Crear Alumno -->
-    <div class="card">
+<!-- Hero Section -->
+<section class="quantum-grid grid-hero mb-4 stagger-parent">
+    <!-- Main Control Panel -->
+    <div class="quantum-card hero-card hover-reveal tilt-card">
         <div class="card-header">
-            <h2 class="card-title">Gestión de Alumnos</h2>
-            <p class="card-description">Registra nuevos alumnos y genera sus códigos QR</p>
+            <div class="card-icon pulse-effect" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
+                <i data-lucide="command"></i>
+            </div>
+            <h2 class="card-title text-reveal">
+                <span>Centro</span> <span>de</span> <span>Control</span>
+            </h2>
+            <p class="card-subtitle slide-reveal">
+                <span class="slide-reveal-content">Gestiona estudiantes y clases con tecnología QR de nueva generación</span>
+            </p>
         </div>
         
-        <form id="alumnoForm">
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-grid">
+                <button class="action-btn btn-primary scale-hover magnetic-btn" id="quickCreateStudent">
+                    <i data-lucide="user-plus"></i>
+                    <span>Nuevo Estudiante</span>
+                </button>
+                <button class="action-btn btn-secondary scale-hover magnetic-btn" id="quickCreateClass">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Nueva Clase</span>
+                </button>
+                <button class="action-btn btn-success scale-hover magnetic-btn" id="generateQR">
+                    <i data-lucide="qr-code"></i>
+                    <span>Generar QR</span>
+                </button>
+                <button class="action-btn btn-warning scale-hover magnetic-btn" id="scannerMode">
+                    <i data-lucide="scan"></i>
+                    <span>Escáner</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Live Stats Panel -->
+    <div class="quantum-card stats-panel hover-reveal">
+        <div class="card-header">
+            <h3 class="card-title">Métricas en Vivo</h3>
+            <div class="live-indicator">
+                <div class="pulse-dot"></div>
+                <span>Tiempo Real</span>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, var(--primary), #4f46e5);">
+                    <i data-lucide="users"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="liveStudentCount">0</div>
+                    <div class="metric-label">Estudiantes</div>
+                    <div class="metric-change positive">
+                        <i data-lucide="trending-up"></i>
+                        <span id="studentGrowth">+0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, var(--success), #059669);">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="liveAttendanceCount">0</div>
+                    <div class="metric-label">Asistencias Hoy</div>
+                    <div class="metric-change positive">
+                        <i data-lucide="trending-up"></i>
+                        <span id="attendanceGrowth">+0%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2);">
+                    <i data-lucide="book-open"></i>
+                </div>
+                <div class="metric-content">
+                    <div class="metric-value" id="liveClassCount">0</div>
+                    <div class="metric-label">Clases Activas</div>
+                    <div class="metric-change neutral">
+                        <i data-lucide="minus"></i>
+                        <span id="classGrowth">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Management Section -->
+<section class="quantum-grid grid-2 mb-4">
+    <!-- Student Management -->
+    <div class="quantum-card management-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
+                <i data-lucide="graduation-cap"></i>
+            </div>
+            <h3 class="card-title">Gestión de Estudiantes</h3>
+            <p class="card-subtitle">Registro y administración con QR automático</p>
+        </div>
+        
+        <form id="studentForm" class="quantum-form">
             <div class="form-group">
-                <label class="form-label" for="codigo">Código del Alumno</label>
-                <input type="text" id="codigo" name="codigo" class="form-input" required placeholder="Ej: EST001">
+                <label class="form-label" for="studentCode">Código del Estudiante</label>
+                <input type="text" id="studentCode" name="codigo" class="quantum-input" required 
+                       placeholder="EST001" autocomplete="off">
             </div>
             <div class="form-group">
-                <label class="form-label" for="nombre">Nombre Completo</label>
-                <input type="text" id="nombre" name="nombre" class="form-input" required placeholder="Ej: Juan Pérez">
+                <label class="form-label" for="studentName">Nombre Completo</label>
+                <input type="text" id="studentName" name="nombre" class="quantum-input" required 
+                       placeholder="Juan Pérez García" autocomplete="off">
             </div>
-            <button type="submit" class="btn btn-primary">Crear Alumno</button>
+            <button type="submit" class="quantum-btn btn-primary btn-lg">
+                <i data-lucide="user-plus"></i>
+                Crear Estudiante
+                <div class="btn-loader hidden">
+                    <div class="spinner-ring"></div>
+                </div>
+            </button>
         </form>
         
-        <div id="alumnoStatus" class="mt-4"></div>
+        <div id="studentStatus" class="mt-2"></div>
     </div>
 
-    <!-- Crear Clase -->
-    <div class="card">
+    <!-- Class Management -->
+    <div class="quantum-card management-card">
         <div class="card-header">
-            <h2 class="card-title">Gestión de Clases</h2>
-            <p class="card-description">Crea nuevas clases para registro de asistencia</p>
+            <div class="card-icon" style="background: linear-gradient(135deg, var(--success), #059669); color: white;">
+                <i data-lucide="book-open"></i>
+            </div>
+            <h3 class="card-title">Gestión de Clases</h3>
+            <p class="card-subtitle">Crea y administra tus clases académicas</p>
         </div>
         
-        <form id="claseForm">
+        <form id="classForm" class="quantum-form">
             <div class="form-group">
-                <label class="form-label" for="asignatura">Asignatura</label>
-                <input type="text" id="asignatura" name="asignatura" class="form-input" required placeholder="Ej: Matemáticas I">
+                <label class="form-label" for="className">Nombre de la Asignatura</label>
+                <input type="text" id="className" name="asignatura" class="quantum-input" required 
+                       placeholder="Matemáticas Avanzadas" autocomplete="off">
             </div>
-            <button type="submit" class="btn btn-primary">Crear Clase</button>
+            <button type="submit" class="quantum-btn btn-success btn-lg">
+                <i data-lucide="plus-circle"></i>
+                Crear Clase
+                <div class="btn-loader hidden">
+                    <div class="spinner-ring"></div>
+                </div>
+            </button>
         </form>
         
-        <div id="claseStatus" class="mt-4"></div>
+        <div id="classStatus" class="mt-2"></div>
     </div>
+</section>
 
-    <!-- QR de Clase -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">QR de Clase</h2>
-            <p class="card-description">Genera QR dinámico para registro de asistencias</p>
+<!-- QR Generation Section -->
+<section class="quantum-card qr-section mb-4">
+    <div class="card-header">
+        <div class="card-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2); color: white;">
+            <i data-lucide="qr-code"></i>
         </div>
-        
+        <h3 class="card-title">Generador QR Dinámico</h3>
+        <p class="card-subtitle">Crea códigos QR inteligentes con expiración automática</p>
+    </div>
+    
+    <div class="qr-controls">
         <div class="form-group">
-            <label class="form-label" for="claseIdQr">Seleccionar Clase</label>
-            <select id="claseIdQr" class="form-input">
-                <option value="">Selecciona una clase...</option>
+            <label class="form-label" for="qrClassSelect">Seleccionar Clase</label>
+            <select id="qrClassSelect" class="quantum-input quantum-select">
+                <option value="">🎯 Elige una clase para generar QR...</option>
             </select>
         </div>
-        <button type="button" class="btn btn-primary" id="btnGenerarQr" disabled onclick="generarQrClase()">Generar QR</button>
-        
-        <div class="qr-instructions" style="display: none;" id="qrInstructions">
-            <div class="alert-info">
-                <strong>📱 Instrucciones:</strong>
-                <ol>
-                    <li>Los estudiantes deben escanear este QR con su móvil</li>
-                    <li>Se abrirá automáticamente la página de registro</li>
-                    <li>Solo necesitan ingresar su ID de alumno</li>
-                    <li>El QR se renueva automáticamente cada 5 minutos</li>
-                </ol>
+        <button type="button" class="quantum-btn btn-primary btn-lg" id="generateQRBtn" disabled>
+            <i data-lucide="zap"></i>
+            Generar QR Inteligente
+            <div class="btn-loader hidden">
+                <div class="spinner-ring"></div>
+            </div>
+        </button>
+    </div>
+    
+    <div class="qr-instructions hidden" id="qrInstructions">
+        <div class="quantum-alert alert-info">
+            <i data-lucide="info"></i>
+            <div>
+                <strong>🚀 QR Inteligente Generado</strong>
+                <ul class="instruction-list">
+                    <li>Los estudiantes escanean con cualquier app QR</li>
+                    <li>Se abre automáticamente el formulario de registro</li>
+                    <li>QR se auto-renueva cada 5 minutos por seguridad</li>
+                    <li>Incluye validación de tiempo real</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="qrContainer" class="qr-display-area hidden">
+        <!-- QR will be displayed here -->
+    </div>
+</section>
+
+<!-- Data Tables Section -->
+<section class="quantum-grid grid-2 mb-4">
+    <!-- Students Table -->
+    <div class="quantum-card table-card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="card-title">Estudiantes Registrados</h3>
+                    <p class="card-subtitle">Listado completo con códigos QR</p>
+                </div>
+                <button class="quantum-btn btn-sm btn-secondary" id="refreshStudents">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
             </div>
         </div>
         
-        <div id="qrContainer" class="qr-display" style="display: none;">
-            <!-- QR se cargará aquí -->
+        <div class="quantum-table-container">
+            <div id="studentsTableContainer">
+                <div class="loading-state">
+                    <div class="quantum-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p>Cargando estudiantes...</p>
+                </div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Listados -->
-<div class="grid grid-2 mt-4">
-    <!-- Lista de Alumnos -->
-    <div class="card">
+    <!-- Classes Table -->
+    <div class="quantum-card table-card">
         <div class="card-header">
-            <h2 class="card-title">Alumnos Registrados</h2>
-            <p class="card-description">Lista de todos los alumnos en el sistema</p>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="card-title">Clases del Sistema</h3>
+                    <p class="card-subtitle">Administra y monitorea tus clases</p>
+                </div>
+                <button class="quantum-btn btn-sm btn-secondary" id="refreshClasses">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
+            </div>
         </div>
-        <div id="alumnosList">
-            <div class="loading"><span class="spinner"></span>Cargando alumnos...</div>
+        
+        <div class="quantum-table-container">
+            <div id="classesTableContainer">
+                <div class="loading-state">
+                    <div class="quantum-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p>Cargando clases...</p>
+                </div>
+            </div>
         </div>
     </div>
+</section>
 
-    <!-- Lista de Clases -->
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">Clases Activas</h2>
-            <p class="card-description">Gestiona tus clases y genera códigos QR</p>
-        </div>
-        <div id="clasesList">
-            <div class="loading"><span class="spinner"></span>Cargando clases...</div>
-        </div>
-    </div>
-</div>
-
-<!-- Enlaces rápidos -->
-<div class="card mt-4">
+<!-- Quick Links Section -->
+<section class="quantum-card links-section">
     <div class="card-header">
-        <h2 class="card-title">Enlaces Rápidos</h2>
+        <div class="card-icon" style="background: linear-gradient(135deg, var(--warning), #d97706); color: white;">
+            <i data-lucide="external-link"></i>
+        </div>
+        <h3 class="card-title">Enlaces Rápidos</h3>
+        <p class="card-subtitle">Acceso directo a funcionalidades avanzadas</p>
     </div>
-    <div class="flex gap-4">
-        <a href="/asistencias" class="btn btn-secondary">Ver Todas las Asistencias</a>
-        <a href="/api/asistencias/csv" class="btn btn-success">Descargar CSV Global</a>
-        <a href="/docente/scanner" class="btn btn-primary">👨‍🏫 Escáner Docente</a>
-        <a href="/swagger" class="btn btn-secondary" target="_blank">Documentación API</a>
+    
+    <div class="links-grid">
+        <a href="/asistencias" class="link-card">
+            <div class="link-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                <i data-lucide="clipboard-list"></i>
+            </div>
+            <div class="link-content">
+                <h4>Todas las Asistencias</h4>
+                <p>Ver registro completo de asistencias</p>
+            </div>
+            <i data-lucide="arrow-right" class="link-arrow"></i>
+        </a>
+        
+        <a href="/api/asistencias/csv" class="link-card">
+            <div class="link-icon" style="background: linear-gradient(135deg, var(--success), #059669);">
+                <i data-lucide="download"></i>
+            </div>
+            <div class="link-content">
+                <h4>Exportar CSV</h4>
+                <p>Descargar datos en formato CSV</p>
+            </div>
+            <i data-lucide="arrow-right" class="link-arrow"></i>
+        </a>
+        
+        <a href="/docente/scanner" class="link-card featured">
+            <div class="link-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2);">
+                <i data-lucide="scan-line"></i>
+            </div>
+            <div class="link-content">
+                <h4>Escáner Docente</h4>
+                <p>Interfaz avanzada de escaneo QR</p>
+            </div>
+            <i data-lucide="arrow-right" class="link-arrow"></i>
+        </a>
+        
+        <a href="/swagger" target="_blank" class="link-card">
+            <div class="link-icon" style="background: linear-gradient(135deg, var(--warning), #d97706);">
+                <i data-lucide="code-2"></i>
+            </div>
+            <div class="link-content">
+                <h4>Documentación API</h4>
+                <p>Explorar endpoints de la API</p>
+            </div>
+            <i data-lucide="external-link" class="link-arrow"></i>
+        </a>
     </div>
-</div>
+</section>
+
 
 @section Scripts {
 <script>
-    // Cargar clases en el selector
-    async function cargarClasesEnSelector() {
-        try {
-            const clases = await Utils.request('/api/clases');
-            const select = document.getElementById('claseIdQr');
-            const btn = document.getElementById('btnGenerarQr');
-            
-            select.innerHTML = '<option value="">Selecciona una clase...</option>';
-            
-            clases.forEach(clase => {
-                if (clase.activa) {
-                    const option = document.createElement('option');
-                    option.value = clase.id;
-                    option.textContent = `${clase.asignatura} (ID: ${clase.id})`;
-                    select.appendChild(option);
-                }
-            });
-            
-            // Habilitar botón cuando se seleccione una clase
-            select.addEventListener('change', () => {
-                btn.disabled = !select.value;
-            });
-            
-        } catch (error) {
-            console.error('Error cargando clases:', error);
+// Dashboard state management
+const Dashboard = {
+    data: {
+        students: [],
+        classes: [],
+        stats: {
+            totalStudents: 0,
+            activeClasses: 0,
+            todayAttendance: 0
         }
-    }
-
-    async function generarQrClase() {
-        const claseId = document.getElementById('claseIdQr').value;
-        if (!claseId) {
-            alert('Por favor selecciona una clase');
+    },
+    cache: {
+        studentsTable: null,
+        classesTable: null,
+        lastUpdate: 0
+    },
+    timers: {
+        statsUpdate: null,
+        qrRefresh: null,
+        countdown: null
+    },
+    
+    async init() {
+        console.log('🚀 Initializing QuantumAttend Dashboard...');
+        
+        // Initialize components
+        await this.loadInitialData();
+        this.setupEventListeners();
+        this.startRealTimeUpdates();
+        
+        // Initialize icons
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        console.log('✅ Dashboard initialized successfully');
+    },
+    
+    async loadInitialData() {
+        const loader = document.getElementById('globalLoader');
+        if (loader) loader.classList.add('show');
+        
+        try {
+            // Load data only if not recently updated (5 seconds cache)
+            const now = Date.now();
+            if (now - this.cache.lastUpdate > 5000) {
+                await Promise.all([
+                    this.loadStudents(),
+                    this.loadClasses(),
+                    this.updateStats()
+                ]);
+                this.cache.lastUpdate = now;
+            }
+        } catch (error) {
+            console.error('❌ Error loading initial data:', error);
+            this.showError('Error cargando datos iniciales');
+        } finally {
+            if (loader) loader.classList.remove('show');
+        }
+    },
+    
+    async loadStudents() {
+        try {
+            const students = await Utils.request('/api/alumnos');
+            if (Array.isArray(students)) {
+                this.data.students = students;
+                this.renderStudentsTable();
+                this.populateClassSelect();
+            } else {
+                console.warn('Students data is not an array:', students);
+                this.data.students = [];
+            }
+        } catch (error) {
+            console.error('Error loading students:', error);
+            this.showError(document.body, 'Error cargando estudiantes: ' + error.message);
+        }
+    },
+    
+    async loadClasses() {
+        try {
+            const classes = await Utils.request('/api/clases');
+            if (Array.isArray(classes)) {
+                this.data.classes = classes;
+                this.renderClassesTable();
+                this.populateClassSelect();
+            } else {
+                console.warn('Classes data is not an array:', classes);
+                this.data.classes = [];
+            }
+        } catch (error) {
+            console.error('Error loading classes:', error);
+            this.showError(document.body, 'Error cargando clases: ' + error.message);
+        }
+    },
+    
+    renderStudentsTable() {
+        const container = document.getElementById('studentsTableContainer');
+        if (!container) return;
+        
+        // Check if we need to re-render
+        const currentHash = JSON.stringify(this.data.students).slice(0, 50);
+        if (this.cache.studentsTable === currentHash) return;
+        this.cache.studentsTable = currentHash;
+        
+        if (this.data.students.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="users" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay estudiantes registrados</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza agregando tu primer estudiante</p>
+                    <button class="quantum-btn btn-primary" onclick="Dashboard.showAddStudentModal()">
+                        <i data-lucide="user-plus"></i>
+                        Agregar Primer Estudiante
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
             return;
         }
 
+        // Add search and filter bar
+        const searchBarHTML = `
+            <div class="search-filter-bar">
+                <div class="search-input">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" class="quantum-input" placeholder="Buscar estudiantes..." 
+                           id="studentSearch" onkeyup="Dashboard.filterStudents()">
+                </div>
+                <button class="quantum-btn btn-primary" onclick="Dashboard.showAddStudentModal()">
+                    <i data-lucide="user-plus"></i>
+                    Nuevo Estudiante
+                </button>
+            </div>
+        `;
+        
+        const tableHTML = `
+            ${searchBarHTML}
+            <table class="quantum-table" id="studentsTable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAllStudents" onchange="Dashboard.selectAllStudents(this.checked)">
+                        </th>
+                        <th onclick="Dashboard.sortStudents('codigo')" style="cursor: pointer;">
+                            Código <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
+                        </th>
+                        <th onclick="Dashboard.sortStudents('nombre')" style="cursor: pointer;">
+                            Nombre <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
+                        </th>
+                        <th>QR</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.data.students.map(student => `
+                        <tr class="student-row" data-id="${student.id}" data-codigo="${student.codigo.toLowerCase()}" data-nombre="${student.nombre.toLowerCase()}">
+                            <td>
+                                <input type="checkbox" class="student-checkbox" value="${student.id}">
+                            </td>
+                            <td>
+                                <code class="code-badge">${student.codigo}</code>
+                            </td>
+                            <td>
+                                <div class="student-info">
+                                    <strong>${student.nombre}</strong>
+                                    <small>ID: ${student.id}</small>
+                                </div>
+                            </td>
+                            <td>
+                                ${student.qrAlumnoBase64 ? 
+                                    `<button class="status-badge success" onclick="Dashboard.showStudentQR(${student.id})">
+                                        <i data-lucide="qr-code" style="width: 12px; height: 12px;"></i> Ver QR
+                                    </button>` : 
+                                    '<span class="status-badge warning">⚠ Generando...</span>'
+                                }
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editStudent(${student.id})" 
+                                            title="Editar estudiante">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.showStudentQR(${student.id}, event)"
+                                            title="Ver QR">
+                                        <i data-lucide="qr-code"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteStudent(${student.id})"
+                                            title="Eliminar estudiante">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div class="table-footer" id="studentsFooter" style="display: none;">
+                <div class="bulk-actions">
+                    <span id="selectedCount">0 estudiantes seleccionados</span>
+                    <button class="quantum-btn btn-danger btn-sm" onclick="Dashboard.bulkDeleteStudents()">
+                        <i data-lucide="trash-2"></i>
+                        Eliminar Seleccionados
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = tableHTML;
+        lucide.createIcons();
+    },
+    
+    renderClassesTable() {
+        const container = document.getElementById('classesTableContainer');
+        if (!container) return;
+        
+        // Check if we need to re-render
+        const currentHash = JSON.stringify(this.data.classes).slice(0, 50);
+        if (this.cache.classesTable === currentHash) return;
+        this.cache.classesTable = currentHash;
+        
+        if (this.data.classes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="book-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay clases registradas</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza programando tu primera clase</p>
+                    <button class="quantum-btn btn-primary" onclick="Dashboard.showAddClassModal()">
+                        <i data-lucide="plus-circle"></i>
+                        Crear Primera Clase
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+
+        // Add search and filter bar for classes
+        const searchBarHTML = `
+            <div class="search-filter-bar">
+                <div class="search-input">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" class="quantum-input" placeholder="Buscar clases..." 
+                           id="classSearch" onkeyup="Dashboard.filterClasses()">
+                </div>
+                <div class="filter-select">
+                    <select class="quantum-input quantum-select" id="statusFilter" onchange="Dashboard.filterClasses()">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activas</option>
+                        <option value="closed">Cerradas</option>
+                    </select>
+                </div>
+                <button class="quantum-btn btn-primary" onclick="Dashboard.showAddClassModal()">
+                    <i data-lucide="plus-circle"></i>
+                    Nueva Clase
+                </button>
+            </div>
+        `;
+        
+        const tableHTML = `
+            ${searchBarHTML}
+            <table class="quantum-table" id="classesTable">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAllClasses" onchange="Dashboard.selectAllClasses(this.checked)">
+                        </th>
+                        <th onclick="Dashboard.sortClasses('asignatura')" style="cursor: pointer;">
+                            Asignatura <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
+                        </th>
+                        <th>Estado</th>
+                        <th onclick="Dashboard.sortClasses('inicioUtc')" style="cursor: pointer;">
+                            Inicio <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
+                        </th>
+                        <th>QR</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.data.classes.map(cls => {
+                        const statusFilter = cls.activa ? 'active' : 'closed';
+                        
+                        return `
+                            <tr class="class-row" data-id="${cls.id}"
+                                data-asignatura="${cls.asignatura.toLowerCase()}"
+                                data-status="${statusFilter}"
+                                data-inicio="${cls.inicioUtc}">
+                                <td>
+                                    <input type="checkbox" class="class-checkbox" value="${cls.id}">
+                                </td>
+                                <td>
+                                    <div class="class-info">
+                                        <strong>${cls.asignatura}</strong>
+                                        <small>ID: ${cls.id}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    ${cls.activa ? 
+                                        '<span class="status-badge success">🟢 Activa</span>' : 
+                                        '<span class="status-badge danger">🔴 Cerrada</span>'
+                                    }
+                                </td>
+                                <td>
+                                    <time class="timestamp">
+                                        ${new Date(cls.inicioUtc).toLocaleString('es-ES', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short'
+                                        })}
+                                    </time>
+                                </td>
+                                <td>
+                                    ${cls.activa ? `
+                                        <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.generateClassQR(${cls.id})"
+                                                title="Generar QR">
+                                            <i data-lucide="qr-code"></i>
+                                            QR
+                                        </button>
+                                    ` : `
+                                        <span class="status-badge warning">Sin QR</span>
+                                    `}
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        ${cls.activa ? `
+                                            <button class="quantum-btn btn-sm btn-warning" onclick="Dashboard.closeClass(${cls.id})"
+                                                    title="Cerrar clase">
+                                                <i data-lucide="lock"></i>
+                                            </button>
+                                        ` : `
+                                            <button class="quantum-btn btn-sm btn-success" onclick="Dashboard.reopenClass(${cls.id})"
+                                                    title="Reabrir clase">
+                                                <i data-lucide="unlock"></i>
+                                            </button>
+                                        `}
+                                        <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editClass(${cls.id})"
+                                                title="Editar clase">
+                                            <i data-lucide="edit-3"></i>
+                                        </button>
+                                        <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewClassAttendance(${cls.id})"
+                                                title="Ver asistencia">
+                                            <i data-lucide="users"></i>
+                                        </button>
+                                        <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteClass(${cls.id})"
+                                                title="Eliminar clase">
+                                            <i data-lucide="trash-2"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+            <div class="table-footer" id="classesFooter" style="display: none;">
+                <div class="bulk-actions">
+                    <span id="selectedClassCount">0 clases seleccionadas</span>
+                    <button class="quantum-btn btn-danger btn-sm" onclick="Dashboard.bulkDeleteClasses()">
+                        <i data-lucide="trash-2"></i>
+                        Eliminar Seleccionadas
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = tableHTML;
+        lucide.createIcons();
+    },
+    
+    populateClassSelect() {
+        const select = document.getElementById('qrClassSelect');
+        if (!select) return;
+        
+        const activeClasses = this.data.classes.filter(cls => cls.activa);
+        
+        select.innerHTML = '<option value="">🎯 Elige una clase para generar QR...</option>';
+        
+        activeClasses.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.id;
+            option.textContent = `${cls.asignatura} (ID: ${cls.id})`;
+            select.appendChild(option);
+        });
+        
+        // Enable/disable generate button
+        const btn = document.getElementById('generateQRBtn');
+        if (btn) {
+            select.addEventListener('change', () => {
+                btn.disabled = !select.value;
+            });
+        }
+    },
+    
+    setupEventListeners() {
+        // Student form
+        const studentForm = document.getElementById('studentForm');
+        if (studentForm) {
+            studentForm.addEventListener('submit', this.handleStudentSubmit.bind(this));
+        }
+        
+        // Class form  
+        const classForm = document.getElementById('classForm');
+        if (classForm) {
+            classForm.addEventListener('submit', this.handleClassSubmit.bind(this));
+        }
+        
+        // QR Generation
+        const generateBtn = document.getElementById('generateQRBtn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', this.handleQRGeneration.bind(this));
+        }
+        
+        // Refresh buttons
+        const refreshStudents = document.getElementById('refreshStudents');
+        if (refreshStudents) {
+            refreshStudents.addEventListener('click', () => this.loadStudents());
+        }
+        
+        const refreshClasses = document.getElementById('refreshClasses');
+        if (refreshClasses) {
+            refreshClasses.addEventListener('click', () => this.loadClasses());
+        }
+        
+        // Quick action buttons
+        const quickButtons = {
+            quickCreateStudent: () => document.getElementById('studentCode')?.focus(),
+            quickCreateClass: () => document.getElementById('className')?.focus(),
+            generateQR: () => document.getElementById('qrClassSelect')?.focus(),
+            scannerMode: () => window.open('/docente/scanner', '_blank')
+        };
+        
+        Object.entries(quickButtons).forEach(([id, handler]) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', handler);
+        });
+    },
+    
+    async handleStudentSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('studentStatus');
+        
+        // Show loading state
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const student = await Utils.request('/api/alumnos', {
+                method: 'POST',
+                body: JSON.stringify({
+                    codigo: formData.get('codigo'),
+                    nombre: formData.get('nombre')
+                })
+            });
+            
+            // Success
+            form.reset();
+            this.showSuccess(status, '✅ Estudiante creado exitosamente');
+            await this.loadStudents();
+            await this.updateStats();
+            
+            // Animate the new student
+            setTimeout(() => {
+                const row = document.querySelector(`[data-id="${student.id}"]`);
+                if (row) {
+                    row.style.background = 'linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent)';
+                    setTimeout(() => row.style.background = '', 2000);
+                }
+            }, 500);
+            
+        } catch (error) {
+            this.showError(status, error.message || 'Error al crear estudiante');
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+        }
+    },
+    
+    async handleClassSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('classStatus');
+        
+        // Show loading state
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const cls = await Utils.request('/api/clases', {
+                method: 'POST',
+                body: JSON.stringify({
+                    asignatura: formData.get('asignatura')
+                })
+            });
+            
+            // Success
+            form.reset();
+            this.showSuccess(status, '✅ Clase creada exitosamente');
+            await this.loadClasses();
+            await this.updateStats();
+            
+        } catch (error) {
+            this.showError(status, error.message || 'Error al crear clase');
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+        }
+    },
+    
+    async handleQRGeneration() {
+        const select = document.getElementById('qrClassSelect');
+        const btn = document.getElementById('generateQRBtn');
         const container = document.getElementById('qrContainer');
         const instructions = document.getElementById('qrInstructions');
+        const loader = btn.querySelector('.btn-loader');
         
-        container.style.display = 'block';
-        instructions.style.display = 'block';
+        const classId = select?.value;
+        if (!classId) return;
         
-        // Usar el QR manager
-        window.qrManager.currentClassId = claseId;
-        await window.qrManager.loadQr();
-        window.qrManager.startAutoRefresh();
+        // Show loading
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
         
-        // Scroll al QR
-        container.scrollIntoView({ behavior: 'smooth' });
-    }
+        try {
+            const qrData = await Utils.request(`/api/clases/${classId}/qr`);
+            
+            // Show QR
+            container.innerHTML = `
+                <div class="qr-display">
+                    <img src="data:image/png;base64,${qrData.base64Png}" 
+                         alt="QR Code" class="qr-image" />
+                    <div class="qr-info">
+                        <h4>📱 QR para ${qrData.claseInfo.asignatura}</h4>
+                        <p><strong>Expira:</strong> ${new Date(qrData.expiraUtc).toLocaleTimeString()}</p>
+                        <p><strong>URL:</strong> <code>${qrData.url}</code></p>
+                    </div>
+                </div>
+            `;
+            
+            container.classList.remove('hidden');
+            container.classList.add('active');
+            instructions?.classList.remove('hidden');
+            
+            // Scroll to QR
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+        } catch (error) {
+            this.showError(document.body, error.message || 'Error generando QR');
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+        }
+    },
     
-    // Cargar clases al inicializar
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(cargarClasesEnSelector, 500);
+    async updateStats() {
+        try {
+            const [students, classes] = await Promise.all([
+                Utils.request('/api/alumnos'),
+                Utils.request('/api/clases')
+            ]);
+            
+            if (Array.isArray(students) && Array.isArray(classes)) {
+                this.data.stats.totalStudents = students.length;
+                this.data.stats.activeClasses = classes.filter(c => c && c.activa).length;
+                
+                // Update UI
+                this.animateCounter('liveStudentCount', this.data.stats.totalStudents);
+                this.animateCounter('liveClassCount', this.data.stats.activeClasses);
+                
+                // Update header stats
+                this.animateCounter('totalStudents', this.data.stats.totalStudents);
+                this.animateCounter('activeClasses', this.data.stats.activeClasses);
+            } else {
+                console.warn('Invalid data received for stats update');
+            }
+            
+        } catch (error) {
+            console.error('Error updating stats:', error);
+            // Don't show error to user for background stats update
+        }
+    },
+    
+    animateCounter(elementId, targetValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const currentValue = parseInt(element.textContent) || 0;
+        const safeTargetValue = Math.max(0, targetValue || 0); // Prevent negative values
+        
+        if (currentValue === safeTargetValue) return; // Skip if no change
+        
+        // Prevent animation if element is already animating
+        if (element.dataset.animating === 'true') {
+            element.textContent = safeTargetValue;
+            return;
+        }
+        
+        element.dataset.animating = 'true';
+        
+        // Use requestAnimationFrame for better performance
+        const startTime = performance.now();
+        const duration = 500; // Fixed duration for smoother animation
+        
+        const animate = (timestamp) => {
+            const progress = Math.min((timestamp - startTime) / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+            const current = Math.round(currentValue + (safeTargetValue - currentValue) * easeProgress);
+            
+            // Ensure we don't go negative
+            element.textContent = Math.max(0, current);
+            
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Ensure final value is correct
+                element.textContent = safeTargetValue;
+                element.dataset.animating = 'false';
+                
+                // Brief highlight on completion
+                element.style.color = 'var(--success)';
+                setTimeout(() => {
+                    element.style.color = '';
+                }, 300);
+            }
+        };
+        
+        requestAnimationFrame(animate);
+    },
+    
+    startRealTimeUpdates() {
+        // Clear existing timers
+        this.clearTimers();
+        
+        // Update stats every 60 seconds (reduced from 30)
+        this.timers.statsUpdate = setInterval(() => {
+            // Only update if page is visible
+            if (!document.hidden) {
+                this.updateStats();
+            }
+        }, 60000);
+        
+        // Update timestamp displays every 2 minutes (reduced frequency)
+        setInterval(() => {
+            if (!document.hidden) {
+                const timestamps = document.querySelectorAll('.timestamp');
+                timestamps.forEach(el => {
+                    const date = new Date(el.dateTime || el.textContent);
+                    if (date && !isNaN(date)) {
+                        el.textContent = date.toLocaleString('es-ES', {
+                            dateStyle: 'short',
+                            timeStyle: 'short'
+                        });
+                    }
+                });
+            }
+        }, 120000);
+    },
+    
+    clearTimers() {
+        Object.values(this.timers).forEach(timer => {
+            if (timer) clearInterval(timer);
+        });
+        this.timers = {
+            statsUpdate: null,
+            qrRefresh: null,
+            countdown: null
+        };
+    },
+    
+    showSuccess(container, message) {
+        if (!container) container = document.body;
+        
+        const alert = document.createElement('div');
+        alert.className = 'quantum-alert alert-success';
+        alert.innerHTML = `
+            <i data-lucide="check-circle"></i>
+            <span>${message}</span>
+        `;
+        
+        if (container === document.body) {
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        } else {
+            container.innerHTML = '';
+            container.appendChild(alert);
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+        
+        lucide.createIcons();
+    },
+    
+    showError(container, message) {
+        console.error('Dashboard Error:', message);
+        
+        if (!container) container = document.body;
+        
+        try {
+            const alert = document.createElement('div');
+            alert.className = 'quantum-alert alert-danger';
+            alert.innerHTML = `
+                <i data-lucide="alert-circle"></i>
+                <span>${message}</span>
+            `;
+            
+            if (container === document.body) {
+                container.appendChild(alert);
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 5000);
+            } else {
+                container.innerHTML = '';
+                container.appendChild(alert);
+                setTimeout(() => {
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                }, 5000);
+            }
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        } catch (error) {
+            console.error('Error showing error message:', error);
+        }
+    },
+    
+    // Action methods
+    async deleteStudent(id) {
+        if (!confirm('¿Estás seguro de eliminar este estudiante?')) return;
+        
+        try {
+            await Utils.request(`/api/alumnos/${id}`, { method: 'DELETE' });
+            this.showSuccess(document.body, 'Estudiante eliminado exitosamente');
+            await this.loadStudents();
+            await this.updateStats();
+        } catch (error) {
+            this.showError(document.body, error.message || 'Error al eliminar estudiante');
+        }
+    },
+    
+    async deleteClass(id) {
+        if (!confirm('¿Estás seguro de eliminar esta clase?')) return;
+        
+        try {
+            await Utils.request(`/api/clases/${id}`, { method: 'DELETE' });
+            this.showSuccess(document.body, 'Clase eliminada exitosamente');
+            await this.loadClasses();
+            await this.updateStats();
+        } catch (error) {
+            this.showError(document.body, error.message || 'Error al eliminar clase');
+        }
+    },
+    
+    async closeClass(id) {
+        if (!confirm('¿Cerrar esta clase? No se podrán registrar más asistencias.')) return;
+        
+        try {
+            await Utils.request(`/api/clases/${id}/cerrar`, { method: 'POST' });
+            this.showSuccess(document.body, 'Clase cerrada exitosamente');
+            await this.loadClasses();
+            await this.updateStats();
+        } catch (error) {
+            this.showError(document.body, error.message || 'Error al cerrar clase');
+        }
+    },
+    
+    generateClassQR(id) {
+        const select = document.getElementById('qrClassSelect');
+        if (select) {
+            select.value = id;
+            select.dispatchEvent(new Event('change'));
+            document.getElementById('generateQRBtn')?.click();
+        }
+    },
+
+    // ============================================================================
+    // 🎭 ADVANCED CRUD OPERATIONS
+    // ============================================================================
+
+    // Student CRUD Operations
+    showAddStudentModal() {
+        this.showStudentModal();
+    },
+
+    showStudentModal(student = null) {
+        const isEdit = !!student;
+        const modalHTML = `
+            <div class="modal-overlay" id="studentModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <i data-lucide="${isEdit ? 'edit-3' : 'user-plus'}"></i>
+                            ${isEdit ? 'Editar Estudiante' : 'Nuevo Estudiante'}
+                        </h2>
+                        <button class="modal-close" onclick="Dashboard.closeModal('studentModal')">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <form class="modal-body" onsubmit="Dashboard.handleStudentFormSubmit(event, ${isEdit})">
+                        ${isEdit ? `<input type="hidden" name="id" value="${student.id}">` : ''}
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" for="editStudentCode">Código del Estudiante</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="editStudentCode" name="codigo" 
+                                           class="quantum-input" required 
+                                           value="${isEdit ? student.codigo : ''}"
+                                           placeholder="Ej: EST001"
+                                           pattern="[A-Za-z0-9]+"
+                                           onkeyup="Dashboard.validateStudentCode(this)">
+                                    <i data-lucide="hash" class="input-icon"></i>
+                                </div>
+                                <div class="form-error" id="codeError">El código debe ser único y alfanumérico</div>
+                                <div class="form-success" id="codeSuccess">Código disponible</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required" for="editStudentName">Nombre Completo</label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="editStudentName" name="nombre" 
+                                           class="quantum-input" required 
+                                           value="${isEdit ? student.nombre : ''}"
+                                           placeholder="Ej: Juan Pérez García"
+                                           onkeyup="Dashboard.validateStudentName(this)">
+                                    <i data-lucide="user" class="input-icon"></i>
+                                </div>
+                                <div class="form-error" id="nameError">El nombre debe tener al menos 3 caracteres</div>
+                                <div class="form-success" id="nameSuccess">Nombre válido</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar" id="saveProgress" style="display: none;">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="quantum-btn btn-secondary" onclick="Dashboard.closeModal('studentModal')">
+                                <i data-lucide="x"></i>
+                                Cancelar
+                            </button>
+                            <button type="submit" class="quantum-btn btn-primary" id="saveStudentBtn">
+                                <i data-lucide="save"></i>
+                                ${isEdit ? 'Actualizar' : 'Crear'} Estudiante
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = document.getElementById('studentModal');
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        // Focus first input
+        setTimeout(() => {
+            document.getElementById('editStudentCode').focus();
+        }, 300);
+    },
+
+    async editStudent(id) {
+        try {
+            const student = this.data.students.find(s => s.id === id);
+            if (student) {
+                this.showStudentModal(student);
+            } else {
+                Utils.showNotification('Estudiante no encontrado', 'error');
+            }
+        } catch (error) {
+            Utils.showNotification('Error al cargar estudiante: ' + error.message, 'error');
+        }
+    },
+
+    async handleStudentFormSubmit(event, isEdit = false) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        const btn = document.getElementById('saveStudentBtn');
+        const progress = document.getElementById('saveProgress');
+        
+        // Show loading state
+        btn.classList.add('loading');
+        btn.disabled = true;
+        progress.style.display = 'block';
+        
+        // Animate progress
+        let progressValue = 0;
+        const progressInterval = setInterval(() => {
+            progressValue += Math.random() * 20;
+            if (progressValue > 90) progressValue = 90;
+            progress.querySelector('.progress-fill').style.width = progressValue + '%';
+        }, 100);
+
+        try {
+            const studentData = {
+                codigo: formData.get('codigo'),
+                nombre: formData.get('nombre')
+            };
+
+            let response;
+            if (isEdit) {
+                const id = formData.get('id');
+                response = await Utils.request(`/api/alumnos/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(studentData)
+                });
+            } else {
+                response = await Utils.request('/api/alumnos', {
+                    method: 'POST',
+                    body: JSON.stringify(studentData)
+                });
+            }
+            
+            // Complete progress
+            clearInterval(progressInterval);
+            progress.querySelector('.progress-fill').style.width = '100%';
+            
+            // Success
+            Utils.showNotification(
+                `✅ Estudiante ${isEdit ? 'actualizado' : 'creado'} exitosamente`, 
+                'success'
+            );
+            
+            // Close modal and refresh
+            setTimeout(() => {
+                this.closeModal('studentModal');
+                this.loadStudents();
+                this.updateStats();
+            }, 500);
+            
+        } catch (error) {
+            clearInterval(progressInterval);
+            Utils.showNotification('Error: ' + error.message, 'error');
+        } finally {
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            setTimeout(() => {
+                progress.style.display = 'none';
+                progress.querySelector('.progress-fill').style.width = '0%';
+            }, 1000);
+        }
+    },
+
+    validateStudentCode(input) {
+        const code = input.value.trim();
+        const error = document.getElementById('codeError');
+        const success = document.getElementById('codeSuccess');
+        
+        if (code.length < 3) {
+            input.classList.remove('success');
+            input.classList.add('invalid');
+            error.classList.add('show');
+            success.classList.remove('show');
+            return false;
+        }
+        
+        // Check if code exists
+        const exists = this.data.students.some(s => s.codigo.toLowerCase() === code.toLowerCase());
+        if (exists) {
+            input.classList.remove('success');
+            input.classList.add('invalid');
+            error.textContent = 'Este código ya existe';
+            error.classList.add('show');
+            success.classList.remove('show');
+            return false;
+        }
+        
+        input.classList.remove('invalid');
+        input.classList.add('success');
+        error.classList.remove('show');
+        success.classList.add('show');
+        return true;
+    },
+
+    validateStudentName(input) {
+        const name = input.value.trim();
+        const error = document.getElementById('nameError');
+        const success = document.getElementById('nameSuccess');
+        
+        if (name.length < 3) {
+            input.classList.remove('success');
+            input.classList.add('invalid');
+            error.classList.add('show');
+            success.classList.remove('show');
+            return false;
+        }
+        
+        input.classList.remove('invalid');
+        input.classList.add('success');
+        error.classList.remove('show');
+        success.classList.add('show');
+        return true;
+    },
+
+    async deleteStudent(id) {
+        try {
+            await Utils.request(`/api/alumnos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            Utils.showNotification('✅ Estudiante eliminado exitosamente', 'success');
+            
+            // Refresh data
+            this.loadStudents();
+            this.updateStats();
+            
+        } catch (error) {
+            Utils.showNotification('Error al eliminar estudiante: ' + error.message, 'error');
+        }
+    },
+
+    confirmDeleteStudent(id) {
+        const student = this.data.students.find(s => s.id === id);
+        if (!student) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Estudiante?',
+            message: `¿Estás seguro de que deseas eliminar a <strong>${student.nombre}</strong> (${student.codigo})? Esta acción no se puede deshacer.`,
+            icon: 'user-x',
+            confirmText: 'Sí, Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: () => this.deleteStudent(id)
+        });
+    },
+
+    async bulkDeleteStudents() {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        const ids = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (ids.length === 0) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Estudiantes?',
+            message: `¿Estás seguro de que deseas eliminar ${ids.length} estudiantes seleccionados? Esta acción no se puede deshacer.`,
+            icon: 'users-x',
+            confirmText: `Sí, Eliminar ${ids.length}`,
+            cancelText: 'Cancelar',
+            onConfirm: async () => {
+                const btn = document.getElementById('confirmBtn');
+                btn.classList.add('loading');
+                btn.disabled = true;
+                
+                try {
+                    // Delete all selected students
+                    await Promise.all(ids.map(id => 
+                        Utils.request(`/api/alumnos/${id}`, { method: 'DELETE' })
+                    ));
+                    
+                    Utils.showNotification(`✅ ${ids.length} estudiantes eliminados exitosamente`, 'success');
+                    
+                    // Refresh data
+                    this.loadStudents();
+                    this.updateStats();
+                    
+                } catch (error) {
+                    Utils.showNotification('Error al eliminar estudiantes: ' + error.message, 'error');
+                }
+            }
+        });
+    },
+
+    showStudentQR(id, event) {
+        // Prevent event bubbling
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+        }
+        
+        const student = this.data.students.find(s => s.id === id);
+        if (!student || !student.qrAlumnoBase64) {
+            Utils.showNotification('QR no disponible para este estudiante', 'warning');
+            return;
+        }
+        
+        const modalHTML = `
+            <div class="modal-overlay" id="qrModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <i data-lucide="qr-code"></i>
+                            QR de ${student.nombre}
+                        </h2>
+                        <button class="modal-close" onclick="Dashboard.closeModal('qrModal')">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="qr-display">
+                            <img src="data:image/png;base64,${student.qrAlumnoBase64}" 
+                                 alt="QR de ${student.nombre}" 
+                                 style="max-width: 300px; border-radius: 16px; box-shadow: var(--shadow-lg);">
+                        </div>
+                        <div style="margin-top: 1.5rem;">
+                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">${student.nombre}</h4>
+                            <code class="code-badge">${student.codigo}</code>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="quantum-btn btn-secondary" onclick="Dashboard.downloadStudentQR(${id})">
+                            <i data-lucide="download"></i>
+                            Descargar QR
+                        </button>
+                        <button class="quantum-btn btn-primary" onclick="Dashboard.closeModal('qrModal')">
+                            <i data-lucide="check"></i>
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = document.getElementById('qrModal');
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    },
+
+    downloadStudentQR(id) {
+        const student = this.data.students.find(s => s.id === id);
+        if (!student || !student.qrAlumnoBase64) return;
+        
+        try {
+            const link = document.createElement('a');
+            link.download = `QR-${student.codigo}-${student.nombre.replace(/[^a-z0-9]/gi, '_')}.png`;
+            link.href = `data:image/png;base64,${student.qrAlumnoBase64}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            Utils.showNotification('QR descargado exitosamente', 'success');
+        } catch (error) {
+            Utils.showNotification('Error al descargar QR', 'error');
+        }
+    },
+
+    // Search and Filter Functions with debouncing
+    filterStudents() {
+        if (!this._debouncedFilterStudents) {
+            this._debouncedFilterStudents = this.debounce(() => {
+                const searchTerm = document.getElementById('studentSearch')?.value.toLowerCase() || '';
+                const rows = document.querySelectorAll('#studentsTable .student-row');
+                
+                rows.forEach(row => {
+                    const codigo = row.getAttribute('data-codigo');
+                    const nombre = row.getAttribute('data-nombre');
+                    const matches = codigo.includes(searchTerm) || nombre.includes(searchTerm);
+                    
+                    row.style.display = matches ? '' : 'none';
+                    
+                    if (matches && searchTerm) {
+                        row.classList.add('search-highlight');
+                        setTimeout(() => row.classList.remove('search-highlight'), 1000);
+                    }
+                });
+            }, 300);
+        }
+        
+        this._debouncedFilterStudents();
+    },
+
+    sortStudents(field) {
+        // Implementation for sorting
+        this.data.students.sort((a, b) => {
+            if (field === 'codigo') return a.codigo.localeCompare(b.codigo);
+            if (field === 'nombre') return a.nombre.localeCompare(b.nombre);
+            return 0;
+        });
+        this.renderStudentsTable();
+    },
+
+    selectAllStudents(checked) {
+        const checkboxes = document.querySelectorAll('.student-checkbox');
+        checkboxes.forEach(cb => cb.checked = checked);
+        this.updateBulkActions();
+    },
+
+    updateBulkActions() {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        const footer = document.getElementById('studentsFooter');
+        const count = document.getElementById('selectedCount');
+        
+        if (checkboxes.length > 0) {
+            footer.style.display = 'flex';
+            count.textContent = `${checkboxes.length} estudiantes seleccionados`;
+        } else {
+            footer.style.display = 'none';
+        }
+    },
+
+    // ============================================================================
+    // 🎓 CLASS CRUD OPERATIONS  
+    // ============================================================================
+
+    async editClass(id) {
+        Utils.showNotification('Funcionalidad de edición de clases en desarrollo', 'info');
+    },
+
+    async deleteClass(id) {
+        try {
+            await Utils.request(`/api/clases/${id}`, {
+                method: 'DELETE'
+            });
+            
+            Utils.showNotification('✅ Clase eliminada exitosamente', 'success');
+            this.loadClasses();
+            this.updateStats();
+            
+        } catch (error) {
+            Utils.showNotification('Error al eliminar clase: ' + error.message, 'error');
+        }
+    },
+
+    confirmDeleteClass(id) {
+        const clase = this.data.classes.find(c => c.id === id);
+        if (!clase) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Clase?',
+            message: `¿Estás seguro de que deseas eliminar la clase <strong>${clase.asignatura}</strong>? Esta acción no se puede deshacer.`,
+            icon: 'book-x',
+            confirmText: 'Sí, Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: () => this.deleteClass(id)
+        });
+    },
+
+    reopenClass(id) {
+        Utils.showNotification('Funcionalidad de reabrir clase en desarrollo', 'info');
+    },
+
+    viewClassAttendance(id) {
+        Utils.showNotification('Vista de asistencia en desarrollo', 'info'); 
+    },
+
+    showAddClassModal() {
+        Utils.showNotification('Modal de crear clase en desarrollo', 'info');
+    },
+
+    filterClasses() {
+        if (!this._debouncedFilterClasses) {
+            this._debouncedFilterClasses = this.debounce(() => {
+                const searchTerm = document.getElementById('classSearch')?.value.toLowerCase() || '';
+                const statusFilter = document.getElementById('statusFilter')?.value || '';
+                const rows = document.querySelectorAll('#classesTable .class-row');
+                
+                rows.forEach(row => {
+                    const asignatura = row.getAttribute('data-asignatura');
+                    const status = row.getAttribute('data-status');
+                    
+                    const matchesSearch = asignatura.includes(searchTerm);
+                    const matchesStatus = !statusFilter || status === statusFilter;
+                    const matches = matchesSearch && matchesStatus;
+                    
+                    row.style.display = matches ? '' : 'none';
+                });
+            }, 300);
+        }
+        
+        this._debouncedFilterClasses();
+    },
+
+    sortClasses(field) {
+        this.data.classes.sort((a, b) => {
+            if (field === 'asignatura') return a.asignatura.localeCompare(b.asignatura);
+            if (field === 'inicioUtc') return new Date(a.inicioUtc) - new Date(b.inicioUtc);
+            return 0;
+        });
+        this.renderClassesTable();
+    },
+
+    selectAllClasses(checked) {
+        const checkboxes = document.querySelectorAll('.class-checkbox');
+        checkboxes.forEach(cb => cb.checked = checked);
+        this.updateClassBulkActions();
+    },
+
+    updateClassBulkActions() {
+        const checkboxes = document.querySelectorAll('.class-checkbox:checked');
+        const footer = document.getElementById('classesFooter');
+        const count = document.getElementById('selectedClassCount');
+        
+        if (checkboxes.length > 0) {
+            footer.style.display = 'flex';
+            count.textContent = `${checkboxes.length} clases seleccionadas`;
+        } else {
+            footer.style.display = 'none';
+        }
+    },
+
+    async bulkDeleteClasses() {
+        const checkboxes = document.querySelectorAll('.class-checkbox:checked');
+        const ids = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (ids.length === 0) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Clases?',
+            message: `¿Estás seguro de que deseas eliminar ${ids.length} clases seleccionadas? Esta acción no se puede deshacer.`,
+            icon: 'book-x',
+            confirmText: `Sí, Eliminar ${ids.length}`,
+            cancelText: 'Cancelar',
+            onConfirm: async () => {
+                try {
+                    await Promise.all(ids.map(id => 
+                        Utils.request(`/api/clases/${id}`, { method: 'DELETE' })
+                    ));
+                    
+                    Utils.showNotification(`✅ ${ids.length} clases eliminadas exitosamente`, 'success');
+                    this.loadClasses();
+                    this.updateStats();
+                    
+                } catch (error) {
+                    Utils.showNotification('Error al eliminar clases: ' + error.message, 'error');
+                }
+            }
+        });
+    },
+
+    // Utility Functions
+    showConfirmDialog({ title, message, icon, confirmText, cancelText, onConfirm, onCancel }) {
+        const modalHTML = `
+            <div class="modal-overlay" id="confirmModal">
+                <div class="modal-content" style="max-width: 450px;">
+                    <div class="modal-body">
+                        <div class="confirm-dialog">
+                            <div class="confirm-icon">
+                                <i data-lucide="${icon}"></i>
+                            </div>
+                            <h3 class="confirm-title">${title}</h3>
+                            <p class="confirm-message">${message}</p>
+                            <div class="confirm-actions">
+                                <button class="quantum-btn btn-secondary" onclick="Dashboard.closeModal('confirmModal')" id="cancelBtn">
+                                    ${cancelText}
+                                </button>
+                                <button class="quantum-btn btn-danger" onclick="Dashboard.executeConfirmAction()" id="confirmBtn">
+                                    ${confirmText}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = document.getElementById('confirmModal');
+        
+        // Store the confirm action
+        this._confirmAction = onConfirm;
+        this._cancelAction = onCancel;
+        
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    },
+
+    executeConfirmAction() {
+        if (this._confirmAction) {
+            this._confirmAction();
+        }
+        this.closeModal('confirmModal');
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.remove();
+                }
+                this._confirmAction = null;
+                this._cancelAction = null;
+            }, 300);
+        }
+    },
+    
+    // Utility function for debouncing
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func.apply(this, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+};
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    Dashboard.init();
+    
+    // Setup checkbox listeners with event delegation for better performance
+    document.addEventListener('change', (e) => {
+        if (e.target.classList.contains('student-checkbox')) {
+            Dashboard.updateBulkActions();
+        } else if (e.target.classList.contains('class-checkbox')) {
+            Dashboard.updateClassBulkActions();
+        }
     });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        Dashboard.clearTimers();
+    });
+    
+    // Pause updates when page is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            Dashboard.clearTimers();
+        } else {
+            Dashboard.startRealTimeUpdates();
+        }
+    });
+});
+
+// All styles have been moved to the main CSS file
 </script>
-
-<style>
-.alert-info {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 1rem 0;
-    font-size: 0.875rem;
-}
-
-.alert-info ol {
-    margin: 0.5rem 0 0 0;
-    padding-left: 1.25rem;
-}
-
-.alert-info li {
-    margin-bottom: 0.25rem;
-}
-
-.qr-display {
-    border: 2px dashed #e5e7eb;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-top: 1rem;
-    background: #fafafa;
-}
-</style>
 }

@@ -9,12 +9,16 @@ public interface IDataService
     Task<Alumno> CreateAlumnoAsync(AlumnoCreateDto dto);
     Task<Alumno?> GetAlumnoAsync(int id);
     Task<IEnumerable<Alumno>> GetAlumnosAsync();
+    Task<bool> UpdateAlumnoAsync(int id, AlumnoCreateDto dto);
+    Task<bool> DeleteAlumnoAsync(int id);
     
     // Clases
     Task<Clase> CreateClaseAsync(ClaseCreateDto dto);
     Task<Clase?> GetClaseAsync(int id);
     Task<IEnumerable<Clase>> GetClasesAsync();
     Task<bool> CerrarClaseAsync(int id);
+    Task<bool> UpdateClaseAsync(int id, ClaseCreateDto dto);
+    Task<bool> DeleteClaseAsync(int id);
     
     // Asistencias
     Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo);
@@ -68,6 +72,22 @@ public class InMemoryDataService : IDataService
         return Task.FromResult(_alumnos.Values.AsEnumerable());
     }
 
+    public Task<bool> UpdateAlumnoAsync(int id, AlumnoCreateDto dto)
+    {
+        if (!_alumnos.TryGetValue(id, out var alumno))
+            return Task.FromResult(false);
+
+        alumno.Codigo = dto.Codigo;
+        alumno.Nombre = dto.Nombre;
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> DeleteAlumnoAsync(int id)
+    {
+        var removed = _alumnos.TryRemove(id, out _);
+        return Task.FromResult(removed);
+    }
+
     public Task<Clase> CreateClaseAsync(ClaseCreateDto dto)
     {
         var id = Interlocked.Increment(ref _claseSeq);
@@ -90,6 +110,21 @@ public class InMemoryDataService : IDataService
     public Task<IEnumerable<Clase>> GetClasesAsync()
     {
         return Task.FromResult(_clases.Values.AsEnumerable());
+    }
+
+    public Task<bool> UpdateClaseAsync(int id, ClaseCreateDto dto)
+    {
+        if (!_clases.TryGetValue(id, out var clase))
+            return Task.FromResult(false);
+
+        clase.Asignatura = dto.Asignatura;
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> DeleteClaseAsync(int id)
+    {
+        var removed = _clases.TryRemove(id, out _);
+        return Task.FromResult(removed);
     }
 
     public Task<bool> CerrarClaseAsync(int id)

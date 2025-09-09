@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using registroAsistencia.Data;
 using registroAsistencia.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,33 +9,24 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Base de datos
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 // Servicios personalizados
-builder.Services.AddSingleton<IDataService, InMemoryDataService>();
+builder.Services.AddScoped<IDataService, EfDataService>();
 builder.Services.AddSingleton<IQrService, QrService>();
 builder.Services.AddSingleton<ICsvService, CsvService>();
 builder.Services.AddSingleton<ILoggingService, ConsoleLoggingService>();
 
 var app = builder.Build();
 
-// Datos de prueba iniciales
-using (var scope = app.Services.CreateScope())
-{
-    var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
-    var qrService = scope.ServiceProvider.GetRequiredService<IQrService>();
-    
-    // Crear alumnos de ejemplo
-    var alumno1 = await dataService.CreateAlumnoAsync(new registroAsistencia.Models.AlumnoCreateDto("EST001", "Juan Pérez"));
-    var alumno2 = await dataService.CreateAlumnoAsync(new registroAsistencia.Models.AlumnoCreateDto("EST002", "María García"));
-    var alumno3 = await dataService.CreateAlumnoAsync(new registroAsistencia.Models.AlumnoCreateDto("EST003", "Carlos López"));
-    
-    // Agregar QR a los alumnos
-    alumno1.QrAlumnoBase64 = qrService.GenerateBase64Qr($"alumno:{alumno1.Id}");
-    alumno2.QrAlumnoBase64 = qrService.GenerateBase64Qr($"alumno:{alumno2.Id}");
-    alumno3.QrAlumnoBase64 = qrService.GenerateBase64Qr($"alumno:{alumno3.Id}");
-    
-    // Crear una clase de ejemplo
-    await dataService.CreateClaseAsync(new registroAsistencia.Models.ClaseCreateDto("Matemáticas I"));
-}
+// Datos de prueba iniciales (comentados para evitar duplicados)
+// using (var scope = app.Services.CreateScope())
+// {
+//     var dataService = scope.ServiceProvider.GetRequiredService<IDataService>();
+//     // Los datos se crean una sola vez. Usa la API para crear más datos.
+// }
 
 if (app.Environment.IsDevelopment())
 {

@@ -22,15 +22,34 @@ public class ClasesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ClaseCreateDto dto)
     {
-        var clase = await _dataService.CreateClaseAsync(dto);
-        return Ok(clase);
+        try
+        {
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Asignatura))
+            {
+                return BadRequest(new { message = "Asignatura es requerida" });
+            }
+            
+            var clase = await _dataService.CreateClaseAsync(dto);
+            return Ok(clase);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var clases = await _dataService.GetClasesAsync();
-        return Ok(clases);
+        try
+        {
+            var clases = await _dataService.GetClasesAsync();
+            return Ok(clases ?? new List<Clase>());
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener clases: " + ex.Message });
+        }
     }
 
     [HttpGet("{id}")]
@@ -40,6 +59,27 @@ public class ClasesController : ControllerBase
         if (clase == null)
             return NotFound();
         return Ok(clase);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] ClaseCreateDto dto)
+    {
+        var updated = await _dataService.UpdateClaseAsync(id, dto);
+        if (!updated)
+            return NotFound();
+        
+        var clase = await _dataService.GetClaseAsync(id);
+        return Ok(clase);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var deleted = await _dataService.DeleteClaseAsync(id);
+        if (!deleted)
+            return NotFound();
+        
+        return NoContent();
     }
 
     [HttpPost("{id}/cerrar")]
