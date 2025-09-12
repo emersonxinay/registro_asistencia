@@ -138,3 +138,4 @@ E:\csharp\registroAsistencia\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Wor
 E:\csharp\registroAsistencia\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 E:\csharp\registroAsistencia\obj\Debug\net9.0\compressed\jtn4fv8qdp-qqhu8ooboc.gz
 E:\csharp\registroAsistencia\obj\Debug\net9.0\compressed\n57h8i515h-a08qgwynw6.gz
+E:\csharp\registroAsistencia\obj\Debug\net9.0\compressed\y5bqqfi2xg-b1al7632ef.gz

@@ -1,6 +1,10 @@
 {
   "Files": [
     {
+      "Id": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css",
+      "PackagePath": "staticwebassets\\css\\clases.css"
+    },
+    {
       "Id": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
       "PackagePath": "staticwebassets\\css\\styles.css"
     },

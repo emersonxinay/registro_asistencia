@@ -1,0 +1,314 @@
+@{
+    ViewData["Title"] = "Código QR de Clase";
+    var claseId = ViewData["ClaseId"];
+}
+
+@section Styles {
+    <style>
+        .qr-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .qr-card {
+            background: var(--card-gradient);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .qr-header {
+            margin-bottom: 2rem;
+        }
+        
+        .qr-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .qr-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        .qr-display {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .qr-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+        
+        .qr-info {
+            background: var(--glass-gradient);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            text-align: left;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-icon {
+            color: var(--primary);
+            width: 1.25rem;
+        }
+        
+        .qr-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .error-state {
+            padding: 2rem;
+            text-align: center;
+            color: var(--danger);
+        }
+        
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        @@media (max-width: 768px) {
+            .qr-container {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+            
+            .qr-card {
+                padding: 1.5rem;
+            }
+            
+            .qr-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="qr-container">
+    <div class="qr-card">
+        <div class="qr-header">
+            <h1 class="qr-title">Código QR de Asistencia</h1>
+            <p class="qr-subtitle">Escanea este código para registrar tu asistencia</p>
+        </div>
+        
+        <div id="qrContent">
+            <div class="loading-state">
+                <div class="quantum-spinner">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
+                <p>Generando código QR...</p>
+            </div>
+        </div>
+        
+        <div id="qrActions" class="qr-actions" style="display: none;">
+            <button class="quantum-btn btn-primary" onclick="refreshQR()">
+                <i data-lucide="refresh-cw"></i>
+                Regenerar QR
+            </button>
+            <button class="quantum-btn btn-secondary" onclick="printQR()">
+                <i data-lucide="printer"></i>
+                Imprimir
+            </button>
+            <button class="quantum-btn btn-secondary" onclick="shareQR()">
+                <i data-lucide="share-2"></i>
+                Compartir
+            </button>
+            <a href="/clases" class="quantum-btn btn-secondary">
+                <i data-lucide="arrow-left"></i>
+                Volver a Clases
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+class QRDisplay {
+    constructor(claseId) {
+        this.claseId = claseId;
+        this.qrData = null;
+        this.refreshInterval = null;
+        this.init();
+    }
+    
+    async init() {
+        console.log(`🔍 Cargando QR para clase ${this.claseId}`);
+        await this.loadQR();
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        
+        // Auto-refresh every 4 minutes (QR expires in 5 minutes)
+        this.refreshInterval = setInterval(() => {
+            this.loadQR();
+        }, 240000);
+    }
+    
+    async loadQR() {
+        const content = document.getElementById('qrContent');
+        const actions = document.getElementById('qrActions');
+        
+        try {
+            const response = await fetch(`/api/clases/${this.claseId}/qr`);
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al generar QR');
+            }
+            
+            this.qrData = await response.json();
+            this.renderQR();
+            actions.style.display = 'flex';
+            
+        } catch (error) {
+            console.error('Error cargando QR:', error);
+            content.innerHTML = `
+                <div class="error-state">
+                    <i data-lucide="alert-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h3>Error al cargar QR</h3>
+                    <p>${error.message}</p>
+                    <button class="quantum-btn btn-primary" onclick="qrDisplay.loadQR()">
+                        <i data-lucide="refresh-cw"></i>
+                        Reintentar
+                    </button>
+                </div>
+            `;
+            
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+    }
+    
+    renderQR() {
+        const content = document.getElementById('qrContent');
+        const expiraEn = new Date(this.qrData.expiraUtc).getTime() - new Date().getTime();
+        const minutosRestantes = Math.max(0, Math.floor(expiraEn / 60000));
+        
+        content.innerHTML = `
+            <div class="qr-display">
+                <img src="data:image/png;base64,${this.qrData.base64Png}" 
+                     alt="Código QR de asistencia" 
+                     class="qr-image">
+            </div>
+            
+            <div class="qr-info">
+                <div class="info-item">
+                    <i data-lucide="book-open" class="info-icon"></i>
+                    <span><strong>Clase:</strong> ${this.qrData.claseInfo.asignatura}</span>
+                </div>
+                <div class="info-item">
+                    <i data-lucide="calendar" class="info-icon"></i>
+                    <span><strong>Inicio:</strong> ${new Date(this.qrData.claseInfo.inicio).toLocaleString('es-ES')}</span>
+                </div>
+                <div class="info-item">
+                    <i data-lucide="clock" class="info-icon"></i>
+                    <span><strong>Expira en:</strong> ${minutosRestantes} minutos</span>
+                </div>
+                <div class="info-item">
+                    <i data-lucide="link" class="info-icon"></i>
+                    <span><strong>URL:</strong> <code style="font-size: 0.8rem; background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px;">${this.qrData.url}</code></span>
+                </div>
+            </div>
+            
+            <div class="success-message">
+                <i data-lucide="info"></i>
+                <span>Los estudiantes pueden escanear este código para registrar su asistencia automáticamente</span>
+            </div>
+        `;
+        
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+    
+    destroy() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+        }
+    }
+}
+
+function refreshQR() {
+    qrDisplay.loadQR();
+}
+
+function printQR() {
+    window.print();
+}
+
+function shareQR() {
+    if (qrDisplay.qrData && navigator.share) {
+        navigator.share({
+            title: `QR de Asistencia - ${qrDisplay.qrData.claseInfo.asignatura}`,
+            text: 'Escanea este código para registrar tu asistencia',
+            url: qrDisplay.qrData.url
+        });
+    } else if (qrDisplay.qrData) {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(qrDisplay.qrData.url).then(() => {
+            alert('URL copiada al portapapeles');
+        });
+    }
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    window.qrDisplay = new QRDisplay(@claseId);
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (window.qrDisplay) {
+        qrDisplay.destroy();
+    }
+});
+</script>
+}

@@ -3,6 +3,10 @@
     ViewData["Subtitle"] = "Crea y administra clases, controla asistencias y genera reportes";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/clases.css" />
+}
+
 <!-- Classes Management Section -->
 <section class="management-grid mb-4">
     <!-- Class Creation Panel -->
@@ -456,12 +460,18 @@ class ClassesManager {
         const loader = btn.querySelector('.btn-loader');
         const status = document.getElementById('classCreateStatus');
         
+        const editId = form.dataset.editId;
+        const isEditing = !!editId;
+        
         btn.disabled = true;
         loader?.classList.remove('hidden');
         
         try {
-            const response = await fetch('/api/clases', {
-                method: 'POST',
+            const url = isEditing ? `/api/clases/${editId}` : '/api/clases';
+            const method = isEditing ? 'PUT' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -472,7 +482,7 @@ class ClassesManager {
             
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.message || 'Error al crear clase');
+                throw new Error(error.message || `Error al ${isEditing ? 'actualizar' : 'crear'} clase`);
             }
             
             const clase = await response.json();
@@ -480,19 +490,24 @@ class ClassesManager {
             status.innerHTML = `
                 <div class="quantum-alert alert-success">
                     <i data-lucide="check-circle"></i>
-                    <span>✅ Clase creada exitosamente</span>
+                    <span>✅ Clase ${isEditing ? 'actualizada' : 'creada'} exitosamente</span>
                 </div>
             `;
             
+            // Reset form
             form.reset();
+            delete form.dataset.editId;
+            btn.innerHTML = '<i data-lucide="plus-circle"></i>Crear Clase<div class="btn-loader hidden"><div class="spinner-ring"></div></div>';
+            
             await this.loadClasses();
             
-            // Highlight new class
+            // Highlight class
             setTimeout(() => {
-                const newCard = document.querySelector(`[data-id="${clase.id}"]`);
-                if (newCard) {
-                    newCard.style.background = 'linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent)';
-                    setTimeout(() => newCard.style.background = '', 3000);
+                const card = document.querySelector(`[data-id="${clase.id}"]`);
+                if (card) {
+                    const color = isEditing ? 'rgba(6, 182, 212, 0.1)' : 'rgba(34, 197, 94, 0.1)';
+                    card.style.background = `linear-gradient(90deg, ${color}, transparent)`;
+                    setTimeout(() => card.style.background = '', 3000);
                 }
             }, 500);
             
@@ -518,7 +533,7 @@ class ClassesManager {
     }
 
     generateQR(id) {
-        window.open(`/api/clases/${id}/qr`, '_blank');
+        window.open(`/clases/${id}/qr`, '_blank');
     }
 
     async closeClass(id) {
@@ -541,7 +556,23 @@ class ClassesManager {
     }
 
     async reopenClass(id) {
-        alert('Función de reapertura en desarrollo');
+        if (!confirm('¿Reabrir esta clase? Los estudiantes podrán registrar asistencia nuevamente.')) return;
+        
+        try {
+            const response = await fetch(`/api/clases/${id}/reabrir`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al reabrir clase');
+            }
+            
+            await this.loadClasses();
+            
+        } catch (error) {
+            alert('Error al reabrir clase: ' + error.message);
+        }
     }
 
     viewAttendance(id) {
@@ -549,11 +580,59 @@ class ClassesManager {
     }
 
     editClass(id) {
-        alert('Función de edición en desarrollo');
+        // Encontrar la clase y llenar el formulario
+        const clase = this.classes.find(c => c.id === id);
+        if (!clase) return;
+        
+        document.getElementById('classSubject').value = clase.asignatura;
+        document.getElementById('classDescription').value = clase.descripcion || '';
+        
+        // Cambiar el formulario a modo edición
+        const form = document.getElementById('classCreateForm');
+        const btn = form.querySelector('button[type="submit"]');
+        
+        form.dataset.editId = id;
+        btn.innerHTML = '<i data-lucide="edit-3"></i>Actualizar Clase<div class="btn-loader hidden"><div class="spinner-ring"></div></div>';
+        
+        // Scroll al formulario
+        document.getElementById('classSubject').focus();
+        document.getElementById('classSubject').scrollIntoView({ behavior: 'smooth' });
+        
+        // Regenerar iconos
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     }
 
-    duplicateClass(id) {
-        alert('Función de duplicación en desarrollo');
+    async duplicateClass(id) {
+        if (!confirm('¿Duplicar esta clase?')) return;
+        
+        try {
+            const response = await fetch(`/api/clases/${id}/duplicar`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Error al duplicar clase');
+            }
+            
+            const claseNueva = await response.json();
+            
+            await this.loadClasses();
+            
+            // Highlight new class
+            setTimeout(() => {
+                const newCard = document.querySelector(`[data-id="${claseNueva.id}"]`);
+                if (newCard) {
+                    newCard.style.background = 'linear-gradient(90deg, rgba(6, 182, 212, 0.1), transparent)';
+                    setTimeout(() => newCard.style.background = '', 3000);
+                }
+            }, 500);
+            
+        } catch (error) {
+            alert('Error al duplicar clase: ' + error.message);
+        }
     }
 
     async deleteClass(id) {
@@ -576,11 +655,49 @@ class ClassesManager {
     }
 
     generateReport() {
-        alert('Función de reportes en desarrollo');
+        const reportData = {
+            clases: this.classes,
+            resumen: {
+                totalClases: this.classes.length,
+                clasesActivas: this.classes.filter(c => c.activa).length,
+                clasesCerradas: this.classes.filter(c => !c.activa).length
+            },
+            fechaGeneracion: new Date().toLocaleString('es-ES')
+        };
+        
+        // Crear y descargar reporte JSON
+        const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reporte-clases-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 
     exportData() {
-        window.open('/api/clases/export', '_blank');
+        // Crear CSV con datos de clases
+        const headers = ['ID', 'Asignatura', 'Estado', 'Inicio', 'Fin'];
+        const csvData = [headers];
+        
+        this.classes.forEach(clase => {
+            csvData.push([
+                clase.id,
+                clase.asignatura,
+                clase.activa ? 'Activa' : 'Cerrada',
+                new Date(clase.inicioUtc).toLocaleString('es-ES'),
+                clase.finUtc ? new Date(clase.finUtc).toLocaleString('es-ES') : ''
+            ]);
+        });
+        
+        const csvContent = csvData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `clases-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
     }
 }
 

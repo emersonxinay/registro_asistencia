@@ -65,4 +65,12 @@ public class HomeController : Controller
         ViewData["Subtitle"] = "Crea y administra clases, controla asistencias y genera reportes";
         return View();
     }
+
+    [Route("clases/{id:int}/qr")]
+    public IActionResult ClaseQr(int id)
+    {
+        ViewData["Title"] = "Código QR de Clase";
+        ViewData["ClaseId"] = id;
+        return View("ClaseQr");
+    }
 }

@@ -128,6 +128,35 @@ public class EfDataService : IDataService
         return true;
     }
 
+    public async Task<bool> ReabrirClaseAsync(int id)
+    {
+        var clase = await _context.Clases.FindAsync(id);
+        if (clase == null || !clase.FinUtc.HasValue)
+            return false;
+
+        clase.FinUtc = null;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<Clase> DuplicarClaseAsync(int id)
+    {
+        var claseOriginal = await _context.Clases.FindAsync(id);
+        if (claseOriginal == null)
+            throw new ArgumentException("Clase no encontrada");
+
+        var claseNueva = new Clase
+        {
+            Asignatura = claseOriginal.Asignatura + " (Copia)",
+            InicioUtc = DateTime.UtcNow,
+            FinUtc = null
+        };
+
+        _context.Clases.Add(claseNueva);
+        await _context.SaveChangesAsync();
+        return claseNueva;
+    }
+
     public async Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo)
     {
         var existeAsistencia = await ExisteAsistenciaAsync(alumnoId, claseId);
@@ -254,5 +283,235 @@ public class EfDataService : IDataService
             await _context.SaveChangesAsync();
             _logger.LogInformation("🗑️ Token consumido - Nonce: {Nonce}", nonce);
         }
+    }
+
+    // ===== IMPLEMENTACIÓN DE CURSOS =====
+    public async Task<Curso> CreateCursoAsync(CursoCreateDto dto)
+    {
+        var curso = new Curso
+        {
+            Nombre = dto.Nombre,
+            Codigo = dto.Codigo,
+            Descripcion = dto.Descripcion,
+            Activo = true,
+            FechaCreacion = DateTime.UtcNow
+        };
+
+        _context.Cursos.Add(curso);
+        await _context.SaveChangesAsync();
+        return curso;
+    }
+
+    public async Task<Curso?> GetCursoAsync(int id)
+    {
+        return await _context.Cursos
+            .Include(c => c.Ramos)
+            .Include(c => c.AlumnoCursos)
+                .ThenInclude(ac => ac.Alumno)
+            .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<IEnumerable<Curso>> GetCursosAsync()
+    {
+        return await _context.Cursos
+            .Include(c => c.Ramos)
+            .Include(c => c.AlumnoCursos)
+            .Where(c => c.Activo)
+            .OrderBy(c => c.Nombre)
+            .ToListAsync();
+    }
+
+    public async Task<bool> UpdateCursoAsync(int id, CursoUpdateDto dto)
+    {
+        var curso = await _context.Cursos.FindAsync(id);
+        if (curso == null)
+            return false;
+
+        curso.Nombre = dto.Nombre;
+        curso.Codigo = dto.Codigo;
+        curso.Descripcion = dto.Descripcion;
+        curso.Activo = dto.Activo;
+        
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteCursoAsync(int id)
+    {
+        var curso = await _context.Cursos.FindAsync(id);
+        if (curso == null)
+            return false;
+
+        // Soft delete
+        curso.Activo = false;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    // ===== IMPLEMENTACIÓN DE RAMOS =====
+    public async Task<Ramo> CreateRamoAsync(RamoCreateDto dto)
+    {
+        var ramo = new Ramo
+        {
+            Nombre = dto.Nombre,
+            Codigo = dto.Codigo,
+            CursoId = dto.CursoId,
+            Descripcion = dto.Descripcion,
+            Activo = true,
+            FechaCreacion = DateTime.UtcNow
+        };
+
+        _context.Ramos.Add(ramo);
+        await _context.SaveChangesAsync();
+        return ramo;
+    }
+
+    public async Task<Ramo?> GetRamoAsync(int id)
+    {
+        return await _context.Ramos
+            .Include(r => r.Curso)
+            .Include(r => r.Clases)
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
+    public async Task<IEnumerable<Ramo>> GetRamosAsync()
+    {
+        return await _context.Ramos
+            .Include(r => r.Curso)
+            .Where(r => r.Activo)
+            .OrderBy(r => r.Curso.Nombre)
+            .ThenBy(r => r.Nombre)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Ramo>> GetRamosByCursoAsync(int cursoId)
+    {
+        return await _context.Ramos
+            .Include(r => r.Curso)
+            .Where(r => r.CursoId == cursoId && r.Activo)
+            .OrderBy(r => r.Nombre)
+            .ToListAsync();
+    }
+
+    public async Task<bool> UpdateRamoAsync(int id, RamoUpdateDto dto)
+    {
+        var ramo = await _context.Ramos.FindAsync(id);
+        if (ramo == null)
+            return false;
+
+        ramo.Nombre = dto.Nombre;
+        ramo.Codigo = dto.Codigo;
+        ramo.Descripcion = dto.Descripcion;
+        ramo.Activo = dto.Activo;
+        
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteRamoAsync(int id)
+    {
+        var ramo = await _context.Ramos.FindAsync(id);
+        if (ramo == null)
+            return false;
+
+        // Soft delete
+        ramo.Activo = false;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    // ===== IMPLEMENTACIÓN DE ALUMNOS-CURSOS =====
+    public async Task<AlumnoCurso> InscribirAlumnoEnCursoAsync(AlumnoCursoCreateDto dto)
+    {
+        // Validar que el alumno no exceda el límite de 2 cursos
+        var cursosActuales = await _context.AlumnoCursos
+            .Where(ac => ac.AlumnoId == dto.AlumnoId && ac.Activo)
+            .CountAsync();
+
+        if (cursosActuales >= 2)
+            throw new InvalidOperationException("El alumno ya está inscrito en el máximo de 2 cursos");
+
+        // Verificar que no esté ya inscrito en este curso
+        var yaInscrito = await _context.AlumnoCursos
+            .AnyAsync(ac => ac.AlumnoId == dto.AlumnoId && ac.CursoId == dto.CursoId && ac.Activo);
+
+        if (yaInscrito)
+            throw new InvalidOperationException("El alumno ya está inscrito en este curso");
+
+        var alumnoCurso = new AlumnoCurso
+        {
+            AlumnoId = dto.AlumnoId,
+            CursoId = dto.CursoId,
+            FechaInscripcion = DateTime.UtcNow,
+            Activo = true
+        };
+
+        _context.AlumnoCursos.Add(alumnoCurso);
+        await _context.SaveChangesAsync();
+        return alumnoCurso;
+    }
+
+    public async Task<IEnumerable<AlumnoCursoDto>> GetAlumnosCursoAsync(int cursoId)
+    {
+        return await _context.AlumnoCursos
+            .Include(ac => ac.Alumno)
+            .Include(ac => ac.Curso)
+            .Where(ac => ac.CursoId == cursoId && ac.Activo)
+            .Select(ac => new AlumnoCursoDto(
+                ac.Id,
+                ac.AlumnoId,
+                ac.CursoId,
+                ac.Alumno.Nombre,
+                ac.Curso.Nombre,
+                ac.FechaInscripcion,
+                ac.Activo
+            ))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AlumnoCursoDto>> GetCursosAlumnoAsync(int alumnoId)
+    {
+        return await _context.AlumnoCursos
+            .Include(ac => ac.Alumno)
+            .Include(ac => ac.Curso)
+            .Where(ac => ac.AlumnoId == alumnoId && ac.Activo)
+            .Select(ac => new AlumnoCursoDto(
+                ac.Id,
+                ac.AlumnoId,
+                ac.CursoId,
+                ac.Alumno.Nombre,
+                ac.Curso.Nombre,
+                ac.FechaInscripcion,
+                ac.Activo
+            ))
+            .ToListAsync();
+    }
+
+    public async Task<bool> DesinscribirAlumnoDelCursoAsync(int alumnoId, int cursoId)
+    {
+        var alumnoCurso = await _context.AlumnoCursos
+            .FirstOrDefaultAsync(ac => ac.AlumnoId == alumnoId && ac.CursoId == cursoId && ac.Activo);
+
+        if (alumnoCurso == null)
+            return false;
+
+        alumnoCurso.Activo = false;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> AlumnoPerteneceCursoAsync(int alumnoId, int cursoId)
+    {
+        return await _context.AlumnoCursos
+            .AnyAsync(ac => ac.AlumnoId == alumnoId && ac.CursoId == cursoId && ac.Activo);
+    }
+
+    public async Task<bool> ValidarLimiteInscripcionAsync(int alumnoId)
+    {
+        var cursosActuales = await _context.AlumnoCursos
+            .Where(ac => ac.AlumnoId == alumnoId && ac.Activo)
+            .CountAsync();
+
+        return cursosActuales < 2;
     }
 }

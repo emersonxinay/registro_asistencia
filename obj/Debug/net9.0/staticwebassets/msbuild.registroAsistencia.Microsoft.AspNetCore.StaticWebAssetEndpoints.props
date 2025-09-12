@@ -1,5 +1,17 @@
 ﻿<Project>
   <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/clases.b1al7632ef.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\clases.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"b1al7632ef"},{"Name":"integrity","Value":"sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="},{"Name":"label","Value":"_content/registroAsistencia/css/clases.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"13822"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 15:14:51 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/clases.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\clases.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"13822"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\u0022"},{"Name":"Last-Modified","Value":"Tue, 09 Sep 2025 15:14:51 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.a08qgwynw6.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

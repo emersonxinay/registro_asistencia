@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Threading;
 using registroAsistencia.Models;
 
 namespace registroAsistencia.Services;
@@ -17,8 +18,33 @@ public interface IDataService
     Task<Clase?> GetClaseAsync(int id);
     Task<IEnumerable<Clase>> GetClasesAsync();
     Task<bool> CerrarClaseAsync(int id);
+    Task<bool> ReabrirClaseAsync(int id);
+    Task<Clase> DuplicarClaseAsync(int id);
     Task<bool> UpdateClaseAsync(int id, ClaseCreateDto dto);
     Task<bool> DeleteClaseAsync(int id);
+    
+    // Cursos
+    Task<Curso> CreateCursoAsync(CursoCreateDto dto);
+    Task<Curso?> GetCursoAsync(int id);
+    Task<IEnumerable<Curso>> GetCursosAsync();
+    Task<bool> UpdateCursoAsync(int id, CursoUpdateDto dto);
+    Task<bool> DeleteCursoAsync(int id);
+    
+    // Ramos
+    Task<Ramo> CreateRamoAsync(RamoCreateDto dto);
+    Task<Ramo?> GetRamoAsync(int id);
+    Task<IEnumerable<Ramo>> GetRamosAsync();
+    Task<IEnumerable<Ramo>> GetRamosByCursoAsync(int cursoId);
+    Task<bool> UpdateRamoAsync(int id, RamoUpdateDto dto);
+    Task<bool> DeleteRamoAsync(int id);
+    
+    // Alumnos-Cursos
+    Task<AlumnoCurso> InscribirAlumnoEnCursoAsync(AlumnoCursoCreateDto dto);
+    Task<IEnumerable<AlumnoCursoDto>> GetAlumnosCursoAsync(int cursoId);
+    Task<IEnumerable<AlumnoCursoDto>> GetCursosAlumnoAsync(int alumnoId);
+    Task<bool> DesinscribirAlumnoDelCursoAsync(int alumnoId, int cursoId);
+    Task<bool> AlumnoPerteneceCursoAsync(int alumnoId, int cursoId);
+    Task<bool> ValidarLimiteInscripcionAsync(int alumnoId); // Máximo 2 cursos
     
     // Asistencias
     Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo);
@@ -38,9 +64,15 @@ public class InMemoryDataService : IDataService
     private readonly ConcurrentDictionary<int, Clase> _clases = new();
     private readonly ConcurrentBag<Asistencia> _asistencias = new();
     private readonly ConcurrentDictionary<string, QrClaseToken> _tokens = new();
+    private readonly ConcurrentDictionary<int, Curso> _cursos = new();
+    private readonly ConcurrentDictionary<int, Ramo> _ramos = new();
+    private readonly ConcurrentDictionary<int, AlumnoCurso> _alumnoCursos = new();
     private readonly ILogger<InMemoryDataService> _logger;
     private int _alumnoSeq = 0;
     private int _claseSeq = 0;
+    private int _cursoSeq = 0;
+    private int _ramoSeq = 0;
+    private int _alumnoCursoSeq = 0;
 
     public InMemoryDataService(ILogger<InMemoryDataService> logger)
     {
@@ -134,6 +166,33 @@ public class InMemoryDataService : IDataService
         
         clase.FinUtc = DateTime.UtcNow;
         return Task.FromResult(true);
+    }
+
+    public Task<bool> ReabrirClaseAsync(int id)
+    {
+        if (!_clases.TryGetValue(id, out var clase) || !clase.FinUtc.HasValue)
+            return Task.FromResult(false);
+        
+        clase.FinUtc = null;
+        return Task.FromResult(true);
+    }
+
+    public Task<Clase> DuplicarClaseAsync(int id)
+    {
+        if (!_clases.TryGetValue(id, out var claseOriginal))
+            throw new ArgumentException("Clase no encontrada");
+
+        var nuevoId = Interlocked.Increment(ref _claseSeq);
+        var claseNueva = new Clase
+        {
+            Id = nuevoId,
+            Asignatura = claseOriginal.Asignatura + " (Copia)",
+            InicioUtc = DateTime.UtcNow,
+            FinUtc = null
+        };
+
+        _clases[claseNueva.Id] = claseNueva;
+        return Task.FromResult(claseNueva);
     }
 
     public Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo)
@@ -257,5 +316,93 @@ public class InMemoryDataService : IDataService
         var removed = _tokens.TryRemove(nonce, out var token);
         _logger.LogInformation("🗑️ Token consumido - Nonce: {Nonce}, Removido: {Removido}", nonce, removed);
         return Task.CompletedTask;
+    }
+
+    // Cursos (stub implementations for interface compliance)
+    public Task<Curso> CreateCursoAsync(CursoCreateDto dto)
+    {
+        throw new NotImplementedException("Use EfDataService for Curso operations");
+    }
+
+    public Task<Curso?> GetCursoAsync(int id)
+    {
+        throw new NotImplementedException("Use EfDataService for Curso operations");
+    }
+
+    public Task<IEnumerable<Curso>> GetCursosAsync()
+    {
+        throw new NotImplementedException("Use EfDataService for Curso operations");
+    }
+
+    public Task<bool> UpdateCursoAsync(int id, CursoUpdateDto dto)
+    {
+        throw new NotImplementedException("Use EfDataService for Curso operations");
+    }
+
+    public Task<bool> DeleteCursoAsync(int id)
+    {
+        throw new NotImplementedException("Use EfDataService for Curso operations");
+    }
+
+    // Ramos (stub implementations)
+    public Task<Ramo> CreateRamoAsync(RamoCreateDto dto)
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    public Task<Ramo?> GetRamoAsync(int id)
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    public Task<IEnumerable<Ramo>> GetRamosAsync()
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    public Task<IEnumerable<Ramo>> GetRamosByCursoAsync(int cursoId)
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    public Task<bool> UpdateRamoAsync(int id, RamoUpdateDto dto)
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    public Task<bool> DeleteRamoAsync(int id)
+    {
+        throw new NotImplementedException("Use EfDataService for Ramo operations");
+    }
+
+    // Alumnos-Cursos (stub implementations)
+    public Task<AlumnoCurso> InscribirAlumnoEnCursoAsync(AlumnoCursoCreateDto dto)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<IEnumerable<AlumnoCursoDto>> GetAlumnosCursoAsync(int cursoId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<IEnumerable<AlumnoCursoDto>> GetCursosAlumnoAsync(int alumnoId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<bool> DesinscribirAlumnoDelCursoAsync(int alumnoId, int cursoId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<bool> AlumnoPerteneceCursoAsync(int alumnoId, int cursoId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<bool> ValidarLimiteInscripcionAsync(int alumnoId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
     }
 }

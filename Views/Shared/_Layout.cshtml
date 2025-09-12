@@ -18,7 +18,7 @@
     <link href="~/css/styles.css" rel="stylesheet" />
     
     <!-- Meta tags -->
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#0ea5e9">
     <meta name="description" content="Sistema de asistencia inteligente con QR avanzado">
     
     @await RenderSectionAsync("Styles", required: false)
@@ -49,19 +49,19 @@
             
             <!-- Enhanced Navigation Menu -->
             <div class="nav-menu" id="navMenu">
-                <a href="/" class="nav-link @(ViewContext.RouteData.Values["action"].ToString() == "Index" ? "active" : "")">
+                <a href="/" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                     <i data-lucide="home"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="/alumnos" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Alumnos" ? "active" : "")">
+                <a href="/alumnos" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Alumnos" ? "active" : "")">
                     <i data-lucide="users"></i>
                     <span>Estudiantes</span>
                 </a>
-                <a href="/clases" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Clases" ? "active" : "")">
+                <a href="/clases" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clases" ? "active" : "")">
                     <i data-lucide="book-open"></i>
                     <span>Clases</span>
                 </a>
-                <a href="/asistencias" class="nav-link @(ViewContext.RouteData.Values["controller"].ToString() == "Asistencias" ? "active" : "")">
+                <a href="/asistencias" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Asistencias" ? "active" : "")">
                     <i data-lucide="check-circle"></i>
                     <span>Asistencias</span>
                 </a>

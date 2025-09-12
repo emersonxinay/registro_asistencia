@@ -36,6 +36,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxBc2lzdGVuY2lhcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/csharp/registroAsistencia/Views/Home/ClaseQr.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDbGFzZVFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/csharp/registroAsistencia/Views/Home/Clases.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxDbGFzZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

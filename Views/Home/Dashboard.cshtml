@@ -208,6 +208,91 @@
     </div>
 </section>
 
+<!-- Courses and Subjects Section -->
+<section class="quantum-grid grid-2 mb-4">
+    <!-- Course Management -->
+    <div class="quantum-card management-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2); color: white;">
+                <i data-lucide="folder-plus"></i>
+            </div>
+            <h3 class="card-title">Gestión de Cursos</h3>
+            <p class="card-subtitle">Crea y administra cursos para estudiantes</p>
+        </div>
+        
+        <form id="courseForm" class="quantum-form">
+            <div class="form-group">
+                <label class="form-label" for="courseCode">Código del Curso</label>
+                <input type="text" id="courseCode" name="codigo" class="quantum-input" required 
+                       placeholder="INF-2024" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="courseName">Nombre del Curso</label>
+                <input type="text" id="courseName" name="nombre" class="quantum-input" required 
+                       placeholder="Ingeniería en Informática" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="courseDesc">Descripción (Opcional)</label>
+                <textarea id="courseDesc" name="descripcion" class="quantum-input" 
+                          placeholder="Descripción del curso..." rows="3"></textarea>
+            </div>
+            <button type="submit" class="quantum-btn btn-primary btn-lg">
+                <i data-lucide="folder-plus"></i>
+                Crear Curso
+                <div class="btn-loader hidden">
+                    <div class="spinner-ring"></div>
+                </div>
+            </button>
+        </form>
+        
+        <div id="courseStatus" class="mt-2"></div>
+    </div>
+
+    <!-- Subject Management -->
+    <div class="quantum-card management-card">
+        <div class="card-header">
+            <div class="card-icon" style="background: linear-gradient(135deg, var(--warning), #d97706); color: white;">
+                <i data-lucide="book-plus"></i>
+            </div>
+            <h3 class="card-title">Gestión de Ramos</h3>
+            <p class="card-subtitle">Crea ramos asociados a cursos</p>
+        </div>
+        
+        <form id="subjectForm" class="quantum-form">
+            <div class="form-group">
+                <label class="form-label" for="subjectCourse">Curso</label>
+                <select id="subjectCourse" name="cursoId" class="quantum-input quantum-select" required>
+                    <option value="">Selecciona un curso...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="subjectCode">Código del Ramo</label>
+                <input type="text" id="subjectCode" name="codigo" class="quantum-input" required 
+                       placeholder="MAT-001" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="subjectName">Nombre del Ramo</label>
+                <input type="text" id="subjectName" name="nombre" class="quantum-input" required 
+                       placeholder="Matemáticas I" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="subjectDesc">Descripción (Opcional)</label>
+                <textarea id="subjectDesc" name="descripcion" class="quantum-input" 
+                          placeholder="Descripción del ramo..." rows="2"></textarea>
+            </div>
+            <button type="submit" class="quantum-btn btn-warning btn-lg">
+                <i data-lucide="book-plus"></i>
+                Crear Ramo
+                <div class="btn-loader hidden">
+                    <div class="spinner-ring"></div>
+                </div>
+            </button>
+        </form>
+        
+        <div id="subjectStatus" class="mt-2"></div>
+    </div>
+</section>
+
 <!-- Data Tables Section -->
 <section class="quantum-grid grid-2 mb-4">
     <!-- Students Table -->
@@ -263,6 +348,67 @@
                         <div class="spinner-ring"></div>
                     </div>
                     <p>Cargando clases...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses and Subjects Tables -->
+<section class="quantum-grid grid-2 mb-4">
+    <!-- Courses Table -->
+    <div class="quantum-card table-card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="card-title">Cursos del Sistema</h3>
+                    <p class="card-subtitle">Administra los cursos disponibles</p>
+                </div>
+                <button class="quantum-btn btn-sm btn-secondary" id="refreshCourses">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+        
+        <div class="quantum-table-container">
+            <div id="coursesTableContainer">
+                <div class="loading-state">
+                    <div class="quantum-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p>Cargando cursos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects Table -->
+    <div class="quantum-card table-card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="card-title">Ramos del Sistema</h3>
+                    <p class="card-subtitle">Administra los ramos por curso</p>
+                </div>
+                <button class="quantum-btn btn-sm btn-secondary" id="refreshSubjects">
+                    <i data-lucide="refresh-cw"></i>
+                    Actualizar
+                </button>
+            </div>
+        </div>
+        
+        <div class="quantum-table-container">
+            <div id="subjectsTableContainer">
+                <div class="loading-state">
+                    <div class="quantum-spinner">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                    </div>
+                    <p>Cargando ramos...</p>
                 </div>
             </div>
         </div>
@@ -334,6 +480,8 @@ const Dashboard = {
     data: {
         students: [],
         classes: [],
+        courses: [],
+        subjects: [],
         stats: {
             totalStudents: 0,
             activeClasses: 0,
@@ -378,6 +526,8 @@ const Dashboard = {
                 await Promise.all([
                     this.loadStudents(),
                     this.loadClasses(),
+                    this.loadCourses(),
+                    this.loadSubjects(),
                     this.updateStats()
                 ]);
                 this.cache.lastUpdate = now;
@@ -421,6 +571,39 @@ const Dashboard = {
         } catch (error) {
             console.error('Error loading classes:', error);
             this.showError(document.body, 'Error cargando clases: ' + error.message);
+        }
+    },
+    
+    async loadCourses() {
+        try {
+            const courses = await Utils.request('/api/cursos');
+            if (Array.isArray(courses)) {
+                this.data.courses = courses;
+                this.renderCoursesTable();
+                this.populateCourseSelects();
+            } else {
+                console.warn('Courses data is not an array:', courses);
+                this.data.courses = [];
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            this.showError(document.body, 'Error cargando cursos: ' + error.message);
+        }
+    },
+    
+    async loadSubjects() {
+        try {
+            const subjects = await Utils.request('/api/ramos');
+            if (Array.isArray(subjects)) {
+                this.data.subjects = subjects;
+                this.renderSubjectsTable();
+            } else {
+                console.warn('Subjects data is not an array:', subjects);
+                this.data.subjects = [];
+            }
+        } catch (error) {
+            console.error('Error loading subjects:', error);
+            this.showError(document.body, 'Error cargando ramos: ' + error.message);
         }
     },
     
@@ -696,6 +879,173 @@ const Dashboard = {
         lucide.createIcons();
     },
     
+    renderCoursesTable() {
+        const container = document.getElementById('coursesTableContainer');
+        if (!container) return;
+        
+        if (this.data.courses.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay cursos registrados</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza creando tu primer curso</p>
+                    <button class="quantum-btn btn-primary" onclick="document.getElementById('courseCode').focus()">
+                        <i data-lucide="folder-plus"></i>
+                        Crear Primer Curso
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        
+        const tableHTML = `
+            <table class="quantum-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Ramos</th>
+                        <th>Estudiantes</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.data.courses.map(course => `
+                        <tr>
+                            <td>
+                                <code class="code-badge">${course.codigo}</code>
+                            </td>
+                            <td>
+                                <div class="course-info">
+                                    <strong>${course.nombre}</strong>
+                                    <small>ID: ${course.id}</small>
+                                </div>
+                            </td>
+                            <td>
+                                ${course.activo ? 
+                                    '<span class="status-badge success">🟢 Activo</span>' : 
+                                    '<span class="status-badge danger">🔴 Inactivo</span>'
+                                }
+                            </td>
+                            <td>
+                                <span class="metric-value">${course.ramos?.length || 0}</span>
+                            </td>
+                            <td>
+                                <span class="metric-value">${course.alumnoCursos?.filter(ac => ac.activo).length || 0}</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editCourse(${course.id})" 
+                                            title="Editar curso">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewCourseStudents(${course.id})"
+                                            title="Ver estudiantes">
+                                        <i data-lucide="users"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteCourse(${course.id})"
+                                            title="Eliminar curso">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        container.innerHTML = tableHTML;
+        lucide.createIcons();
+    },
+    
+    renderSubjectsTable() {
+        const container = document.getElementById('subjectsTableContainer');
+        if (!container) return;
+        
+        if (this.data.subjects.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="book-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay ramos registrados</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza creando tu primer ramo</p>
+                    <button class="quantum-btn btn-primary" onclick="document.getElementById('subjectCourse').focus()">
+                        <i data-lucide="book-plus"></i>
+                        Crear Primer Ramo
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+            return;
+        }
+        
+        const tableHTML = `
+            <table class="quantum-table">
+                <thead>
+                    <tr>
+                        <th>Curso</th>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Clases</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.data.subjects.map(subject => `
+                        <tr>
+                            <td>
+                                <div class="course-info">
+                                    <strong>${subject.curso?.nombre || 'N/A'}</strong>
+                                    <small>${subject.curso?.codigo || 'N/A'}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <code class="code-badge">${subject.codigo}</code>
+                            </td>
+                            <td>
+                                <div class="subject-info">
+                                    <strong>${subject.nombre}</strong>
+                                    <small>ID: ${subject.id}</small>
+                                </div>
+                            </td>
+                            <td>
+                                ${subject.activo ? 
+                                    '<span class="status-badge success">🟢 Activo</span>' : 
+                                    '<span class="status-badge danger">🔴 Inactivo</span>'
+                                }
+                            </td>
+                            <td>
+                                <span class="metric-value">${subject.clases?.length || 0}</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editSubject(${subject.id})" 
+                                            title="Editar ramo">
+                                        <i data-lucide="edit-3"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewSubjectClasses(${subject.id})"
+                                            title="Ver clases">
+                                        <i data-lucide="book-open"></i>
+                                    </button>
+                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteSubject(${subject.id})"
+                                            title="Eliminar ramo">
+                                        <i data-lucide="trash-2"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        container.innerHTML = tableHTML;
+        lucide.createIcons();
+    },
+    
     populateClassSelect() {
         const select = document.getElementById('qrClassSelect');
         if (!select) return;
@@ -720,6 +1070,20 @@ const Dashboard = {
         }
     },
     
+    populateCourseSelects() {
+        const select = document.getElementById('subjectCourse');
+        if (!select) return;
+        
+        select.innerHTML = '<option value="">Selecciona un curso...</option>';
+        
+        this.data.courses.filter(course => course.activo).forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.id;
+            option.textContent = `${course.nombre} (${course.codigo})`;
+            select.appendChild(option);
+        });
+    },
+    
     setupEventListeners() {
         // Student form
         const studentForm = document.getElementById('studentForm');
@@ -731,6 +1095,18 @@ const Dashboard = {
         const classForm = document.getElementById('classForm');
         if (classForm) {
             classForm.addEventListener('submit', this.handleClassSubmit.bind(this));
+        }
+        
+        // Course form
+        const courseForm = document.getElementById('courseForm');
+        if (courseForm) {
+            courseForm.addEventListener('submit', this.handleCourseSubmit.bind(this));
+        }
+        
+        // Subject form
+        const subjectForm = document.getElementById('subjectForm');
+        if (subjectForm) {
+            subjectForm.addEventListener('submit', this.handleSubjectSubmit.bind(this));
         }
         
         // QR Generation
@@ -748,6 +1124,16 @@ const Dashboard = {
         const refreshClasses = document.getElementById('refreshClasses');
         if (refreshClasses) {
             refreshClasses.addEventListener('click', () => this.loadClasses());
+        }
+        
+        const refreshCourses = document.getElementById('refreshCourses');
+        if (refreshCourses) {
+            refreshCourses.addEventListener('click', () => this.loadCourses());
+        }
+        
+        const refreshSubjects = document.getElementById('refreshSubjects');
+        if (refreshSubjects) {
+            refreshSubjects.addEventListener('click', () => this.loadSubjects());
         }
         
         // Quick action buttons
@@ -883,6 +1269,77 @@ const Dashboard = {
             
         } catch (error) {
             this.showError(document.body, error.message || 'Error generando QR');
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+        }
+    },
+    
+    async handleCourseSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('courseStatus');
+        
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const course = await Utils.request('/api/cursos', {
+                method: 'POST',
+                body: JSON.stringify({
+                    codigo: formData.get('codigo'),
+                    nombre: formData.get('nombre'),
+                    descripcion: formData.get('descripcion') || null
+                })
+            });
+            
+            form.reset();
+            this.showSuccess(status, '✅ Curso creado exitosamente');
+            await this.loadCourses();
+            await this.updateStats();
+            
+        } catch (error) {
+            this.showError(status, error.message || 'Error al crear curso');
+        } finally {
+            btn.disabled = false;
+            loader?.classList.add('hidden');
+        }
+    },
+    
+    async handleSubjectSubmit(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        const loader = btn.querySelector('.btn-loader');
+        const status = document.getElementById('subjectStatus');
+        
+        btn.disabled = true;
+        loader?.classList.remove('hidden');
+        
+        try {
+            const subject = await Utils.request('/api/ramos', {
+                method: 'POST',
+                body: JSON.stringify({
+                    cursoId: parseInt(formData.get('cursoId')),
+                    codigo: formData.get('codigo'),
+                    nombre: formData.get('nombre'),
+                    descripcion: formData.get('descripcion') || null
+                })
+            });
+            
+            form.reset();
+            this.showSuccess(status, '✅ Ramo creado exitosamente');
+            await this.loadSubjects();
+            await this.updateStats();
+            
+        } catch (error) {
+            this.showError(status, error.message || 'Error al crear ramo');
         } finally {
             btn.disabled = false;
             loader?.classList.add('hidden');
@@ -1737,6 +2194,81 @@ const Dashboard = {
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
+    },
+    
+    // Course and Subject action handlers (stub implementations)
+    editCourse(id) {
+        Utils.showNotification('Funcionalidad de edición de cursos en desarrollo', 'info');
+    },
+    
+    viewCourseStudents(id) {
+        Utils.showNotification('Vista de estudiantes del curso en desarrollo', 'info');
+    },
+    
+    confirmDeleteCourse(id) {
+        const course = this.data.courses.find(c => c.id === id);
+        if (!course) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Curso?',
+            message: `¿Estás seguro de que deseas eliminar el curso <strong>${course.nombre}</strong>? Esta acción no se puede deshacer.`,
+            icon: 'folder-x',
+            confirmText: 'Sí, Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: () => this.deleteCourse(id)
+        });
+    },
+    
+    async deleteCourse(id) {
+        try {
+            await Utils.request(`/api/cursos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            Utils.showNotification('✅ Curso eliminado exitosamente', 'success');
+            this.loadCourses();
+            this.updateStats();
+            
+        } catch (error) {
+            Utils.showNotification('Error al eliminar curso: ' + error.message, 'error');
+        }
+    },
+    
+    editSubject(id) {
+        Utils.showNotification('Funcionalidad de edición de ramos en desarrollo', 'info');
+    },
+    
+    viewSubjectClasses(id) {
+        Utils.showNotification('Vista de clases del ramo en desarrollo', 'info');
+    },
+    
+    confirmDeleteSubject(id) {
+        const subject = this.data.subjects.find(s => s.id === id);
+        if (!subject) return;
+        
+        this.showConfirmDialog({
+            title: '¿Eliminar Ramo?',
+            message: `¿Estás seguro de que deseas eliminar el ramo <strong>${subject.nombre}</strong>? Esta acción no se puede deshacer.`,
+            icon: 'book-x',
+            confirmText: 'Sí, Eliminar',
+            cancelText: 'Cancelar',
+            onConfirm: () => this.deleteSubject(id)
+        });
+    },
+    
+    async deleteSubject(id) {
+        try {
+            await Utils.request(`/api/ramos/${id}`, {
+                method: 'DELETE'
+            });
+            
+            Utils.showNotification('✅ Ramo eliminado exitosamente', 'success');
+            this.loadSubjects();
+            this.updateStats();
+            
+        } catch (error) {
+            Utils.showNotification('Error al eliminar ramo: ' + error.message, 'error');
+        }
     }
 };
 

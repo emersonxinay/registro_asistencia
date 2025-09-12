@@ -96,6 +96,31 @@ public class ClasesController : ControllerBase
         return Ok(clase);
     }
 
+    [HttpPost("{id}/reabrir")]
+    public async Task<IActionResult> Reabrir(int id)
+    {
+        var result = await _dataService.ReabrirClaseAsync(id);
+        if (!result)
+            return BadRequest("No se pudo reabrir la clase.");
+        
+        var clase = await _dataService.GetClaseAsync(id);
+        return Ok(clase);
+    }
+
+    [HttpPost("{id}/duplicar")]
+    public async Task<IActionResult> Duplicar(int id)
+    {
+        try
+        {
+            var claseNueva = await _dataService.DuplicarClaseAsync(id);
+            return Ok(claseNueva);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{id}/qr")]
     public async Task<IActionResult> GetQr(int id)
     {

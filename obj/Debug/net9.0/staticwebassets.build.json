@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "IQXtfDxPhr10/i1VJNDrI6AYv90Y0MxfTzQwYPAx9SA=",
+  "Hash": "h+PSqUYjykg50ItWCb2w0D0xkhMtbEAD81716pRJ364=",
   "Source": "registroAsistencia",
   "BasePath": "_content/registroAsistencia",
   "Mode": "Default",
@@ -59,6 +59,48 @@
       "OriginalItemSpec": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css"
     },
     {
+      "Identity": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\y5bqqfi2xg-b1al7632ef.gz",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "css/clases#[.{fingerprint=b1al7632ef}]?.css.gz",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Alternative",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css",
+      "AssetTraitName": "Content-Encoding",
+      "AssetTraitValue": "gzip",
+      "Fingerprint": "7r33hn0ke5",
+      "Integrity": "PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css"
+    },
+    {
+      "Identity": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css",
+      "SourceId": "registroAsistencia",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\csharp\\registroAsistencia\\wwwroot\\",
+      "BasePath": "_content/registroAsistencia",
+      "RelativePath": "css/clases#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "b1al7632ef",
+      "Integrity": "DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\clases.css"
+    },
+    {
       "Identity": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\styles.css",
       "SourceId": "registroAsistencia",
       "SourceType": "Discovered",
@@ -102,6 +144,304 @@
     }
   ],
   "Endpoints": [
+    {
+      "Route": "css/clases.b1al7632ef.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\y5bqqfi2xg-b1al7632ef.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000417014178"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2397"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1al7632ef"
+        },
+        {
+          "Name": "label",
+          "Value": "css/clases.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="
+        }
+      ]
+    },
+    {
+      "Route": "css/clases.b1al7632ef.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "13822"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1al7632ef"
+        },
+        {
+          "Name": "label",
+          "Value": "css/clases.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="
+        }
+      ]
+    },
+    {
+      "Route": "css/clases.b1al7632ef.css.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\y5bqqfi2xg-b1al7632ef.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2397"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "b1al7632ef"
+        },
+        {
+          "Name": "label",
+          "Value": "css/clases.css.gz"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k="
+        }
+      ]
+    },
+    {
+      "Route": "css/clases.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\y5bqqfi2xg-b1al7632ef.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000417014178"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2397"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="
+        }
+      ]
+    },
+    {
+      "Route": "css/clases.css",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\wwwroot\\css\\clases.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "13822"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="
+        }
+      ]
+    },
+    {
+      "Route": "css/clases.css.gz",
+      "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\y5bqqfi2xg-b1al7632ef.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2397"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 09 Sep 2025 15:14:51 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-PV2GCMPKOk3w2yFBrDJsB/tVj/XhtOMrR58/JrjUi/k="
+        }
+      ]
+    },
     {
       "Route": "css/styles.a08qgwynw6.css",
       "AssetFile": "E:\\csharp\\registroAsistencia\\obj\\Debug\\net9.0\\compressed\\n57h8i515h-a08qgwynw6.gz",
