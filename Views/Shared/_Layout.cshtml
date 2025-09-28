@@ -61,13 +61,17 @@
                         <i data-lucide="layout-dashboard"></i>
                         <span>Mi Dashboard</span>
                     </a>
-                    <a href="/workflow" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workflow" ? "active" : "")">
+                    <a href="/workflow/cursos" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workflow" ? "active" : "")">
                         <i data-lucide="plus-circle"></i>
                         <span>Crear Clase</span>
                     </a>
                     <a href="/docente/cursos" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Cursos" ? "active" : "")">
                         <i data-lucide="book"></i>
                         <span>Mis Cursos</span>
+                    </a>
+                    <a href="/workflow/mis-clases" class="nav-link">
+                        <i data-lucide="calendar"></i>
+                        <span>Mis Clases</span>
                     </a>
                     <a href="/docente/scanner" class="nav-link scanner-link">
                         <i data-lucide="scan"></i>

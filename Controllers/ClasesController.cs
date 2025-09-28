@@ -54,13 +54,37 @@ public class ClasesController : ControllerBase
         }
     }
 
+    [HttpGet("mis-clases")]
+    public async Task<IActionResult> GetMisClases()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var todasClases = await _dataService.GetClasesAsync();
+            var misClases = todasClases.Where(c => c.DocenteId == userId).ToList();
+
+            return Ok(misClases);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener mis clases: " + ex.Message });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var clase = await _dataService.GetClaseAsync(id);
-        if (clase == null)
-            return NotFound();
-        return Ok(clase);
+        try
+        {
+            var clase = await _dataService.GetClaseAsync(id);
+            if (clase == null)
+                return NotFound($"Clase con ID {id} no encontrada");
+            return Ok(clase);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener la clase: " + ex.Message });
+        }
     }
 
     [HttpPut("{id}")]
@@ -187,5 +211,12 @@ public class ClasesController : ControllerBase
         var bytes = _qrService.GeneratePngBytes(payloadUrl);
 
         return File(bytes, "image/png", $"qr-clase-{id}.png");
+    }
+
+    // Método helper para obtener el ID del usuario actual
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out int userId) ? userId : 1;
     }
 }

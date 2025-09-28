@@ -113,12 +113,56 @@ public class EfDataService : IDataService
 
     public async Task<Clase?> GetClaseAsync(int id)
     {
-        return await _context.Clases.FindAsync(id);
+        try
+        {
+            // Primero intentar con todas las relaciones
+            var clase = await _context.Clases
+                .Include(c => c.Docente)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (clase == null)
+                return null;
+
+            // Si tiene RamoId, cargar el Ramo y Curso de forma separada para evitar errores
+            if (clase.RamoId.HasValue)
+            {
+                try
+                {
+                    var ramoConCurso = await _context.Ramos
+                        .Include(r => r.Curso)
+                        .FirstOrDefaultAsync(r => r.Id == clase.RamoId.Value);
+
+                    if (ramoConCurso != null)
+                    {
+                        clase.Ramo = ramoConCurso;
+                    }
+                }
+                catch (Exception ramoEx)
+                {
+                    Console.WriteLine($"⚠️ Warning: No se pudo cargar Ramo {clase.RamoId}: {ramoEx.Message}");
+                    // Continuar sin el Ramo, la clase sigue siendo válida
+                }
+            }
+
+            return clase;
+        }
+        catch (Exception ex)
+        {
+            // Log del error para debugging
+            Console.WriteLine($"❌ Error en GetClaseAsync({id}): {ex.Message}");
+            Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<Clase>> GetClasesAsync()
     {
-        return await _context.Clases.ToListAsync();
+        return await _context.Clases
+            .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+            .Include(c => c.Docente)
+            .OrderByDescending(c => c.InicioUtc)
+            .ToListAsync();
     }
 
     public async Task<bool> UpdateClaseAsync(int id, ClaseCreateDto dto)
@@ -217,30 +261,40 @@ public class EfDataService : IDataService
 
     public async Task<IEnumerable<dynamic>> GetAsistenciasPorClaseAsync(int claseId)
     {
-        var result = await _context.Asistencias
-            .Include(a => a.Alumno)
-            .Include(a => a.Clase)
-            .Where(a => a.ClaseId == claseId)
-            .OrderBy(a => a.MarcadaUtc)
-            .Select(a => new
-            {
-                a.Id,
-                a.ClaseId,
-                Asignatura = a.Clase.Asignatura,
-                a.AlumnoId,
-                AlumnoCodigo = a.Alumno.Codigo,
-                AlumnoNombre = a.Alumno.Nombre,
-                Codigo = a.Alumno.Codigo,
-                Nombre = a.Alumno.Nombre,
-                a.Metodo,
-                a.MarcadaUtc,
-                FechaHoraRegistro = a.MarcadaUtc,
-                a.Estado,
-                a.MinutosRetraso
-            })
-            .ToListAsync();
+        try
+        {
+            var result = await _context.Asistencias
+                .Include(a => a.Alumno)
+                .Include(a => a.Clase)
+                .Where(a => a.ClaseId == claseId)
+                .OrderBy(a => a.MarcadaUtc)
+                .Select(a => new
+                {
+                    a.Id,
+                    a.ClaseId,
+                    Asignatura = a.Clase.Asignatura,
+                    a.AlumnoId,
+                    AlumnoCodigo = a.Alumno.Codigo,
+                    AlumnoNombre = a.Alumno.Nombre,
+                    Codigo = a.Alumno.Codigo,
+                    Nombre = a.Alumno.Nombre,
+                    a.Metodo,
+                    a.MarcadaUtc,
+                    FechaHoraRegistro = a.MarcadaUtc,
+                    a.Estado,
+                    a.MinutosRetraso
+                })
+                .ToListAsync();
 
-        return result.Cast<dynamic>();
+            return result.Cast<dynamic>();
+        }
+        catch (Exception ex)
+        {
+            // Log del error para debugging
+            Console.WriteLine($"❌ Error en GetAsistenciasPorClaseAsync({claseId}): {ex.Message}");
+            Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     public async Task<IEnumerable<dynamic>> GetAsistenciasAsync()

@@ -4,13 +4,21 @@
     <!-- Header del Workflow -->
     <div class="workflow-header">
         <div class="workflow-breadcrumb">
-            <span class="step completed">1. Seleccionar Curso</span>
-            <span class="step active">2. Seleccionar Ramo</span>
-            <span class="step">3. Configurar Clase</span>
-            <span class="step">4. Clase Creada</span>
+            <span class="step completed">✅ 1. Curso Elegido</span>
+            <span class="step active">🎯 2. Elegir Materia</span>
+            <span class="step">⚙️ 3. Configurar Clase</span>
+            <span class="step">🎉 4. ¡Clase Lista!</span>
         </div>
-        <h1>📖 Paso 2: Selecciona un Ramo</h1>
-        <p>Elige el ramo del curso <strong>@Model.Curso.Nombre</strong> para crear la clase</p>
+        <h1>🎯 Paso 2: Elige la Materia/Asignatura</h1>
+        <p>Selecciona la <strong>materia específica</strong> del curso <strong>@Model.Curso.Nombre</strong> donde vas a crear tu nueva clase</p>
+        <div class="workflow-explanation">
+            <div class="explanation-card">
+                <div class="explanation-icon">💡</div>
+                <div class="explanation-text">
+                    <strong>¿Qué viene después?</strong> Una vez que elijas la materia, podrás configurar los detalles de tu clase (fecha, hora, duración) y generar el código QR para que los estudiantes registren su asistencia.
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Información del Curso Seleccionado -->
@@ -28,6 +36,26 @@
         </div>
     </div>
 
+    <!-- Progreso Visual -->
+    <div class="progress-indicator">
+        <div class="progress-steps">
+            <div class="progress-step completed">
+                <div class="step-circle">✓</div>
+                <div class="step-label">Curso Seleccionado</div>
+            </div>
+            <div class="progress-arrow">→</div>
+            <div class="progress-step active">
+                <div class="step-circle">2</div>
+                <div class="step-label">Elige Materia</div>
+            </div>
+            <div class="progress-arrow">→</div>
+            <div class="progress-step pending">
+                <div class="step-circle">3</div>
+                <div class="step-label">Configurar Clase</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Lista de Ramos -->
     <div class="ramos-selection">
         @if (!Model.Ramos.Any())
@@ -35,11 +63,12 @@
             <div class="no-ramos">
                 <div class="empty-state">
                     <div class="empty-icon">📖</div>
-                    <h3>Este curso no tiene ramos asignados</h3>
-                    <p>Es necesario que el curso tenga al menos un ramo para poder crear una clase.</p>
+                    <h3>❌ No puedes crear clases aún</h3>
+                    <p><strong>Este curso no tiene materias/asignaturas configuradas.</strong></p>
+                    <p>Para crear una clase, primero necesitas tener al menos una materia o asignatura en este curso. Las clases se crean dentro de materias específicas.</p>
                     <div class="empty-actions">
-                        <a href="/admin/cursos/@Model.Curso.Id/ramos" class="btn-primary">
-                            Gestionar Ramos
+                        <a href="/docente/cursos/@Model.Curso.Id" class="btn-primary">
+                            📚 Gestionar Materias del Curso
                         </a>
                     </div>
                 </div>
@@ -79,7 +108,7 @@
                         
                         <div class="ramo-actions">
                             <button class="btn-select" onclick="selectRamo(@ramo.Id, '@ramo.Nombre', @Model.Curso.Id)">
-                                <span>Seleccionar Ramo</span>
+                                <span>🎯 Crear Clase en @ramo.Nombre</span>
                                 <span class="arrow">→</span>
                             </button>
                         </div>
@@ -91,15 +120,18 @@
 
     <!-- Acciones del Workflow -->
     <div class="workflow-actions">
-        <a href="/workflow" class="btn-secondary">
+        <a href="/workflow/cursos" class="btn-secondary">
             ← Cambiar Curso
         </a>
         
         <div class="action-right">
             @if (Model.Curso.EsPropietario)
             {
-                <a href="/admin/cursos/@Model.Curso.Id/crear-ramo" class="btn-outline">
-                    + Crear Nuevo Ramo
+                <a href="/workflow/curso/@Model.Curso.Id/asistencias" class="btn-outline">
+                    📊 Ver Asistencias del Curso
+                </a>
+                <a href="/docente/cursos/@Model.Curso.Id/ramos" class="btn-outline">
+                    ➕ Crear Nueva Materia
                 </a>
             }
         </div>
@@ -114,12 +146,13 @@ function selectRamo(ramoId, ramoNombre, cursoId) {
     card.innerHTML = `
         <div class="loading-state">
             <div class="spinner"></div>
-            <p>Configurando clase...</p>
+            <p>🎯 Configurando nueva clase...</p>
+            <small>Te llevaremos al formulario de configuración</small>
         </div>
     `;
     
     // Navegar al siguiente paso
-    window.location.href = `/workflow/crear-clase?cursoId=${cursoId}&ramoId=${ramoId}`;
+    window.location.href = `/workflow/curso/${cursoId}/ramo/${ramoId}/crear-clase`;
 }
 
 // Animaciones de entrada
@@ -183,7 +216,125 @@ document.addEventListener('DOMContentLoaded', function() {
 .workflow-header p {
     color: #7f8c8d;
     font-size: 1.2em;
-    margin: 0;
+    margin: 0 0 20px 0;
+}
+
+.workflow-explanation {
+    margin-bottom: 20px;
+}
+
+.explanation-card {
+    background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+    border: 2px solid #27ae60;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.1);
+}
+
+.explanation-icon {
+    font-size: 2em;
+    background: #27ae60;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.explanation-text {
+    color: #2c3e50;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+.explanation-text strong {
+    color: #27ae60;
+}
+
+.progress-indicator {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.progress-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1em;
+    transition: all 0.3s ease;
+}
+
+.progress-step.completed .step-circle {
+    background: #27ae60;
+    color: white;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.progress-step.active .step-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transform: scale(1.1);
+}
+
+.progress-step.pending .step-circle {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 2px solid #e9ecef;
+}
+
+.step-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+}
+
+.progress-step.completed .step-label {
+    color: #27ae60;
+}
+
+.progress-step.active .step-label {
+    color: #667eea;
+}
+
+.progress-step.pending .step-label {
+    color: #6c757d;
+}
+
+.progress-arrow {
+    font-size: 1.5em;
+    color: #3498db;
+    font-weight: bold;
 }
 
 .selected-course-info {
@@ -436,6 +587,21 @@ document.addEventListener('DOMContentLoaded', function() {
     align-items: center;
     justify-content: center;
     padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.loading-state p {
+    margin: 10px 0 5px 0;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.loading-state small {
+    opacity: 0.9;
+    font-size: 0.9em;
+    margin: 0;
 }
 
 .spinner {
@@ -516,33 +682,49 @@ document.addEventListener('DOMContentLoaded', function() {
     .workflow-breadcrumb {
         gap: 10px;
     }
-    
+
     .workflow-breadcrumb .step {
         font-size: 0.8em;
         padding: 8px 15px;
     }
-    
+
+    .progress-steps {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .progress-arrow {
+        transform: rotate(90deg);
+        font-size: 1.2em;
+    }
+
+    .explanation-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
     .course-summary {
         flex-direction: column;
         text-align: center;
         gap: 15px;
     }
-    
+
     .ramos-grid {
         grid-template-columns: 1fr;
         gap: 20px;
     }
-    
+
     .ramo-stats {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .workflow-actions {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .action-right {
         justify-content: center;
     }

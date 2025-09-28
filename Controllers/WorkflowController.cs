@@ -32,6 +32,7 @@ public class WorkflowController : Controller
     // PASO 1: Seleccionar Curso
     [Route("workflow")]
     [Route("workflow/cursos")]
+    [Route("workflow/inicio")]
     public async Task<IActionResult> SeleccionarCurso()
     {
         var docenteId = GetCurrentUserId();
@@ -56,7 +57,8 @@ public class WorkflowController : Controller
     }
 
     // PASO 2: Seleccionar Ramo/Asignatura
-    [Route("workflow/ramos/{cursoId:int}")]
+    [Route("workflow/curso/{cursoId:int}/ramos")]
+    [Route("workflow/ramos/{cursoId:int}")] // Compatibilidad
     public async Task<IActionResult> SeleccionarRamo(int cursoId)
     {
         var docenteId = GetCurrentUserId();
@@ -81,6 +83,7 @@ public class WorkflowController : Controller
         var ramosDisponibles = await _context.DocenteRamos
             .Where(dr => dr.DocenteId == docenteId && dr.Activo)
             .Include(dr => dr.Ramo)
+                .ThenInclude(r => r.Clases)
             .Where(dr => dr.Ramo.CursoId == cursoId && dr.Ramo.Activo)
             .Select(dr => new RamoViewModel
             {
@@ -89,7 +92,9 @@ public class WorkflowController : Controller
                 Codigo = dr.Ramo.Codigo,
                 Descripcion = dr.Ramo.Descripcion,
                 TotalClasesActivas = dr.Ramo.Clases.Count(c => c.FinUtc == null),
-                TotalEstudiantes = _context.AlumnoCursos.Count(ac => ac.CursoId == cursoId && ac.Activo)
+                TotalClases = dr.Ramo.Clases.Count(),
+                TotalEstudiantes = _context.AlumnoCursos.Count(ac => ac.CursoId == cursoId && ac.Activo),
+                HorasSemanales = 0 // Por defecto 0, ya que el modelo Ramo no tiene esta propiedad
             })
             .ToListAsync();
 
@@ -107,7 +112,7 @@ public class WorkflowController : Controller
                 Codigo = curso.Codigo,
                 Descripcion = curso.Descripcion,
                 EsPropietario = esPropietario,
-                TotalRamos = ramosDisponibles.Count
+                TotalRamos = ramosDisponibles.Count()
             },
             Ramos = ramosDisponibles
         };
@@ -118,7 +123,8 @@ public class WorkflowController : Controller
     }
 
     // PASO 3: Configurar y Crear Clase
-    [Route("workflow/crear-clase/{cursoId:int}/{ramoId:int}")]
+    [Route("workflow/curso/{cursoId:int}/ramo/{ramoId:int}/crear-clase")]
+    [Route("workflow/crear-clase/{cursoId:int}/{ramoId:int}")] // Compatibilidad
     public async Task<IActionResult> CrearClase(int cursoId, int ramoId)
     {
         var docenteId = GetCurrentUserId();
@@ -155,6 +161,7 @@ public class WorkflowController : Controller
 
     [HttpPost]
     [Route("workflow/crear-clase")]
+    [Route("workflow/procesar-clase")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CrearClase([FromForm] CrearClaseViewModel model)
     {
@@ -207,7 +214,8 @@ public class WorkflowController : Controller
     }
 
     // PASO 4: Clase Creada - Mostrar QR y Opciones
-    [Route("workflow/clase-creada/{claseId:int}")]
+    [Route("workflow/clase/{claseId:int}/creada")]
+    [Route("workflow/clase-creada/{claseId:int}")] // Compatibilidad
     public async Task<IActionResult> ClaseCreada(int claseId)
     {
         var docenteId = GetCurrentUserId();
@@ -306,6 +314,159 @@ public class WorkflowController : Controller
         
         return nonce;
     }
+
+    // RUTAS ADICIONALES PARA NAVEGACIÓN Y GESTIÓN
+
+    // Ver asistencias por curso
+    [Route("workflow/curso/{cursoId:int}/asistencias")]
+    public async Task<IActionResult> AsistenciasPorCurso(int cursoId)
+    {
+        var docenteId = GetCurrentUserId();
+
+        // Verificar que el docente tiene acceso al curso
+        var tieneAcceso = await _context.DocenteCursos
+            .AnyAsync(dc => dc.DocenteId == docenteId && dc.CursoId == cursoId && dc.Activo);
+
+        if (!tieneAcceso)
+        {
+            TempData["ErrorMessage"] = "No tienes acceso a este curso";
+            return RedirectToAction("SeleccionarCurso");
+        }
+
+        var curso = await _context.Cursos
+            .Include(c => c.Ramos.Where(r => r.Activo))
+                .ThenInclude(r => r.Clases)
+                    .ThenInclude(c => c.Asistencias)
+            .FirstOrDefaultAsync(c => c.Id == cursoId);
+
+        if (curso == null)
+            return NotFound();
+
+        ViewData["Title"] = $"Asistencias - {curso.Nombre}";
+        return View("AsistenciasCurso", curso);
+    }
+
+    // Ver asistencias por ramo
+    [Route("workflow/curso/{cursoId:int}/ramo/{ramoId:int}/asistencias")]
+    public async Task<IActionResult> AsistenciasPorRamo(int cursoId, int ramoId)
+    {
+        var docenteId = GetCurrentUserId();
+
+        // Verificar accesos
+        var tieneAcceso = await VerificarAccesosCursoRamo(docenteId, cursoId, ramoId);
+        if (!tieneAcceso.success)
+        {
+            TempData["ErrorMessage"] = tieneAcceso.message;
+            return RedirectToAction("SeleccionarCurso");
+        }
+
+        var ramo = await _context.Ramos
+            .Include(r => r.Curso)
+            .Include(r => r.Clases)
+                .ThenInclude(c => c.Asistencias)
+                    .ThenInclude(a => a.Alumno)
+            .FirstOrDefaultAsync(r => r.Id == ramoId);
+
+        if (ramo == null)
+            return NotFound();
+
+        ViewData["Title"] = $"Asistencias - {ramo.Nombre}";
+        return View("AsistenciasRamo", ramo);
+    }
+
+    // Ver asistencias por clase específica
+    [Route("workflow/clase/{claseId:int}/asistencias")]
+    public async Task<IActionResult> AsistenciasPorClase(int claseId)
+    {
+        var docenteId = GetCurrentUserId();
+
+        var clase = await _context.Clases
+            .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+            .Include(c => c.Asistencias)
+                .ThenInclude(a => a.Alumno)
+            .Include(c => c.Docente)
+            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+
+        if (clase == null)
+            return NotFound();
+
+        ViewData["Title"] = $"Asistencias - {clase.Asignatura}";
+        return View("AsistenciasClase", clase);
+    }
+
+    // Gestionar clase específica (editar, finalizar, etc.)
+    [Route("workflow/clase/{claseId:int}/gestionar")]
+    public async Task<IActionResult> GestionarClase(int claseId)
+    {
+        var docenteId = GetCurrentUserId();
+
+        var clase = await _context.Clases
+            .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+            .Include(c => c.Docente)
+            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+
+        if (clase == null)
+            return NotFound();
+
+        // Obtener estadísticas de asistencia
+        var totalAsistencias = await _context.Asistencias
+            .CountAsync(a => a.ClaseId == claseId);
+
+        var totalEstudiantes = await _context.AlumnoCursos
+            .CountAsync(ac => ac.CursoId == clase.Ramo!.Curso.Id && ac.Activo);
+
+        var viewModel = new GestionarClaseViewModel
+        {
+            Clase = clase,
+            TotalAsistencias = totalAsistencias,
+            TotalEstudiantes = totalEstudiantes,
+            PorcentajeAsistencia = totalEstudiantes > 0 ? (double)totalAsistencias / totalEstudiantes * 100 : 0
+        };
+
+        ViewData["Title"] = $"Gestionar - {clase.Asignatura}";
+        return View("GestionarClase", viewModel);
+    }
+
+    // Finalizar clase
+    [HttpPost]
+    [Route("workflow/clase/{claseId:int}/finalizar")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> FinalizarClase(int claseId)
+    {
+        var docenteId = GetCurrentUserId();
+
+        var clase = await _context.Clases
+            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+
+        if (clase == null)
+            return NotFound();
+
+        clase.FinUtc = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Clase finalizada exitosamente";
+        return RedirectToAction("GestionarClase", new { claseId });
+    }
+
+    // Lista de clases del docente
+    [Route("workflow/mis-clases")]
+    public async Task<IActionResult> MisClases()
+    {
+        var docenteId = GetCurrentUserId();
+
+        var clases = await _context.Clases
+            .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+            .Where(c => c.DocenteId == docenteId)
+            .OrderByDescending(c => c.InicioUtc)
+            .Take(50) // Limitar a 50 clases más recientes
+            .ToListAsync();
+
+        ViewData["Title"] = "Mis Clases";
+        return View("MisClases", clases);
+    }
 }
 
 // ViewModels
@@ -403,4 +564,12 @@ public class ClaseDetailViewModel
     public DateTime InicioUtc { get; set; }
     public DateTime? FinUtc { get; set; }
     public bool Activa { get; set; }
+}
+
+public class GestionarClaseViewModel
+{
+    public Models.Clase Clase { get; set; } = new();
+    public int TotalAsistencias { get; set; }
+    public int TotalEstudiantes { get; set; }
+    public double PorcentajeAsistencia { get; set; }
 }

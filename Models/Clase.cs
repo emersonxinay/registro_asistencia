@@ -20,9 +20,12 @@ public class Clase
     public string? Descripcion { get; set; }
     
     public bool Activa => FinUtc is null;
-    
+
+    // Navegación a las asistencias
+    public virtual ICollection<Asistencia> Asistencias { get; set; } = new List<Asistencia>();
+
     // Propiedad computada para mostrar el nombre del ramo o asignatura
-    public string NombreCompleto => Ramo != null ? $"{Ramo.Nombre} ({Ramo.Curso.Nombre})" : Asignatura;
+    public string NombreCompleto => Ramo?.Curso != null ? $"{Ramo.Nombre} ({Ramo.Curso.Nombre})" : Asignatura;
 }
 
 // DTOs actualizados

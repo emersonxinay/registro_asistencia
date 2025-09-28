@@ -85,8 +85,15 @@ public class AsistenciasController : ControllerBase
     [HttpGet("/api/clases/{claseId}/asistencias")] // Ruta alternativa para compatibilidad
     public async Task<IActionResult> GetByClase(int claseId)
     {
-        var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
-        return Ok(asistencias);
+        try
+        {
+            var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
+            return Ok(asistencias);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener asistencias: " + ex.Message });
+        }
     }
 
     [HttpGet("csv")]
@@ -104,5 +111,33 @@ public class AsistenciasController : ControllerBase
         var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
         var bytes = _csvService.GenerateAsistenciasCsv(asistencias);
         return File(bytes, "text/csv; charset=utf-8", $"asistencias-clase-{claseId}.csv");
+    }
+
+    [HttpGet("clase/{claseId}/csv-completo")]
+    public async Task<IActionResult> ExportCsvCompletoByClase(int claseId)
+    {
+        // Obtener información de la clase
+        var clase = await _dataService.GetClaseAsync(claseId);
+        if (clase == null)
+            return NotFound("Clase no encontrada");
+
+        // Obtener asistencias de la clase
+        var asistenciasClase = await _dataService.GetAsistenciasPorClaseAsync(claseId);
+
+        // Obtener todos los estudiantes del curso
+        if (clase.RamoId.HasValue)
+        {
+            var ramo = await _dataService.GetRamoAsync(clase.RamoId.Value);
+            if (ramo != null)
+            {
+                var estudiantesCurso = await _dataService.GetAlumnosCursoAsync(ramo.CursoId);
+                var bytes = _csvService.GenerateAsistenciasCompletoCsv(clase, estudiantesCurso, asistenciasClase);
+                return File(bytes, "text/csv; charset=utf-8", $"asistencias-completa-clase-{claseId}.csv");
+            }
+        }
+
+        // Fallback: usar el CSV normal si no hay información del ramo
+        var normalBytes = _csvService.GenerateAsistenciasCsv(asistenciasClase);
+        return File(normalBytes, "text/csv; charset=utf-8", $"asistencias-clase-{claseId}.csv");
     }
 }

@@ -39,7 +39,7 @@
 
     <!-- Formulario de Configuración -->
     <div class="class-configuration">
-        <form id="crearClaseForm" action="/workflow/crear-clase" method="post" onsubmit="return submitForm(event)">
+        <form id="crearClaseForm" action="/workflow/procesar-clase" method="post" onsubmit="return submitForm(event)">
             @Html.AntiForgeryToken()
             <input type="hidden" id="cursoId" name="CursoId" value="@Model.CursoId">
             <input type="hidden" id="ramoId" name="RamoId" value="@Model.RamoId">
@@ -235,7 +235,7 @@
 
             <!-- Botones de Acción -->
             <div class="form-actions">
-                <a href="/workflow/ramos/@Model.CursoId" class="btn-secondary">
+                <a href="/workflow/curso/@Model.CursoId/ramos" class="btn-secondary">
                     ← Cambiar Ramo
                 </a>
                 

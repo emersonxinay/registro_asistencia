@@ -26,6 +26,23 @@ public class CursosController : ControllerBase
         return Ok(cursos);
     }
 
+    [HttpGet("mis-cursos")]
+    public async Task<ActionResult<IEnumerable<Curso>>> GetMisCursos()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var todosCursos = await _dataService.GetCursosAsync();
+            // Por ahora retornar todos los cursos, pero esto debería filtrarse por docente
+            // cuando se implemente la relación DocenteCurso en el DataService
+            return Ok(todosCursos);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener mis cursos: " + ex.Message });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Curso>> GetCurso(int id)
     {
@@ -107,5 +124,12 @@ public class CursosController : ControllerBase
             return NotFound();
 
         return NoContent();
+    }
+
+    // Método helper para obtener el ID del usuario actual
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out int userId) ? userId : 1;
     }
 }

@@ -1,88 +1,493 @@
 @{
-    ViewData["Title"] = "Lista de Asistencias";
-    ViewData["Subtitle"] = "Registro de todas las asistencias";
+    ViewData["Title"] = "Asistencias por Clase";
+    ViewData["Subtitle"] = "Control detallado de asistencia por clase específica";
 }
 
 <div class="container">
-    <h1>Lista de Asistencias</h1>
+    <h1>Asistencias por Clase</h1>
+    
+    <!-- Selectores de Curso y Clase -->
+    <div style="background: #f0f0f0; padding: 20px; margin-bottom: 20px;">
+        <div style="margin-bottom: 15px;">
+            <label for="selectorCurso" style="font-weight: bold;">1. Seleccionar Curso:</label>
+            <select id="selectorCurso" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarRamosPorCurso()">
+                <option value="">-- Seleccionar Curso --</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="selectorRamo" style="font-weight: bold;">2. Seleccionar Ramo/Asignatura:</label>
+            <select id="selectorRamo" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarClasesPorRamo()" disabled>
+                <option value="">-- Primero selecciona un curso --</option>
+            </select>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="selectorClase" style="font-weight: bold;">3. Seleccionar Clase:</label>
+            <select id="selectorClase" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" disabled>
+                <option value="">-- Primero selecciona un ramo --</option>
+            </select>
+        </div>
+
+        <div>
+            <button onclick="cargarAsistenciasPorClase()" style="background: blue; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
+                CARGAR ASISTENCIAS
+            </button>
+            <button onclick="refrescarDatos()" style="background: green; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
+                REFRESCAR
+            </button>
+            <button onclick="exportarCSV()" style="background: orange; color: white; padding: 10px 20px; font-size: 16px;">
+                EXPORTAR CSV COMPLETO
+            </button>
+        </div>
+    </div>
+    
+    <!-- Resumen -->
+    <div id="resumen" style="display: none; background: #e8f5e8; padding: 15px; margin-bottom: 20px;">
+        <h3>Resumen de la Clase</h3>
+        <div id="claseInfo" style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-weight: bold;"></div>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div>📊 Total Estudiantes: <span id="totalEstudiantes">0</span></div>
+            <div style="color: green;">✅ Presentes: <span id="totalPresentes">0</span></div>
+            <div style="color: orange;">⏰ Tardanzas: <span id="totalTardanzas">0</span></div>
+            <div style="color: red;">❌ Ausentes: <span id="totalAusentes">0</span></div>
+            <div style="color: blue;">📝 Excusados: <span id="totalExcusados">0</span></div>
+            <div style="color: purple;">📈 Registraron: <span id="totalConAsistencia">0</span></div>
+        </div>
+    </div>
     
     <div id="asistenciasList">
         <div style="background: yellow; padding: 20px; margin: 20px 0;">
-            <h3>Cargando asistencias...</h3>
-            <button onclick="cargarAsistencias()" style="background: red; color: white; padding: 10px 20px; font-size: 16px;">
-                CARGAR ASISTENCIAS
-            </button>
+            <h3>Selecciona un curso, ramo y clase para ver las asistencias</h3>
         </div>
     </div>
 </div>
 
 @section Scripts {
 <script>
-console.log('🔥 SIMPLE ASISTENCIAS SCRIPT LOADED');
+console.log('🔥 ASISTENCIAS POR CLASE SCRIPT LOADED');
 
-function cargarAsistencias() {
-    console.log('⚡ LOADING ASISTENCIAS');
-    const container = document.getElementById('asistenciasList');
-    
-    container.innerHTML = '<div style="background: blue; color: white; padding: 20px;">CARGANDO...</div>';
-    
-    fetch('/api/asistencias')
-        .then(response => {
-            console.log('📡 Response:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('✅ DATA:', data);
-            
-            if (!data || data.length === 0) {
-                container.innerHTML = '<div style="background: red; color: white; padding: 20px;">NO DATA</div>';
-                return;
-            }
-            
-            let html = `
-                <div style="background: green; color: white; padding: 20px; margin-bottom: 10px;">
-                    ✅ ASISTENCIAS CARGADAS: ${data.length} registros
-                </div>
-                <table border="3" style="width: 100%; border-collapse: collapse;">
-                    <tr style="background: #f0f0f0;">
-                        <th style="padding: 15px; border: 2px solid black;">ID</th>
-                        <th style="padding: 15px; border: 2px solid black;">Clase</th>
-                        <th style="padding: 15px; border: 2px solid black;">Alumno</th>
-                        <th style="padding: 15px; border: 2px solid black;">Código</th>
-                        <th style="padding: 15px; border: 2px solid black;">Nombre</th>
-                        <th style="padding: 15px; border: 2px solid black;">Método</th>
-                        <th style="padding: 15px; border: 2px solid black;">Fecha</th>
-                    </tr>
-            `;
-            
-            for (let i = 0; i < data.length; i++) {
-                const item = data[i];
-                html += `
-                    <tr style="border: 2px solid black;">
-                        <td style="padding: 10px; border: 1px solid black;">${item.id || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.claseId || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.alumnoId || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.alumnoCodigo || item.codigo || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.alumnoNombre || item.nombre || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.metodo || 'N/A'}</td>
-                        <td style="padding: 10px; border: 1px solid black;">${item.marcadaUtc || 'N/A'}</td>
-                    </tr>
-                `;
-            }
-            
-            html += '</table>';
-            container.innerHTML = html;
-            
-            console.log('✅ RENDERED');
-        })
-        .catch(error => {
-            console.error('❌ ERROR:', error);
-            container.innerHTML = '<div style="background: red; color: white; padding: 20px;">ERROR: ' + error.message + '</div>';
+// Cargar cursos al iniciar
+async function cargarCursos() {
+    try {
+        const response = await fetch('/api/cursos/mis-cursos');
+        const cursos = await response.json();
+
+        const selector = document.getElementById('selectorCurso');
+        selector.innerHTML = '<option value="">-- Seleccionar Curso --</option>';
+
+        cursos.forEach(curso => {
+            const option = document.createElement('option');
+            option.value = curso.id;
+            option.textContent = `${curso.nombre} (${curso.codigo})`;
+            selector.appendChild(option);
         });
+
+        console.log('✅ Cursos cargados:', cursos.length);
+    } catch (error) {
+        console.error('❌ Error cargando cursos:', error);
+    }
 }
 
-// Auto load
-setTimeout(cargarAsistencias, 500);
+// Cargar ramos cuando se selecciona un curso
+async function cargarRamosPorCurso() {
+    const cursoId = document.getElementById('selectorCurso').value;
+    const selectorRamo = document.getElementById('selectorRamo');
+    const selectorClase = document.getElementById('selectorClase');
+
+    // Limpiar selectores dependientes
+    selectorRamo.innerHTML = '<option value="">-- Cargando ramos... --</option>';
+    selectorRamo.disabled = true;
+    selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
+    selectorClase.disabled = true;
+
+    if (!cursoId) {
+        selectorRamo.innerHTML = '<option value="">-- Primero selecciona un curso --</option>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/ramos/curso/${cursoId}`);
+        const ramos = await response.json();
+
+        selectorRamo.innerHTML = '<option value="">-- Seleccionar Ramo/Asignatura --</option>';
+
+        ramos.forEach(ramo => {
+            const option = document.createElement('option');
+            option.value = ramo.id;
+            option.textContent = `${ramo.nombre} (${ramo.codigo})`;
+            selectorRamo.appendChild(option);
+        });
+
+        selectorRamo.disabled = false;
+        console.log('✅ Ramos cargados:', ramos.length);
+    } catch (error) {
+        console.error('❌ Error cargando ramos:', error);
+        selectorRamo.innerHTML = '<option value="">-- Error cargando ramos --</option>';
+    }
+}
+
+// Cargar clases cuando se selecciona un ramo
+async function cargarClasesPorRamo() {
+    const ramoId = document.getElementById('selectorRamo').value;
+    const selectorClase = document.getElementById('selectorClase');
+
+    selectorClase.innerHTML = '<option value="">-- Cargando clases... --</option>';
+    selectorClase.disabled = true;
+
+    if (!ramoId) {
+        selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
+        return;
+    }
+
+    try {
+        // Obtener mis clases (del docente logueado) y filtrar por ramoId
+        const response = await fetch('/api/clases/mis-clases');
+        const todasClases = await response.json();
+        const clases = todasClases.filter(clase => clase.ramoId == ramoId);
+
+        selectorClase.innerHTML = '<option value="">-- Seleccionar Clase --</option>';
+
+        clases.forEach(clase => {
+            const option = document.createElement('option');
+            option.value = clase.id;
+            const fecha = new Date(clase.inicioUtc).toLocaleDateString();
+            const hora = new Date(clase.inicioUtc).toLocaleTimeString();
+            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
+            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+            selectorClase.appendChild(option);
+        });
+
+        selectorClase.disabled = false;
+        console.log('✅ Clases cargadas:', clases.length);
+    } catch (error) {
+        console.error('❌ Error cargando clases:', error);
+        selectorClase.innerHTML = '<option value="">-- Error cargando clases --</option>';
+    }
+}
+
+async function cargarAsistenciasPorClase() {
+    const claseId = document.getElementById('selectorClase').value;
+
+    if (!claseId) {
+        alert('Por favor selecciona una clase específica');
+        return;
+    }
+    
+    const container = document.getElementById('asistenciasList');
+    container.innerHTML = '<div style="background: blue; color: white; padding: 20px;">CARGANDO ASISTENCIAS DE LA CLASE...</div>';
+
+    try {
+        console.log('📡 Fetching data for clase:', claseId);
+
+        // Obtener datos de la clase, estudiantes del curso y asistencias de la clase
+        const [claseResponse, asistenciasResponse] = await Promise.all([
+            fetch(`/api/clases/${claseId}`),
+            fetch(`/api/clases/${claseId}/asistencias`)
+        ]);
+
+        if (!claseResponse.ok) {
+            const errorDetail = await claseResponse.text();
+            console.error('❌ Error response from /api/clases/' + claseId + ':', errorDetail);
+            throw new Error(`Error al cargar clase: ${claseResponse.status} ${claseResponse.statusText}\nDetalle: ${errorDetail}`);
+        }
+
+        if (!asistenciasResponse.ok) {
+            const errorDetail = await asistenciasResponse.text();
+            console.error('❌ Error response from /api/clases/' + claseId + '/asistencias:', errorDetail);
+            throw new Error(`Error al cargar asistencias: ${asistenciasResponse.status} ${asistenciasResponse.statusText}\nDetalle: ${errorDetail}`);
+        }
+
+        const clase = await claseResponse.json();
+        const asistenciasClase = await asistenciasResponse.json();
+
+        // Ahora obtener estudiantes del curso (usando el ramoId de la clase)
+        const ramoResponse = await fetch(`/api/ramos/${clase.ramoId}`);
+        const ramo = await ramoResponse.json();
+        const estudiantesResponse = await fetch(`/api/cursos/${ramo.cursoId}/alumnos`);
+        const alumnoCursoData = await estudiantesResponse.json();
+
+        // Obtener datos completos de cada alumno
+        const estudiantesCompletos = await Promise.all(
+            alumnoCursoData.map(async (ac) => {
+                try {
+                    const alumnoResponse = await fetch(`/api/alumnos/${ac.alumnoId}`);
+                    const alumnoCompleto = await alumnoResponse.json();
+                    return {
+                        ...alumnoCompleto,
+                        id: ac.alumnoId, // Asegurar que tiene el campo id
+                        inscripcionId: ac.id,
+                        fechaInscripcion: ac.fechaInscripcion
+                    };
+                } catch (error) {
+                    console.error(`Error obteniendo datos del alumno ${ac.alumnoId}:`, error);
+                    // Fallback con datos básicos
+                    return {
+                        id: ac.alumnoId,
+                        nombre: ac.alumnoNombre,
+                        codigo: `ALU-${ac.alumnoId}`,
+                        email: 'No disponible',
+                        inscripcionId: ac.id,
+                        fechaInscripcion: ac.fechaInscripcion
+                    };
+                }
+            })
+        );
+
+        const estudiantes = estudiantesCompletos;
+
+        console.log('📊 Datos recibidos:', {
+            clase: clase,
+            estudiantes: estudiantes,
+            asistencias: asistenciasClase
+        });
+
+        console.log('📚 Estudiantes del curso:', estudiantes.length);
+        console.log('📋 Asistencias de la clase:', asistenciasClase.length);
+
+        // LOG DETALLADO: Ver estructura exacta de los primeros estudiantes
+        if (estudiantes.length > 0) {
+            console.log('🔍 Estructura del primer estudiante:', estudiantes[0]);
+            console.log('🔍 Todas las propiedades del primer estudiante:', Object.keys(estudiantes[0]));
+        }
+
+        if (asistenciasClase.length > 0) {
+            console.log('🔍 Estructura de la primera asistencia:', asistenciasClase[0]);
+            console.log('🔍 Todas las propiedades de la primera asistencia:', Object.keys(asistenciasClase[0]));
+        }
+
+        // Función para convertir estado a string para mostrar
+        function estadoToString(estado) {
+            if (typeof estado === 'number') {
+                switch(estado) {
+                    case 1: return 'PRESENTE';
+                    case 2: return 'TARDANZA';
+                    case 3: return 'AUSENTE';
+                    case 4: return 'EXCUSADO';
+                    case 5: return 'PENDIENTE';
+                    default: return 'DESCONOCIDO';
+                }
+            }
+            return estado || 'DESCONOCIDO';
+        }
+
+        // Función para obtener valor de campo con múltiples posibilidades
+        function obtenerCampo(obj, ...campos) {
+            for (const campo of campos) {
+                if (obj && obj[campo] !== undefined && obj[campo] !== null) {
+                    return obj[campo];
+                }
+            }
+            return null;
+        }
+
+        // Crear lista completa de estudiantes para esta clase específica
+        const listaCompleta = estudiantes.map(estudiante => {
+            // Buscar si el estudiante tiene asistencia en esta clase específica
+            const estudianteId = obtenerCampo(estudiante, 'id', 'Id', 'alumnoId', 'AlumnoId');
+            const asistenciaEstudiante = asistenciasClase.find(a =>
+                obtenerCampo(a, 'alumnoId', 'AlumnoId') === estudianteId
+            );
+
+            // Obtener datos del estudiante con múltiples opciones de nombres de campo
+            const codigoEstudiante = obtenerCampo(estudiante, 'codigo', 'Codigo', 'codigoAlumno', 'CodigoAlumno') || 'SIN-CÓDIGO';
+            const nombreEstudiante = obtenerCampo(estudiante, 'nombre', 'Nombre', 'nombreCompleto', 'NombreCompleto') || 'SIN-NOMBRE';
+            const emailEstudiante = obtenerCampo(estudiante, 'email', 'Email', 'correo', 'Correo');
+
+            console.log(`🎯 Estudiante procesado:`, {
+                original: estudiante,
+                id: estudianteId,
+                codigo: codigoEstudiante,
+                nombre: nombreEstudiante,
+                email: emailEstudiante,
+                asistencia: asistenciaEstudiante
+            });
+
+            if (!asistenciaEstudiante) {
+                // El estudiante NO registró asistencia en esta clase
+                return {
+                    id: estudianteId,
+                    codigo: codigoEstudiante,
+                    nombre: nombreEstudiante,
+                    email: emailEstudiante,
+                    estado: 'AUSENTE',
+                    estadoDisplay: 'AUSENTE',
+                    tieneAsistencia: false,
+                    fechaRegistro: null,
+                    horaRegistro: null,
+                    minutosRetraso: 0,
+                    metodoRegistro: null,
+                    color: '#ffebee' // rojo claro
+                };
+            }
+
+            // El estudiante SÍ registró asistencia
+            const estado = obtenerCampo(asistenciaEstudiante, 'estado', 'Estado');
+            let estadoTexto = estadoToString(estado);
+            let color = '#e8f5e8'; // verde claro por defecto
+
+            // Asignar colores según estado
+            if (estado === 2 || estadoTexto === 'TARDANZA') {
+                color = '#fff3e0'; // naranja claro
+            } else if (estado === 3 || estadoTexto === 'AUSENTE') {
+                color = '#ffebee'; // rojo claro
+            } else if (estado === 4 || estadoTexto === 'EXCUSADO') {
+                color = '#e1f5fe'; // azul claro
+            }
+
+            const marcadaUtc = obtenerCampo(asistenciaEstudiante, 'marcadaUtc', 'MarcadaUtc', 'fechaHoraRegistro', 'FechaHoraRegistro');
+            const fechaRegistro = marcadaUtc ? new Date(marcadaUtc) : null;
+
+            return {
+                id: estudianteId,
+                codigo: codigoEstudiante,
+                nombre: nombreEstudiante,
+                email: emailEstudiante,
+                estado: estadoTexto,
+                estadoDisplay: estadoTexto,
+                tieneAsistencia: true,
+                fechaRegistro: fechaRegistro ? fechaRegistro.toLocaleDateString() : 'N/A',
+                horaRegistro: fechaRegistro ? fechaRegistro.toLocaleTimeString() : 'N/A',
+                minutosRetraso: obtenerCampo(asistenciaEstudiante, 'minutosRetraso', 'MinutosRetraso') || 0,
+                metodoRegistro: obtenerCampo(asistenciaEstudiante, 'metodo', 'Metodo', 'metodoRegistro', 'MetodoRegistro') || 'No especificado',
+                asistenciaCompleta: asistenciaEstudiante,
+                color: color
+            };
+        });
+
+        // LOG: Ver la lista completa procesada
+        console.log('📝 Lista completa procesada:', listaCompleta);
+        if (listaCompleta.length > 0) {
+            console.log('📝 Primer estudiante procesado:', listaCompleta[0]);
+        }
+
+        // Calcular estadísticas
+        const totalEstudiantes = listaCompleta.length;
+        const totalPresentes = listaCompleta.filter(e => e.estado === 'PRESENTE').length;
+        const totalTardanzas = listaCompleta.filter(e => e.estado === 'TARDANZA').length;
+        const totalAusentes = listaCompleta.filter(e => e.estado === 'AUSENTE').length;
+        const totalExcusados = listaCompleta.filter(e => e.estado === 'EXCUSADO').length;
+        const totalConAsistencia = listaCompleta.filter(e => e.tieneAsistencia).length;
+        
+        // Mostrar información de la clase
+        const fechaClase = new Date(clase.inicioUtc);
+        document.getElementById('claseInfo').innerHTML = `
+            🏫 ${clase.asignatura || clase.nombreCompleto} |
+            📅 ${fechaClase.toLocaleDateString()} |
+            🕐 ${fechaClase.toLocaleTimeString()} |
+            ${clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA'}
+        `;
+
+        // Mostrar resumen
+        document.getElementById('totalEstudiantes').textContent = totalEstudiantes;
+        document.getElementById('totalPresentes').textContent = totalPresentes;
+        document.getElementById('totalTardanzas').textContent = totalTardanzas;
+        document.getElementById('totalAusentes').textContent = totalAusentes;
+        // Verificar si existe el elemento antes de actualizar
+        const totalExcusadosEl = document.getElementById('totalExcusados');
+        if (totalExcusadosEl) totalExcusadosEl.textContent = totalExcusados;
+        document.getElementById('totalConAsistencia').textContent = totalConAsistencia;
+        document.getElementById('resumen').style.display = 'block';
+        
+        // Generar tabla
+        let html = `
+            <div style="background: green; color: white; padding: 20px; margin-bottom: 10px;">
+                ✅ LISTA COMPLETA DE LA CLASE: ${totalEstudiantes} estudiantes
+            </div>
+            <table border="3" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr style="background: #f0f0f0;">
+                    <th style="padding: 10px; border: 2px solid black;">Código</th>
+                    <th style="padding: 10px; border: 2px solid black;">Nombre Completo</th>
+                    <th style="padding: 10px; border: 2px solid black;">Estado</th>
+                    <th style="padding: 10px; border: 2px solid black;">Fecha Registro</th>
+                    <th style="padding: 10px; border: 2px solid black;">Hora Registro</th>
+                    <th style="padding: 10px; border: 2px solid black;">Min. Retraso</th>
+                    <th style="padding: 10px; border: 2px solid black;">Método</th>
+                    <th style="padding: 10px; border: 2px solid black;">Email</th>
+                </tr>
+        `;
+        
+        listaCompleta.forEach(estudiante => {
+            const estadoColor = estudiante.estado === 'PRESENTE' ? 'green' :
+                               estudiante.estado === 'TARDANZA' ? 'orange' :
+                               estudiante.estado === 'EXCUSADO' ? 'blue' : 'red';
+
+            // Función para convertir método enum a texto
+            function metodoToString(metodo) {
+                if (typeof metodo === 'number') {
+                    switch(metodo) {
+                        case 1: return 'QR Estudiante';
+                        case 2: return 'QR Docente';
+                        case 3: return 'Manual';
+                        case 4: return 'Auto Ausente';
+                        default: return 'Desconocido';
+                    }
+                }
+                return metodo || 'N/A';
+            }
+
+            // Datos seguros para mostrar
+            const codigoDisplay = estudiante.codigo && estudiante.codigo !== 'N/A' ? estudiante.codigo : 'SIN-CÓDIGO';
+            const nombreDisplay = estudiante.nombre && estudiante.nombre !== 'N/A' ? estudiante.nombre : 'SIN-NOMBRE';
+            const emailDisplay = estudiante.email ? estudiante.email : 'No registrado';
+            const fechaDisplay = estudiante.fechaRegistro && estudiante.fechaRegistro !== 'N/A' ? estudiante.fechaRegistro : 'No registró';
+            const horaDisplay = estudiante.horaRegistro && estudiante.horaRegistro !== 'N/A' ? estudiante.horaRegistro : 'N/A';
+
+            html += `
+                <tr style="border: 2px solid black; background: ${estudiante.color};">
+                    <td style="padding: 8px; border: 1px solid black; font-weight: bold;">${codigoDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black;">${nombreDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black; color: ${estadoColor}; font-weight: bold; text-align: center;">${estudiante.estadoDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${fechaDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${horaDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${estudiante.minutosRetraso} min</td>
+                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${metodoToString(estudiante.metodoRegistro)}</td>
+                    <td style="padding: 8px; border: 1px solid black;">${emailDisplay}</td>
+                </tr>
+            `;
+        });
+        
+        html += '</table>';
+        container.innerHTML = html;
+        
+        console.log('✅ LISTA COMPLETA RENDERIZADA');
+        
+    } catch (error) {
+        console.error('❌ ERROR:', error);
+        container.innerHTML = '<div style="background: red; color: white; padding: 20px;">ERROR: ' + error.message + '</div>';
+    }
+}
+
+// Funciones de utilidad adicionales
+function refrescarDatos() {
+    const claseId = document.getElementById('selectorClase').value;
+    if (claseId) {
+        cargarAsistenciasPorClase();
+    }
+}
+
+function exportarCSV() {
+    const claseId = document.getElementById('selectorClase').value;
+    if (!claseId) {
+        alert('Por favor selecciona una clase específica primero');
+        return;
+    }
+
+    // Abrir CSV COMPLETO de asistencias de la clase (incluye todos los alumnos y estados)
+    window.open(`/api/asistencias/clase/${claseId}/csv-completo`, '_blank');
+}
+
+// Cargar cursos al iniciar
+setTimeout(cargarCursos, 500);
+
+// Auto-refrescar cada 30 segundos si hay una clase seleccionada
+setInterval(() => {
+    const claseId = document.getElementById('selectorClase').value;
+    if (claseId) {
+        console.log('🔄 Auto-refrescando datos...');
+        refrescarDatos();
+    }
+}, 30000);
 </script>
 
 }
