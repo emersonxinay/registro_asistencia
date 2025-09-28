@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using registroAsistencia.Data;
 using registroAsistencia.Models;
+using System.Security.Claims;
 
 namespace registroAsistencia.Services;
 
@@ -9,12 +10,14 @@ public class EfDataService : IDataService
     private readonly ApplicationDbContext _context;
     private readonly ILogger<EfDataService> _logger;
     private readonly IQrService _qrService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public EfDataService(ApplicationDbContext context, ILogger<EfDataService> logger, IQrService qrService)
+    public EfDataService(ApplicationDbContext context, ILogger<EfDataService> logger, IQrService qrService, IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _logger = logger;
         _qrService = qrService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<Alumno> CreateAlumnoAsync(AlumnoCreateDto dto)
@@ -74,15 +77,38 @@ public class EfDataService : IDataService
 
     public async Task<Clase> CreateClaseAsync(ClaseCreateDto dto)
     {
+        var docenteId = GetCurrentUserId();
+        if (docenteId == 0)
+        {
+            throw new UnauthorizedAccessException("Usuario no autenticado");
+        }
+
         var clase = new Clase
         {
             Asignatura = dto.Asignatura,
-            InicioUtc = DateTime.UtcNow
+            InicioUtc = DateTime.UtcNow,
+            DocenteId = docenteId,
+            RamoId = dto.RamoId,
+            Descripcion = dto.Descripcion
         };
 
         _context.Clases.Add(clase);
         await _context.SaveChangesAsync();
         return clase;
+    }
+
+    private int GetCurrentUserId()
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext?.User?.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(userIdClaim, out int userId))
+            {
+                return userId;
+            }
+        }
+        return 1; // Fallback al usuario administrador por defecto (admin@quantumattend.edu)
     }
 
     public async Task<Clase?> GetClaseAsync(int id)
@@ -163,12 +189,25 @@ public class EfDataService : IDataService
         if (existeAsistencia)
             return false;
 
+        var clase = await _context.Clases.FindAsync(claseId);
+        if (clase == null) return false;
+
+        var ahora = DateTime.UtcNow;
+        var minutosRetraso = (int)(ahora - clase.InicioUtc).TotalMinutes;
+        var estado = minutosRetraso <= 20 ? EstadoAsistencia.Presente : 
+                    (clase.FinUtc == null || ahora <= clase.FinUtc) ? EstadoAsistencia.Tardanza : EstadoAsistencia.Ausente;
+
         var asistencia = new Asistencia
         {
             AlumnoId = alumnoId,
             ClaseId = claseId,
-            MarcadaUtc = DateTime.UtcNow,
-            Metodo = metodo
+            MarcadaUtc = ahora,
+            ClaseInicioUtc = clase.InicioUtc,
+            ClaseFinUtc = clase.FinUtc,
+            MinutosRetraso = Math.Max(0, minutosRetraso),
+            Estado = estado,
+            Metodo = MetodoRegistro.QrEstudiante,
+            EsRegistroManual = false
         };
 
         _context.Asistencias.Add(asistencia);
@@ -179,18 +218,25 @@ public class EfDataService : IDataService
     public async Task<IEnumerable<dynamic>> GetAsistenciasPorClaseAsync(int claseId)
     {
         var result = await _context.Asistencias
+            .Include(a => a.Alumno)
+            .Include(a => a.Clase)
             .Where(a => a.ClaseId == claseId)
             .OrderBy(a => a.MarcadaUtc)
             .Select(a => new
             {
                 a.Id,
                 a.ClaseId,
-                Asignatura = _context.Clases.Where(c => c.Id == a.ClaseId).Select(c => c.Asignatura).FirstOrDefault(),
+                Asignatura = a.Clase.Asignatura,
                 a.AlumnoId,
-                Codigo = _context.Alumnos.Where(al => al.Id == a.AlumnoId).Select(al => al.Codigo).FirstOrDefault(),
-                Nombre = _context.Alumnos.Where(al => al.Id == a.AlumnoId).Select(al => al.Nombre).FirstOrDefault(),
+                AlumnoCodigo = a.Alumno.Codigo,
+                AlumnoNombre = a.Alumno.Nombre,
+                Codigo = a.Alumno.Codigo,
+                Nombre = a.Alumno.Nombre,
                 a.Metodo,
-                a.MarcadaUtc
+                a.MarcadaUtc,
+                FechaHoraRegistro = a.MarcadaUtc,
+                a.Estado,
+                a.MinutosRetraso
             })
             .ToListAsync();
 
@@ -200,17 +246,24 @@ public class EfDataService : IDataService
     public async Task<IEnumerable<dynamic>> GetAsistenciasAsync()
     {
         var result = await _context.Asistencias
+            .Include(a => a.Alumno)
+            .Include(a => a.Clase)
             .OrderBy(a => a.ClaseId).ThenBy(a => a.MarcadaUtc)
             .Select(a => new
             {
                 a.Id,
                 a.ClaseId,
-                Asignatura = _context.Clases.Where(c => c.Id == a.ClaseId).Select(c => c.Asignatura).FirstOrDefault(),
+                Asignatura = a.Clase.Asignatura,
                 a.AlumnoId,
-                Codigo = _context.Alumnos.Where(al => al.Id == a.AlumnoId).Select(al => al.Codigo).FirstOrDefault(),
-                Nombre = _context.Alumnos.Where(al => al.Id == a.AlumnoId).Select(al => al.Nombre).FirstOrDefault(),
+                AlumnoCodigo = a.Alumno.Codigo,
+                AlumnoNombre = a.Alumno.Nombre,
+                Codigo = a.Alumno.Codigo,
+                Nombre = a.Alumno.Nombre,
                 a.Metodo,
-                a.MarcadaUtc
+                a.MarcadaUtc,
+                FechaHoraRegistro = a.MarcadaUtc,
+                a.Estado,
+                a.MinutosRetraso
             })
             .ToListAsync();
 

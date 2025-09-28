@@ -8,6 +8,10 @@ public class Clase
     public int? RamoId { get; set; }
     public virtual Ramo? Ramo { get; set; }
     
+    // Relación con el docente que creó la clase
+    public int DocenteId { get; set; }
+    public virtual Usuario Docente { get; set; } = null!;
+    
     // Compatibilidad hacia atrás (para clases existentes)
     public string Asignatura { get; set; } = "";
     

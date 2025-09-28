@@ -1,0 +1,1604 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">
+                <i data-lucide="bar-chart-3"></i>
+                Dashboard
+            </h1>
+            <p class="dashboard-subtitle">Panel de control y estadísticas del sistema</p>
+        </div>
+        <div class="header-actions">
+            <button class="refresh-btn" onclick="location.reload()">
+                <i data-lucide="refresh-cw"></i>
+                Actualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas principales -->
+    <div class="stats-grid">
+        <div class="stat-card students">
+            <div class="stat-icon">
+                <i data-lucide="users"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@Model.TotalAlumnos</h3>
+                <p class="stat-label">Total Estudiantes</p>
+            </div>
+        </div>
+
+        <div class="stat-card classes">
+            <div class="stat-icon">
+                <i data-lucide="calendar"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@Model.ClasesActivas</h3>
+                <p class="stat-label">Clases Activas</p>
+            </div>
+        </div>
+
+        <div class="stat-card total-classes">
+            <div class="stat-icon">
+                <i data-lucide="book-open"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@Model.TotalClases</h3>
+                <p class="stat-label">Total Clases</p>
+            </div>
+        </div>
+
+        <div class="stat-card attendance">
+            <div class="stat-icon">
+                <i data-lucide="check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">@Model.AsistenciasHoy</h3>
+                <p class="stat-label">Asistencias Hoy</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos y tablas -->
+    <div class="dashboard-grid">
+        <!-- Gráfico de asistencias por día -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="trending-up"></i>
+                    Asistencias por Día (Últimos 7 días)
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="attendanceChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 5 clases con más asistencias -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="award"></i>
+                    Top 5 Clases por Asistencia
+                </h2>
+            </div>
+            <div class="card-content">
+                @if (Model.AsistenciasPorClase.Any())
+                {
+                    <div class="top-classes-list">
+                        @foreach (var clase in Model.AsistenciasPorClase)
+                        {
+                            <div class="class-item">
+                                <div class="class-info">
+                                    <h4 class="class-name">@clase.Asignatura</h4>
+                                    <span class="class-id">Clase #@clase.ClaseId</span>
+                                </div>
+                                <div class="class-stats">
+                                    <span class="attendance-count">@clase.TotalAsistencias</span>
+                                    <span class="attendance-label">asistencias</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i data-lucide="inbox"></i>
+                        <p>No hay datos de asistencias disponibles</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="dashboard-card quick-actions">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="zap"></i>
+                    Acciones Rápidas
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="actions-grid">
+                    <a href="/clases" class="action-btn primary">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Nueva Clase</span>
+                    </a>
+                    <a href="/alumnos" class="action-btn secondary">
+                        <i data-lucide="user-plus"></i>
+                        <span>Nuevo Estudiante</span>
+                    </a>
+                    <a href="/asistencias" class="action-btn tertiary">
+                        <i data-lucide="list"></i>
+                        <span>Ver Asistencias</span>
+                    </a>
+                    <a href="/qr" class="action-btn quaternary">
+                        <i data-lucide="qr-code"></i>
+                        <span>Generar QR</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen de actividad reciente -->
+        <div class="dashboard-card recent-activity">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i data-lucide="clock"></i>
+                    Actividad Reciente
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i data-lucide="check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Sistema iniciado correctamente</p>
+                            <p class="activity-time">Hace unos momentos</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon info">
+                            <i data-lucide="database"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Base de datos conectada</p>
+                            <p class="activity-time">Hace unos momentos</p>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon primary">
+                            <i data-lucide="user"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p class="activity-title">Usuario administrador disponible</p>
+                            <p class="activity-time">Sistema configurado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Tablas CRUD -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i data-lucide="database"></i>
+                Administración de Datos
+            </h2>
+            <p class="section-subtitle">Gestiona estudiantes, cursos y ramos del sistema</p>
+        </div>
+
+        <!-- Estudiantes y Cursos -->
+        <section class="quantum-grid grid-2 mb-4">
+            <!-- Students Table -->
+            <div class="quantum-card table-card">
+                <div class="card-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="card-title">Estudiantes Registrados</h3>
+                            <p class="card-subtitle">Listado completo con códigos QR</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="quantum-btn btn-sm btn-primary" id="addStudent">
+                                <i data-lucide="plus"></i>
+                                Agregar
+                            </button>
+                            <button class="quantum-btn btn-sm btn-secondary" id="refreshStudents">
+                                <i data-lucide="refresh-cw"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quantum-table-container">
+                    <div id="studentsTableContainer">
+                        <div class="loading-state" id="studentsLoading">
+                            <i data-lucide="loader"></i>
+                            <p>Cargando estudiantes...</p>
+                        </div>
+                        <table class="quantum-table" id="studentsTable" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>QR</th>
+                                    <th>Cursos</th>
+                                    <th>Asistencias</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <!-- Content loaded via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="table-footer" id="studentsFooter" style="display: none;">
+                            <small class="table-count">Mostrando <span id="studentsCount">0</span> estudiantes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Table -->
+            <div class="quantum-card table-card">
+                <div class="card-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="card-title">Cursos del Sistema</h3>
+                            <p class="card-subtitle">Administra los cursos disponibles</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="quantum-btn btn-sm btn-primary" id="addCourse">
+                                <i data-lucide="plus"></i>
+                                Agregar
+                            </button>
+                            <button class="quantum-btn btn-sm btn-secondary" id="refreshCourses">
+                                <i data-lucide="refresh-cw"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quantum-table-container">
+                    <div id="coursesTableContainer">
+                        <div class="loading-state" id="coursesLoading">
+                            <i data-lucide="loader"></i>
+                            <p>Cargando cursos...</p>
+                        </div>
+                        <table class="quantum-table" id="coursesTable" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th>Ramos</th>
+                                    <th>Estudiantes</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coursesTableBody">
+                                <!-- Content loaded via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="table-footer" id="coursesFooter" style="display: none;">
+                            <small class="table-count">Mostrando <span id="coursesCount">0</span> cursos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ramos y Clases -->
+        <section class="quantum-grid grid-2 mb-4">
+            <!-- Subjects Table -->
+            <div class="quantum-card table-card">
+                <div class="card-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="card-title">Ramos del Sistema</h3>
+                            <p class="card-subtitle">Administra los ramos por curso</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="quantum-btn btn-sm btn-primary" id="addSubject">
+                                <i data-lucide="plus"></i>
+                                Agregar
+                            </button>
+                            <button class="quantum-btn btn-sm btn-secondary" id="refreshSubjects">
+                                <i data-lucide="refresh-cw"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quantum-table-container">
+                    <div id="subjectsTableContainer">
+                        <div class="loading-state" id="subjectsLoading">
+                            <i data-lucide="loader"></i>
+                            <p>Cargando ramos...</p>
+                        </div>
+                        <table class="quantum-table" id="subjectsTable" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Estado</th>
+                                    <th>Clases</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="subjectsTableBody">
+                                <!-- Content loaded via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="table-footer" id="subjectsFooter" style="display: none;">
+                            <small class="table-count">Mostrando <span id="subjectsCount">0</span> ramos</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classes Table -->
+            <div class="quantum-card table-card">
+                <div class="card-header">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="card-title">Clases del Sistema</h3>
+                            <p class="card-subtitle">Administra las clases activas</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="quantum-btn btn-sm btn-primary" id="addClass">
+                                <i data-lucide="plus"></i>
+                                Agregar
+                            </button>
+                            <button class="quantum-btn btn-sm btn-secondary" id="refreshClasses">
+                                <i data-lucide="refresh-cw"></i>
+                                Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="quantum-table-container">
+                    <div id="classesTableContainer">
+                        <div class="loading-state" id="classesLoading">
+                            <i data-lucide="loader"></i>
+                            <p>Cargando clases...</p>
+                        </div>
+                        <table class="quantum-table" id="classesTable" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Asignatura</th>
+                                    <th>Ramo</th>
+                                    <th>Estado</th>
+                                    <th>Inicio</th>
+                                    <th>Asistencias</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classesTableBody">
+                                <!-- Content loaded via JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="table-footer" id="classesFooter" style="display: none;">
+                            <small class="table-count">Mostrando <span id="classesCount">0</span> clases</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+    :root {
+        --dashboard-primary: #667eea;
+        --dashboard-secondary: #764ba2;
+        --dashboard-success: #10b981;
+        --dashboard-warning: #f59e0b;
+        --dashboard-danger: #ef4444;
+        --dashboard-info: #3b82f6;
+        --dashboard-bg: #f8fafc;
+        --dashboard-card-bg: #ffffff;
+        --dashboard-border: #e2e8f0;
+        --dashboard-text: #1e293b;
+        --dashboard-text-muted: #64748b;
+        --dashboard-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        --dashboard-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-container {
+        min-height: calc(100vh - 80px);
+        background: var(--dashboard-bg);
+        padding: 2rem;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        background: var(--dashboard-card-bg);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: var(--dashboard-shadow);
+        border: 1px solid var(--dashboard-border);
+    }
+
+    .header-content h1 {
+        color: var(--dashboard-text);
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .dashboard-subtitle {
+        color: var(--dashboard-text-muted);
+        margin: 0.5rem 0 0 0;
+        font-size: 1rem;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(135deg, var(--dashboard-primary), var(--dashboard-secondary));
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--dashboard-card-bg);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: var(--dashboard-shadow);
+        border: 1px solid var(--dashboard-border);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--dashboard-shadow-lg);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-card.students .stat-icon {
+        background: linear-gradient(135deg, var(--dashboard-primary), var(--dashboard-secondary));
+    }
+
+    .stat-card.classes .stat-icon {
+        background: linear-gradient(135deg, var(--dashboard-success), #059669);
+    }
+
+    .stat-card.total-classes .stat-icon {
+        background: linear-gradient(135deg, var(--dashboard-info), #2563eb);
+    }
+
+    .stat-card.attendance .stat-icon {
+        background: linear-gradient(135deg, var(--dashboard-warning), #d97706);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--dashboard-text);
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: var(--dashboard-text-muted);
+        margin: 0.5rem 0 0 0;
+        font-weight: 500;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .dashboard-card {
+        background: var(--dashboard-card-bg);
+        border-radius: 16px;
+        box-shadow: var(--dashboard-shadow);
+        border: 1px solid var(--dashboard-border);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--dashboard-border);
+    }
+
+    .card-title {
+        color: var(--dashboard-text);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .top-classes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .class-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid var(--dashboard-border);
+    }
+
+    .class-name {
+        color: var(--dashboard-text);
+        font-weight: 600;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .class-id {
+        color: var(--dashboard-text-muted);
+        font-size: 0.875rem;
+    }
+
+    .attendance-count {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dashboard-primary);
+    }
+
+    .attendance-label {
+        color: var(--dashboard-text-muted);
+        font-size: 0.875rem;
+        margin-left: 0.5rem;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(135deg, var(--dashboard-primary), var(--dashboard-secondary));
+        color: white;
+    }
+
+    .action-btn.secondary {
+        background: linear-gradient(135deg, var(--dashboard-success), #059669);
+        color: white;
+    }
+
+    .action-btn.tertiary {
+        background: linear-gradient(135deg, var(--dashboard-info), #2563eb);
+        color: white;
+    }
+
+    .action-btn.quaternary {
+        background: linear-gradient(135deg, var(--dashboard-warning), #d97706);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid var(--dashboard-border);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .activity-icon.success {
+        background: var(--dashboard-success);
+    }
+
+    .activity-icon.info {
+        background: var(--dashboard-info);
+    }
+
+    .activity-icon.primary {
+        background: var(--dashboard-primary);
+    }
+
+    .activity-title {
+        color: var(--dashboard-text);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .activity-time {
+        color: var(--dashboard-text-muted);
+        font-size: 0.875rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: var(--dashboard-text-muted);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* Estilos para las tablas CRUD */
+    .dashboard-section {
+        margin-top: 3rem;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        color: var(--dashboard-text);
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .section-subtitle {
+        color: var(--dashboard-text-muted);
+        margin: 0.5rem 0 0 0;
+        font-size: 1rem;
+    }
+
+    .quantum-grid {
+        display: grid;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .quantum-grid.grid-2 {
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    }
+
+    .mb-4 {
+        margin-bottom: 2rem;
+    }
+
+    .quantum-card {
+        background: var(--dashboard-card-bg);
+        border-radius: 16px;
+        box-shadow: var(--dashboard-shadow);
+        border: 1px solid var(--dashboard-border);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .quantum-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--dashboard-shadow-lg);
+    }
+
+    .table-card .card-header {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--dashboard-border);
+    }
+
+    .flex {
+        display: flex;
+    }
+
+    .items-center {
+        align-items: center;
+    }
+
+    .justify-between {
+        justify-content: space-between;
+    }
+
+    .card-title {
+        color: var(--dashboard-text);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .card-subtitle {
+        color: var(--dashboard-text-muted);
+        font-size: 0.875rem;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .quantum-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        text-decoration: none;
+    }
+
+    .quantum-btn.btn-sm {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .quantum-btn.btn-primary {
+        background: linear-gradient(135deg, var(--dashboard-primary), var(--dashboard-secondary));
+        color: white;
+    }
+
+    .quantum-btn.btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .quantum-btn.btn-secondary {
+        background: var(--dashboard-border);
+        color: var(--dashboard-text);
+    }
+
+    .quantum-btn.btn-secondary:hover {
+        background: #cbd5e1;
+        transform: translateY(-1px);
+    }
+
+    .quantum-btn.btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+    }
+
+    .quantum-btn.btn-danger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .quantum-table-container {
+        padding: 0;
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid var(--dashboard-border);
+        border-radius: 8px;
+        background: white;
+        position: relative;
+    }
+
+    /* Custom scrollbar */
+    .quantum-table-container::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .quantum-table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+
+    .quantum-table-container::-webkit-scrollbar-thumb {
+        background: var(--dashboard-primary);
+        border-radius: 4px;
+    }
+
+    .quantum-table-container::-webkit-scrollbar-thumb:hover {
+        background: var(--dashboard-secondary);
+    }
+
+    /* Scroll shadow indicators */
+    .quantum-table-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1), transparent);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 5;
+    }
+
+    .quantum-table-container.scrolled::before {
+        opacity: 1;
+    }
+
+    .quantum-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .quantum-table th,
+    .quantum-table td {
+        padding: 1rem 1.5rem;
+        text-align: left;
+        border-bottom: 1px solid var(--dashboard-border);
+    }
+
+    .quantum-table th {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        font-weight: 600;
+        color: var(--dashboard-text);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 2px solid var(--dashboard-border);
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+    }
+
+    .quantum-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .quantum-table tbody tr:hover {
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        transform: translateY(-1px);
+    }
+
+    .quantum-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Loading state improvements */
+    .loading-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem;
+        color: var(--dashboard-text-muted);
+        gap: 1rem;
+        min-height: 200px;
+    }
+
+    .loading-state i {
+        font-size: 2rem;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .code-badge {
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: #3730a3;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .course-info,
+    .subject-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-info strong,
+    .subject-info strong {
+        color: var(--dashboard-text);
+        font-weight: 600;
+    }
+
+    .course-info small,
+    .subject-info small {
+        color: var(--dashboard-text-muted);
+        font-size: 0.75rem;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .status-badge.success {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-badge.inactive {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .metric-value {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: var(--dashboard-text);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .qr-icon {
+        width: 20px;
+        height: 20px;
+        background: var(--dashboard-primary);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 0.75rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--dashboard-text-muted);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Table footer */
+    .table-footer {
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-top: 1px solid var(--dashboard-border);
+        text-align: center;
+    }
+
+    .table-count {
+        color: var(--dashboard-text-muted);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .quantum-grid.grid-2 {
+            grid-template-columns: 1fr;
+        }
+        
+        .header-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .quantum-table-container {
+            max-height: 350px;
+        }
+        
+        .quantum-table th,
+        .quantum-table td {
+            padding: 0.75rem 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .table-footer {
+            padding: 0.75rem 1rem;
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Lucide icons
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+
+        // Chart data from model
+        const chartData = @Html.Raw(Json.Serialize(Model.AsistenciasPorDia));
+        
+        // Create attendance chart
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(102, 126, 234, 0.3)');
+        gradient.addColorStop(1, 'rgba(102, 126, 234, 0.05)');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.map(d => d.fecha),
+                datasets: [{
+                    label: 'Asistencias',
+                    data: chartData.map(d => d.cantidad),
+                    borderColor: '#667eea',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#667eea',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: '#e2e8f0'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#64748b'
+                        },
+                        grid: {
+                            color: '#e2e8f0'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverBorderWidth: 3
+                    }
+                }
+            }
+        });
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.style.animation = 'pulse 0.5s ease-in-out';
+                setTimeout(() => {
+                    refreshBtn.style.animation = '';
+                }, 500);
+            }
+        }, 300000);
+
+        // Dashboard CRUD functionality
+        const Dashboard = {
+            // Load data functions
+            async loadStudents() {
+                try {
+                    const response = await fetch('/api/alumnos');
+                    const students = await response.json();
+                    this.renderStudentsTable(students);
+                } catch (error) {
+                    console.error('Error loading students:', error);
+                    this.showError('Error cargando estudiantes');
+                }
+            },
+
+            async loadCourses() {
+                try {
+                    const response = await fetch('/api/cursos');
+                    const courses = await response.json();
+                    this.renderCoursesTable(courses);
+                } catch (error) {
+                    console.error('Error loading courses:', error);
+                    this.showError('Error cargando cursos');
+                }
+            },
+
+            async loadSubjects() {
+                try {
+                    const response = await fetch('/api/ramos');
+                    const subjects = await response.json();
+                    this.renderSubjectsTable(subjects);
+                } catch (error) {
+                    console.error('Error loading subjects:', error);
+                    this.showError('Error cargando ramos');
+                }
+            },
+
+            async loadClasses() {
+                try {
+                    const response = await fetch('/api/clases');
+                    const classes = await response.json();
+                    this.renderClassesTable(classes);
+                } catch (error) {
+                    console.error('Error loading classes:', error);
+                    this.showError('Error cargando clases');
+                }
+            },
+
+            // Render functions
+            renderStudentsTable(students) {
+                const tableBody = document.getElementById('studentsTableBody');
+                const loading = document.getElementById('studentsLoading');
+                const table = document.getElementById('studentsTable');
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                const footer = document.getElementById('studentsFooter');
+                const countSpan = document.getElementById('studentsCount');
+
+                if (!students || students.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="empty-state"><i data-lucide="inbox"></i><p>No hay estudiantes registrados</p></td></tr>';
+                    footer.style.display = 'none';
+                    return;
+                }
+
+                footer.style.display = 'block';
+                countSpan.textContent = students.length;
+
+                tableBody.innerHTML = students.map(student => `
+                    <tr>
+                        <td><code class="code-badge">${student.codigo}</code></td>
+                        <td>
+                            <div class="course-info">
+                                <strong>${student.nombre}</strong>
+                                <small>ID: ${student.id}</small>
+                            </div>
+                        </td>
+                        <td>
+                            ${student.qrAlumnoBase64 ? 
+                                '<div class="qr-icon">QR</div>' : 
+                                '<span class="status-badge inactive">Sin QR</span>'
+                            }
+                        </td>
+                        <td><span class="metric-value">0</span></td>
+                        <td><span class="metric-value">0</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editStudent(${student.id})" title="Editar estudiante">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewStudentQR(${student.id})" title="Ver QR">
+                                    <i data-lucide="qr-code"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteStudent(${student.id})" title="Eliminar estudiante">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                if (window.lucide) window.lucide.createIcons();
+            },
+
+            renderCoursesTable(courses) {
+                const tableBody = document.getElementById('coursesTableBody');
+                const loading = document.getElementById('coursesLoading');
+                const table = document.getElementById('coursesTable');
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                const footer = document.getElementById('coursesFooter');
+                const countSpan = document.getElementById('coursesCount');
+
+                if (!courses || courses.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="empty-state"><i data-lucide="inbox"></i><p>No hay cursos registrados</p></td></tr>';
+                    footer.style.display = 'none';
+                    return;
+                }
+
+                footer.style.display = 'block';
+                countSpan.textContent = courses.length;
+
+                tableBody.innerHTML = courses.map(course => `
+                    <tr>
+                        <td><code class="code-badge">${course.codigo}</code></td>
+                        <td>
+                            <div class="course-info">
+                                <strong>${course.nombre}</strong>
+                                <small>ID: ${course.id}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge ${course.activo ? 'success' : 'inactive'}">
+                                ${course.activo ? '🟢 Activo' : '🟡 Inactivo'}
+                            </span>
+                        </td>
+                        <td><span class="metric-value">${course.ramos?.length || 0}</span></td>
+                        <td><span class="metric-value">${course.alumnoCursos?.length || 0}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editCourse(${course.id})" title="Editar curso">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewCourseStudents(${course.id})" title="Ver estudiantes">
+                                    <i data-lucide="users"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteCourse(${course.id})" title="Eliminar curso">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                if (window.lucide) window.lucide.createIcons();
+            },
+
+            renderSubjectsTable(subjects) {
+                const tableBody = document.getElementById('subjectsTableBody');
+                const loading = document.getElementById('subjectsLoading');
+                const table = document.getElementById('subjectsTable');
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                const footer = document.getElementById('subjectsFooter');
+                const countSpan = document.getElementById('subjectsCount');
+
+                if (!subjects || subjects.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="empty-state"><i data-lucide="inbox"></i><p>No hay ramos registrados</p></td></tr>';
+                    footer.style.display = 'none';
+                    return;
+                }
+
+                footer.style.display = 'block';
+                countSpan.textContent = subjects.length;
+
+                tableBody.innerHTML = subjects.map(subject => `
+                    <tr>
+                        <td>
+                            <div class="course-info">
+                                <strong>${subject.curso?.nombre || 'N/A'}</strong>
+                                <small>${subject.curso?.codigo || ''}</small>
+                            </div>
+                        </td>
+                        <td><code class="code-badge">${subject.codigo}</code></td>
+                        <td>
+                            <div class="subject-info">
+                                <strong>${subject.nombre}</strong>
+                                <small>ID: ${subject.id}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge ${subject.activo ? 'success' : 'inactive'}">
+                                ${subject.activo ? '🟢 Activo' : '🟡 Inactivo'}
+                            </span>
+                        </td>
+                        <td><span class="metric-value">${subject.clases?.length || 0}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editSubject(${subject.id})" title="Editar ramo">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewSubjectClasses(${subject.id})" title="Ver clases">
+                                    <i data-lucide="book-open"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteSubject(${subject.id})" title="Eliminar ramo">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                if (window.lucide) window.lucide.createIcons();
+            },
+
+            renderClassesTable(classes) {
+                const tableBody = document.getElementById('classesTableBody');
+                const loading = document.getElementById('classesLoading');
+                const table = document.getElementById('classesTable');
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+                const footer = document.getElementById('classesFooter');
+                const countSpan = document.getElementById('classesCount');
+
+                if (!classes || classes.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="empty-state"><i data-lucide="inbox"></i><p>No hay clases registradas</p></td></tr>';
+                    footer.style.display = 'none';
+                    return;
+                }
+
+                footer.style.display = 'block';
+                countSpan.textContent = classes.length;
+
+                tableBody.innerHTML = classes.map(clase => {
+                    const fechaInicio = new Date(clase.inicioUtc).toLocaleString();
+                    const estado = clase.finUtc ? 'Cerrada' : 'Activa';
+                    return `
+                    <tr>
+                        <td>
+                            <div class="course-info">
+                                <strong>${clase.asignatura}</strong>
+                                <small>ID: ${clase.id}</small>
+                            </div>
+                        </td>
+                        <td>
+                            ${clase.ramo ? 
+                                `<code class="code-badge">${clase.ramo.nombre}</code>` : 
+                                '<span class="status-badge inactive">Sin ramo</span>'
+                            }
+                        </td>
+                        <td>
+                            <span class="status-badge ${clase.finUtc ? 'inactive' : 'success'}">
+                                ${clase.finUtc ? '🔴 Cerrada' : '🟢 Activa'}
+                            </span>
+                        </td>
+                        <td><small>${fechaInicio}</small></td>
+                        <td><span class="metric-value">0</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editClass(${clase.id})" title="Editar clase">
+                                    <i data-lucide="edit-3"></i>
+                                </button>
+                                <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewClassAttendance(${clase.id})" title="Ver asistencias">
+                                    <i data-lucide="users-check"></i>
+                                </button>
+                                ${!clase.finUtc ? 
+                                    `<button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.closeClass(${clase.id})" title="Cerrar clase">
+                                        <i data-lucide="x-circle"></i>
+                                    </button>` :
+                                    `<button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.reopenClass(${clase.id})" title="Reabrir clase">
+                                        <i data-lucide="refresh-cw"></i>
+                                    </button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+                
+                if (window.lucide) window.lucide.createIcons();
+            },
+
+            // Action functions (placeholders)
+            editStudent(id) { alert('Editar estudiante ' + id); },
+            viewStudentQR(id) { window.open('/api/alumnos/' + id + '/qr.png'); },
+            confirmDeleteStudent(id) { if (confirm('¿Eliminar estudiante?')) this.deleteStudent(id); },
+            async deleteStudent(id) { 
+                try {
+                    await fetch('/api/alumnos/' + id, { method: 'DELETE' });
+                    this.loadStudents();
+                } catch (error) {
+                    alert('Error eliminando estudiante');
+                }
+            },
+
+            editCourse(id) { alert('Editar curso ' + id); },
+            viewCourseStudents(id) { alert('Ver estudiantes del curso ' + id); },
+            confirmDeleteCourse(id) { if (confirm('¿Eliminar curso?')) this.deleteCourse(id); },
+            async deleteCourse(id) { 
+                try {
+                    await fetch('/api/cursos/' + id, { method: 'DELETE' });
+                    this.loadCourses();
+                } catch (error) {
+                    alert('Error eliminando curso');
+                }
+            },
+
+            editSubject(id) { alert('Editar ramo ' + id); },
+            viewSubjectClasses(id) { alert('Ver clases del ramo ' + id); },
+            confirmDeleteSubject(id) { if (confirm('¿Eliminar ramo?')) this.deleteSubject(id); },
+            async deleteSubject(id) { 
+                try {
+                    await fetch('/api/ramos/' + id, { method: 'DELETE' });
+                    this.loadSubjects();
+                } catch (error) {
+                    alert('Error eliminando ramo');
+                }
+            },
+
+            editClass(id) { alert('Editar clase ' + id); },
+            viewClassAttendance(id) { window.open('/asistencias?claseId=' + id); },
+            async closeClass(id) {
+                try {
+                    await fetch('/api/clases/' + id + '/cerrar', { method: 'POST' });
+                    this.loadClasses();
+                } catch (error) {
+                    alert('Error cerrando clase');
+                }
+            },
+            async reopenClass(id) {
+                try {
+                    await fetch('/api/clases/' + id + '/reabrir', { method: 'POST' });
+                    this.loadClasses();
+                } catch (error) {
+                    alert('Error reabriendo clase');
+                }
+            },
+
+            showError(message) {
+                alert(message);
+            }
+        };
+
+        // Event listeners
+        document.getElementById('refreshStudents')?.addEventListener('click', () => Dashboard.loadStudents());
+        document.getElementById('refreshCourses')?.addEventListener('click', () => Dashboard.loadCourses());
+        document.getElementById('refreshSubjects')?.addEventListener('click', () => Dashboard.loadSubjects());
+        document.getElementById('refreshClasses')?.addEventListener('click', () => Dashboard.loadClasses());
+
+        document.getElementById('addStudent')?.addEventListener('click', () => window.location.href = '/alumnos');
+        document.getElementById('addCourse')?.addEventListener('click', () => alert('Funcionalidad de agregar curso próximamente'));
+        document.getElementById('addSubject')?.addEventListener('click', () => alert('Funcionalidad de agregar ramo próximamente'));
+        document.getElementById('addClass')?.addEventListener('click', () => window.location.href = '/clases');
+
+        // Load initial data
+        Dashboard.loadStudents();
+        Dashboard.loadCourses();
+        Dashboard.loadSubjects();
+        Dashboard.loadClasses();
+
+        // Setup scroll detection for tables
+        function setupScrollDetection() {
+            const containers = document.querySelectorAll('.quantum-table-container');
+            containers.forEach(container => {
+                container.addEventListener('scroll', function() {
+                    if (this.scrollTop > 10) {
+                        this.classList.add('scrolled');
+                    } else {
+                        this.classList.remove('scrolled');
+                    }
+                });
+            });
+        }
+
+        // Set up scroll detection after data loads
+        setTimeout(setupScrollDetection, 1000);
+
+        // Make Dashboard available globally
+        window.Dashboard = Dashboard;
+    });
+</script>

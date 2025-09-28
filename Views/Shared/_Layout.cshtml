@@ -51,41 +51,130 @@
             <div class="nav-menu" id="navMenu">
                 <a href="/" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                     <i data-lucide="home"></i>
-                    <span>Dashboard</span>
+                    <span>Inicio</span>
                 </a>
-                <a href="/alumnos" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Alumnos" ? "active" : "")">
-                    <i data-lucide="users"></i>
-                    <span>Estudiantes</span>
-                </a>
-                <a href="/clases" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clases" ? "active" : "")">
-                    <i data-lucide="book-open"></i>
-                    <span>Clases</span>
-                </a>
-                <a href="/asistencias" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Asistencias" ? "active" : "")">
-                    <i data-lucide="check-circle"></i>
-                    <span>Asistencias</span>
-                </a>
-                <a href="/docente/scanner" class="nav-link scanner-link">
-                    <i data-lucide="scan"></i>
-                    <span>Scanner</span>
-                </a>
+                
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <!-- Docente Links -->
+                    <a href="/docente/dashboard" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Docente" ? "active" : "")">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Mi Dashboard</span>
+                    </a>
+                    <a href="/workflow" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workflow" ? "active" : "")">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Crear Clase</span>
+                    </a>
+                    <a href="/docente/cursos" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Cursos" ? "active" : "")">
+                        <i data-lucide="book"></i>
+                        <span>Mis Cursos</span>
+                    </a>
+                    <a href="/docente/scanner" class="nav-link scanner-link">
+                        <i data-lucide="scan"></i>
+                        <span>Escáner QR</span>
+                    </a>
+                    
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <!-- Admin Only Links -->
+                        <div class="nav-divider"></div>
+                        <a href="/dashboard" class="nav-link admin-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" && ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                            <i data-lucide="shield"></i>
+                            <span>Panel Admin</span>
+                        </a>
+                        <a href="/alumnos" class="nav-link admin-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Alumnos" ? "active" : "")">
+                            <i data-lucide="users"></i>
+                            <span>Estudiantes</span>
+                        </a>
+                        <a href="/asistencias" class="nav-link admin-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Asistencias" ? "active" : "")">
+                            <i data-lucide="check-circle"></i>
+                            <span>Asistencias</span>
+                        </a>
+                    }
+                }
             </div>
             
             <div class="nav-controls">
-                <button class="nav-btn notification-btn" id="notificationBtn" title="Notificaciones">
-                    <i data-lucide="bell"></i>
-                    <span class="notification-badge" id="notificationCount">0</span>
-                </button>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="user-menu">
+                        <button class="user-btn" id="userMenuBtn" title="Menú de usuario">
+                            <div class="user-avatar">
+                                <i data-lucide="user"></i>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">@User.Identity.Name</span>
+                                <span class="user-role">@(User.IsInRole("Administrador") ? "Admin" : "Docente")</span>
+                            </div>
+                            <i data-lucide="chevron-down" class="user-arrow"></i>
+                        </button>
+                        
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-header">
+                                <div class="user-avatar-large">
+                                    <i data-lucide="user"></i>
+                                </div>
+                                <div class="user-details">
+                                    <div class="user-name-large">@User.Identity.Name</div>
+                                    <div class="user-email">@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</div>
+                                    <div class="user-code">@User.FindFirst("CodigoDocente")?.Value</div>
+                                </div>
+                            </div>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <a href="/perfil" class="dropdown-item">
+                                <i data-lucide="user"></i>
+                                <span>Mi Perfil</span>
+                            </a>
+                            
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <a href="/admin" class="dropdown-item">
+                                    <i data-lucide="shield"></i>
+                                    <span>Administración</span>
+                                </a>
+                            }
+                            
+                            <a href="/ayuda" class="dropdown-item">
+                                <i data-lucide="help-circle"></i>
+                                <span>Ayuda</span>
+                            </a>
+                            
+                            <div class="dropdown-divider"></div>
+                            
+                            <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-form">
+                                <button type="submit" class="dropdown-item logout-btn">
+                                    <i data-lucide="log-out"></i>
+                                    <span>Cerrar Sesión</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <button class="nav-btn notification-btn" id="notificationBtn" title="Notificaciones">
+                        <i data-lucide="bell"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </button>
+                }
+                else
+                {
+                    <div class="auth-buttons">
+                        <a href="/login" class="nav-btn login-btn">
+                            <i data-lucide="log-in"></i>
+                            <span class="mobile-hidden">Iniciar Sesión</span>
+                        </a>
+                        <a href="/register" class="nav-btn register-btn">
+                            <i data-lucide="user-plus"></i>
+                            <span class="mobile-hidden">Registro</span>
+                        </a>
+                    </div>
+                }
                 
                 <button class="nav-btn" id="themeToggle" title="Cambiar tema">
                     <i data-lucide="sun" class="theme-icon light-icon"></i>
                     <i data-lucide="moon" class="theme-icon dark-icon"></i>
                 </button>
-                
-                <div class="nav-status">
-                    <div class="status-indicator online" id="connectionStatus"></div>
-                    <span class="status-text" id="connectionText">Online</span>
-                </div>
                 
                 <!-- Mobile menu toggle -->
                 <button class="nav-toggle" id="navToggle">
@@ -151,7 +240,7 @@
                         <i data-lucide="code"></i>
                         API Docs
                     </a>
-                    <a href="#" class="footer-link">
+                    <a href="/ayuda" class="footer-link">
                         <i data-lucide="help-circle"></i>
                         Ayuda
                     </a>
@@ -173,7 +262,7 @@
     </div>
     
     <!-- Scripts -->
-    <script src="~/js/app.js"></script>
+    <script src="~/js/app.js?v=@DateTime.Now.Ticks"></script>
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
@@ -283,6 +372,101 @@
                     element.style.color = '';
                 }, 300);
             }
+        }
+        
+        // User menu dropdown functionality
+        function initUserMenu() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (!userMenuBtn || !userDropdown) return;
+            
+            // Toggle dropdown on button click
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Close dropdown on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // Close dropdown when window loses focus
+            window.addEventListener('blur', function() {
+                userDropdown.classList.remove('show');
+            });
+        }
+        
+        // Initialize user menu when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initUserMenu);
+        } else {
+            initUserMenu();
+        }
+        
+        // Mobile navigation toggle functionality
+        function initMobileNav() {
+            const navToggle = document.getElementById('navToggle');
+            const navMenu = document.getElementById('navMenu');
+            
+            if (!navToggle || !navMenu) return;
+            
+            // Toggle mobile menu
+            navToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                navToggle.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+            
+            // Close menu when clicking on a link
+            const navLinks = navMenu.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                    navToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                }
+            });
+            
+            // Close menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    navToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                }
+            });
+            
+            // Close menu on window resize to desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 768) {
+                    navToggle.classList.remove('active');
+                    navMenu.classList.remove('active');
+                }
+            });
+        }
+        
+        // Initialize mobile nav when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMobileNav);
+        } else {
+            initMobileNav();
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)

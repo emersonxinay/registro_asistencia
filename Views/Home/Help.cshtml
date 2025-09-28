@@ -1,0 +1,609 @@
+@{
+    ViewData["Title"] = "Ayuda e Instrucciones";
+    ViewData["Subtitle"] = "Guía completa para usar QuantumAttend eficientemente";
+}
+
+@section Styles {
+    <style>
+        .help-nav {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .help-nav h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+
+        .help-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .help-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .help-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .help-nav a:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .help-section {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .help-section h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-by-step {
+            counter-reset: step-counter;
+        }
+
+        .step {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .step:last-child {
+            border-bottom: none;
+        }
+
+        .step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .step h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .step p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .code-snippet {
+            background: var(--surface-variant);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .alert-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--primary);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #d97706;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #059669;
+        }
+
+        .screenshot-placeholder {
+            background: var(--surface-variant);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--text-muted);
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 1.5rem;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-left: 1.5rem;
+        }
+
+        .video-embed {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px dashed var(--border);
+            margin: 1.5rem 0;
+        }
+    </style>
+}
+
+<div class="container">
+    <div class="row">
+        <!-- Navigation Sidebar -->
+        <div class="col-md-3">
+            <div class="help-nav">
+                <h3><i data-lucide="compass"></i> Navegación Rápida</h3>
+                <ul>
+                    <li><a href="#getting-started"><i data-lucide="play-circle"></i> Primeros Pasos</a></li>
+                    <li><a href="#student-management"><i data-lucide="users"></i> Gestionar Estudiantes</a></li>
+                    <li><a href="#class-management"><i data-lucide="book-open"></i> Crear Clases</a></li>
+                    <li><a href="#qr-generation"><i data-lucide="qr-code"></i> Generar QR</a></li>
+                    <li><a href="#attendance-process"><i data-lucide="check-circle"></i> Tomar Asistencia</a></li>
+                    <li><a href="#reports"><i data-lucide="bar-chart-3"></i> Reportes</a></li>
+                    <li><a href="#troubleshooting"><i data-lucide="help-circle"></i> Problemas Comunes</a></li>
+                    <li><a href="#faq"><i data-lucide="message-circle"></i> Preguntas Frecuentes</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Getting Started -->
+            <div id="getting-started" class="help-section">
+                <h2><i data-lucide="rocket"></i> Primeros Pasos</h2>
+                <p>Bienvenido a QuantumAttend. Esta guía te ayudará a configurar el sistema en pocos minutos.</p>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Acceder al Sistema</h4>
+                        <p>Abre tu navegador web y dirígete a la URL del sistema QuantumAttend.</p>
+                        <div class="alert-box alert-info">
+                            <i data-lucide="info"></i>
+                            <span>El sistema funciona mejor en navegadores modernos como Chrome, Firefox, Safari o Edge.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Explorar la Interfaz</h4>
+                        <p>Familiarízate con el menú de navegación:</p>
+                        <ul>
+                            <li><strong>Inicio:</strong> Página principal con información del sistema</li>
+                            <li><strong>Panel Admin:</strong> Dashboard administrativo con todas las funciones</li>
+                            <li><strong>Estudiantes:</strong> Gestión de estudiantes y códigos QR</li>
+                            <li><strong>Clases:</strong> Creación y administración de clases</li>
+                            <li><strong>Asistencias:</strong> Visualización de registros de asistencia</li>
+                            <li><strong>Escáner QR:</strong> Herramienta para escanear códigos QR</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Primer Uso</h4>
+                        <p>Para comenzar, sigue este orden:</p>
+                        <ol>
+                            <li>Registra estudiantes en la sección "Estudiantes"</li>
+                            <li>Crea una clase en la sección "Clases"</li>
+                            <li>Genera el QR de la clase</li>
+                            <li>Los estudiantes pueden registrar asistencia</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Management -->
+            <div id="student-management" class="help-section">
+                <h2><i data-lucide="users"></i> Gestión de Estudiantes</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Registrar un Nuevo Estudiante</h4>
+                        <p>Para agregar un estudiante al sistema:</p>
+                        <ol>
+                            <li>Ve a la sección "Estudiantes"</li>
+                            <li>Completa el formulario con el código único del estudiante</li>
+                            <li>Ingresa el nombre completo</li>
+                            <li>Haz clic en "Crear Estudiante"</li>
+                        </ol>
+                        <div class="alert-box alert-warning">
+                            <i data-lucide="alert-triangle"></i>
+                            <span>El código del estudiante debe ser único. El sistema generará automáticamente un QR personal para el estudiante.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Visualizar y Gestionar QR</h4>
+                        <p>Cada estudiante tiene un código QR único que pueden usar para registrar asistencia:</p>
+                        <ul>
+                            <li>Haz clic en el botón "Ver QR" junto al nombre del estudiante</li>
+                            <li>El QR se puede descargar e imprimir</li>
+                            <li>Los estudiantes deben tener acceso a su QR personal</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Editar o Eliminar Estudiantes</h4>
+                        <p>Puedes modificar la información de los estudiantes:</p>
+                        <ul>
+                            <li>Usa el botón de editar para cambiar nombre o código</li>
+                            <li>Selecciona múltiples estudiantes para operaciones masivas</li>
+                            <li>Exporta la lista completa en formato CSV</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Management -->
+            <div id="class-management" class="help-section">
+                <h2><i data-lucide="book-open"></i> Gestión de Clases</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Crear una Nueva Clase</h4>
+                        <p>Para programar una clase:</p>
+                        <ol>
+                            <li>Ve a la sección "Clases"</li>
+                            <li>Ingresa el nombre de la asignatura</li>
+                            <li>Agrega una descripción opcional</li>
+                            <li>Haz clic en "Crear Clase"</li>
+                        </ol>
+                        <div class="alert-box alert-success">
+                            <i data-lucide="check-circle"></i>
+                            <span>La clase se crea automáticamente con estado "Activa" y está lista para recibir asistencias.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Estados de las Clases</h4>
+                        <p>Las clases pueden tener diferentes estados:</p>
+                        <ul>
+                            <li><strong>Activa:</strong> Acepta registros de asistencia</li>
+                            <li><strong>Cerrada:</strong> No acepta más asistencias</li>
+                        </ul>
+                        <p>Puedes cambiar el estado usando los botones en la tarjeta de cada clase.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Generation -->
+            <div id="qr-generation" class="help-section">
+                <h2><i data-lucide="qr-code"></i> Generación de Códigos QR</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>QR de Clase (Temporal)</h4>
+                        <p>Para que los estudiantes puedan registrar asistencia a una clase específica:</p>
+                        <ol>
+                            <li>Ve al "Panel Admin" o sección "Clases"</li>
+                            <li>Selecciona la clase activa en el selector</li>
+                            <li>Haz clic en "Generar QR Inteligente"</li>
+                            <li>Muestra el QR a los estudiantes</li>
+                        </ol>
+                        <div class="alert-box alert-warning">
+                            <i data-lucide="clock"></i>
+                            <span>El QR de clase se renueva automáticamente cada 5 minutos por seguridad. Genera uno nuevo si ha expirado.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>QR Personal de Estudiante</h4>
+                        <p>Cada estudiante tiene un QR personal único:</p>
+                        <ul>
+                            <li>Se genera automáticamente al crear el estudiante</li>
+                            <li>Es permanente y único para cada estudiante</li>
+                            <li>Los estudiantes lo usan para identificarse</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Process -->
+            <div id="attendance-process" class="help-section">
+                <h2><i data-lucide="check-circle"></i> Proceso de Asistencia</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Para el Docente</h4>
+                        <ol>
+                            <li>Crear una clase activa en el sistema</li>
+                            <li>Generar el QR temporal de la clase</li>
+                            <li>Mostrar el QR en el proyector o pantalla</li>
+                            <li>Instruir a los estudiantes sobre el proceso</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Para el Estudiante</h4>
+                        <ol>
+                            <li>Escanear el QR de la clase con la cámara del teléfono</li>
+                            <li>Se abrirá una página web automáticamente</li>
+                            <li>Usar el escáner de la página para leer su QR personal</li>
+                            <li>Confirmar que la asistencia se registró correctamente</li>
+                        </ol>
+                        <div class="alert-box alert-info">
+                            <i data-lucide="smartphone"></i>
+                            <span>Los estudiantes NO necesitan descargar ninguna aplicación. Solo usan la cámara nativa de su teléfono.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Verificación en Tiempo Real</h4>
+                        <p>El docente puede verificar las asistencias:</p>
+                        <ul>
+                            <li>Las asistencias aparecen inmediatamente en el sistema</li>
+                            <li>Ve la sección "Asistencias" para ver el listado completo</li>
+                            <li>Usa el escáner docente para verificaciones manuales</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports -->
+            <div id="reports" class="help-section">
+                <h2><i data-lucide="bar-chart-3"></i> Reportes y Estadísticas</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>Visualizar Asistencias</h4>
+                        <p>En la sección "Asistencias" puedes:</p>
+                        <ul>
+                            <li>Ver todas las asistencias registradas</li>
+                            <li>Filtrar por clase específica</li>
+                            <li>Ordenar por fecha, estudiante o clase</li>
+                            <li>Buscar asistencias específicas</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="step">
+                        <h4>Exportar Datos</h4>
+                        <p>Puedes exportar la información en diferentes formatos:</p>
+                        <ul>
+                            <li>CSV para Excel o Google Sheets</li>
+                            <li>Datos completos de estudiantes con QRs</li>
+                            <li>Reportes por clase individual</li>
+                        </ul>
+                        <div class="code-snippet">
+                            URL de exportación: /api/asistencias/csv
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div id="troubleshooting" class="help-section">
+                <h2><i data-lucide="wrench"></i> Problemas Comunes</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        El QR de la clase no funciona
+                    </div>
+                    <div class="faq-answer">
+                        <p>Soluciones:</p>
+                        <ul>
+                            <li>Verifica que la clase esté en estado "Activa"</li>
+                            <li>Genera un nuevo QR si han pasado más de 5 minutos</li>
+                            <li>Asegúrate de que el QR sea visible y no esté dañado</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        Los estudiantes no pueden escanear
+                    </div>
+                    <div class="faq-answer">
+                        <p>Posibles causas:</p>
+                        <ul>
+                            <li>QR muy pequeño o con poca resolución</li>
+                            <li>Problemas de iluminación en el aula</li>
+                            <li>Navegador del teléfono no compatible</li>
+                            <li>Permisos de cámara no concedidos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        La asistencia no se registra
+                    </div>
+                    <div class="faq-answer">
+                        <p>Verificar:</p>
+                        <ul>
+                            <li>Que el estudiante esté registrado en el sistema</li>
+                            <li>Que el QR personal del estudiante sea válido</li>
+                            <li>Conexión a internet estable</li>
+                            <li>Que la clase esté activa</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div id="faq" class="help-section">
+                <h2><i data-lucide="message-circle"></i> Preguntas Frecuentes</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        ¿Puedo usar el sistema sin internet?
+                    </div>
+                    <div class="faq-answer">
+                        No, QuantumAttend requiere conexión a internet para funcionar correctamente. Los datos se sincronizan en tiempo real.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        ¿Qué pasa si un estudiante olvida su QR?
+                    </div>
+                    <div class="faq-answer">
+                        El docente puede usar el escáner manual desde el "Escáner QR" para registrar la asistencia manualmente, o puede volver a generar el QR del estudiante.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        ¿Puedo modificar una asistencia ya registrada?
+                    </div>
+                    <div class="faq-answer">
+                        Actualmente el sistema registra asistencias automáticamente. Para modificaciones, contacta al administrador del sistema.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        ¿Cuántos estudiantes puedo registrar?
+                    </div>
+                    <div class="faq-answer">
+                        No hay límite específico en el número de estudiantes. El sistema está diseñado para manejar clases de cualquier tamaño.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <i data-lucide="help-circle"></i>
+                        ¿Los QR tienen fecha de expiración?
+                    </div>
+                    <div class="faq-answer">
+                        Los QR personales de estudiantes son permanentes. Los QR de clase se renuevan cada 5 minutos por seguridad.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="help-section">
+                <h2><i data-lucide="headphones"></i> Soporte Técnico</h2>
+                <p>Si necesitas ayuda adicional:</p>
+                <ul>
+                    <li>Revisa la documentación de la API en <a href="/swagger" target="_blank">/swagger</a></li>
+                    <li>Verifica el estado del sistema en la página principal</li>
+                    <li>Contacta al administrador del sistema para soporte personalizado</li>
+                </ul>
+                
+                <div class="alert-box alert-info">
+                    <i data-lucide="info"></i>
+                    <span>QuantumAttend está en constante desarrollo. Nuevas características y mejoras se agregan regularmente.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+    
+    // Highlight current section in navigation
+    const sections = document.querySelectorAll('.help-section');
+    const navLinks = document.querySelectorAll('.help-nav a');
+    
+    const highlightNavigation = () => {
+        const scrollPosition = window.scrollY + 100;
+        
+        sections.forEach((section, index) => {
+            const sectionTop = section.offsetTop;
+            const sectionBottom = sectionTop + section.offsetHeight;
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const correspondingLink = document.querySelector(`.help-nav a[href="#${section.id}"]`);
+                if (correspondingLink) {
+                    correspondingLink.classList.add('active');
+                }
+            }
+        });
+    };
+    
+    window.addEventListener('scroll', highlightNavigation);
+    highlightNavigation(); // Initial call
+});
+</script>
+}

@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Asistencias";
+}
+
+<div class="container">
+    <h1>Lista de Asistencias</h1>
+    
+    <div id="container">
+        <div style="background: yellow; padding: 20px; margin: 20px 0;">
+            <h3>Cargando...</h3>
+            <button onclick="loadData()" style="background: red; color: white; padding: 10px 20px; font-size: 16px;">
+                CARGAR DATOS
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('🔥 SCRIPT LOADED');
+
+function loadData() {
+    console.log('⚡ LOADING DATA');
+    const container = document.getElementById('container');
+    
+    container.innerHTML = '<div style="background: blue; color: white; padding: 20px;">LOADING...</div>';
+    
+    fetch('/api/asistencias')
+        .then(response => {
+            console.log('📡 Response:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ DATA:', data);
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div style="background: red; color: white; padding: 20px;">NO DATA</div>';
+                return;
+            }
+            
+            let html = `
+                <div style="background: green; color: white; padding: 20px; margin-bottom: 10px;">
+                    ✅ DATOS CARGADOS: ${data.length} registros
+                </div>
+                <table border="3" style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #f0f0f0;">
+                        <th style="padding: 15px; border: 2px solid black;">ID</th>
+                        <th style="padding: 15px; border: 2px solid black;">Clase</th>
+                        <th style="padding: 15px; border: 2px solid black;">Alumno</th>
+                        <th style="padding: 15px; border: 2px solid black;">Fecha</th>
+                    </tr>
+            `;
+            
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+                html += `
+                    <tr style="border: 2px solid black;">
+                        <td style="padding: 10px; border: 1px solid black;">${item.id || 'N/A'}</td>
+                        <td style="padding: 10px; border: 1px solid black;">${item.claseId || 'N/A'}</td>
+                        <td style="padding: 10px; border: 1px solid black;">${item.alumnoNombre || item.nombre || 'N/A'}</td>
+                        <td style="padding: 10px; border: 1px solid black;">${item.marcadaUtc || 'N/A'}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</table>';
+            container.innerHTML = html;
+            
+            console.log('✅ RENDERED');
+        })
+        .catch(error => {
+            console.error('❌ ERROR:', error);
+            container.innerHTML = '<div style="background: red; color: white; padding: 20px;">ERROR: ' + error.message + '</div>';
+        });
+}
+
+// Auto load
+setTimeout(loadData, 500);
+</script>

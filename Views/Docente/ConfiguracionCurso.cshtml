@@ -1,0 +1,728 @@
+@model ConfiguracionCursoViewModel
+
+<div class="configuracion-curso-container">
+    <!-- Header -->
+    <div class="configuracion-header">
+        <div class="header-content">
+            <h1>⚙️ Configuración del Curso</h1>
+            <p>Gestiona y configura las opciones del curso <strong>@Model.Nombre</strong></p>
+        </div>
+        <div class="header-actions">
+            <a href="/docente/cursos/@Model.Id" class="btn-secondary">
+                ← Volver al Curso
+            </a>
+        </div>
+    </div>
+
+    <!-- Información General -->
+    <div class="info-general-section">
+        <div class="curso-overview">
+            <div class="curso-icon">📚</div>
+            <div class="curso-details">
+                <h2>@Model.Nombre</h2>
+                <span class="curso-codigo">@Model.Codigo</span>
+                @if (!string.IsNullOrEmpty(Model.Descripcion))
+                {
+                    <p class="curso-descripcion">@Model.Descripcion</p>
+                }
+                <div class="curso-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        Creado: @Model.FechaCreacion.ToString("dd/MM/yyyy")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-item">
+                <span class="stat-number">@Model.TotalRamos</span>
+                <span class="stat-label">Ramos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">@Model.TotalEstudiantes</span>
+                <span class="stat-label">Estudiantes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuraciones -->
+    <div class="configuraciones-grid">
+        <!-- Gestión de Curso -->
+        <div class="config-card">
+            <div class="config-header">
+                <div class="config-icon gestion">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <h3>Gestión del Curso</h3>
+            </div>
+            <p>Edita la información básica del curso como nombre, código y descripción.</p>
+            <div class="config-actions">
+                <a href="/docente/cursos/@Model.Id/editar" class="btn btn-primary">
+                    <i class="fas fa-edit"></i>
+                    Editar Curso
+                </a>
+            </div>
+        </div>
+
+        <!-- Gestión de Ramos -->
+        <div class="config-card">
+            <div class="config-header">
+                <div class="config-icon ramos">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>Gestión de Ramos</h3>
+            </div>
+            <p>Administra los ramos del curso, agrega nuevos o modifica los existentes.</p>
+            <div class="config-stats">
+                <span class="config-stat">@Model.TotalRamos ramos activos</span>
+            </div>
+            <div class="config-actions">
+                <a href="/docente/cursos/@Model.Id/ramos" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Agregar Ramo
+                </a>
+            </div>
+        </div>
+
+        <!-- Gestión de Estudiantes -->
+        <div class="config-card">
+            <div class="config-header">
+                <div class="config-icon estudiantes">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Gestión de Estudiantes</h3>
+            </div>
+            <p>Administra los estudiantes inscritos, agregar nuevos o gestionar inscripciones.</p>
+            <div class="config-stats">
+                <span class="config-stat">@Model.TotalEstudiantes estudiantes inscritos</span>
+            </div>
+            <div class="config-actions">
+                <a href="/docente/cursos/@Model.Id/estudiantes" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Gestionar Estudiantes
+                </a>
+            </div>
+        </div>
+
+        <!-- Configuración de Clases -->
+        <div class="config-card">
+            <div class="config-header">
+                <div class="config-icon clases">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3>Configuración de Clases</h3>
+            </div>
+            <p>Establece configuraciones por defecto para las clases del curso.</p>
+            <div class="config-actions">
+                <a href="/workflow/cursos/@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Nueva Clase
+                </a>
+            </div>
+        </div>
+
+        <!-- Reportes y Estadísticas -->
+        <div class="config-card">
+            <div class="config-header">
+                <div class="config-icon reportes">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Reportes y Estadísticas</h3>
+            </div>
+            <p>Genera reportes de asistencia y visualiza estadísticas del curso.</p>
+            <div class="config-actions">
+                <a href="/docente/cursos/@Model.Id#estadisticas" class="btn btn-primary">
+                    <i class="fas fa-chart-line"></i>
+                    Ver Estadísticas
+                </a>
+            </div>
+        </div>
+
+        <!-- Configuración Avanzada -->
+        <div class="config-card advanced">
+            <div class="config-header">
+                <div class="config-icon avanzada">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3>Configuración Avanzada</h3>
+            </div>
+            <p>Opciones avanzadas de configuración y administración del curso.</p>
+            <div class="config-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Estas opciones requieren precaución</span>
+            </div>
+            <div class="config-actions">
+                <button class="btn btn-outline" onclick="showAdvancedOptions()">
+                    <i class="fas fa-tools"></i>
+                    Opciones Avanzadas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="acciones-rapidas">
+        <h3>🚀 Acciones Rápidas</h3>
+        <div class="acciones-grid">
+            <a href="/workflow/cursos/@Model.Id" class="accion-card">
+                <i class="fas fa-plus-circle"></i>
+                <span>Crear Nueva Clase</span>
+            </a>
+            <a href="/docente/cursos/@Model.Id/ramos" class="accion-card">
+                <i class="fas fa-book-open"></i>
+                <span>Agregar Ramo</span>
+            </a>
+            <a href="/docente/cursos/@Model.Id/estudiantes" class="accion-card">
+                <i class="fas fa-user-plus"></i>
+                <span>Inscribir Estudiante</span>
+            </a>
+            <a href="/docente/cursos/@Model.Id#estadisticas" class="accion-card">
+                <i class="fas fa-chart-pie"></i>
+                <span>Ver Reportes</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para opciones avanzadas -->
+<div id="advancedModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4>⚠️ Configuración Avanzada</h4>
+            <button class="modal-close" onclick="hideAdvancedOptions()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="warning-section">
+                <p>Las siguientes opciones pueden afectar permanentemente el curso:</p>
+            </div>
+            <div class="advanced-options">
+                <div class="option-item">
+                    <strong>Exportar Datos del Curso</strong>
+                    <p>Exporta toda la información del curso en formato CSV.</p>
+                    <button class="btn btn-outline" onclick="exportarDatos()">
+                        <i class="fas fa-download"></i>
+                        Exportar
+                    </button>
+                </div>
+                <div class="option-item">
+                    <strong>Archivar Curso</strong>
+                    <p>Marca el curso como archivado (solo lectura).</p>
+                    <button class="btn btn-warning" onclick="archivarCurso()">
+                        <i class="fas fa-archive"></i>
+                        Archivar
+                    </button>
+                </div>
+                <div class="option-item danger">
+                    <strong>Eliminar Curso</strong>
+                    <p class="danger-text">⚠️ Esta acción eliminará permanentemente el curso y todos sus datos.</p>
+                    <button class="btn btn-danger" onclick="confirmarEliminacion()">
+                        <i class="fas fa-trash"></i>
+                        Eliminar Curso
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showAdvancedOptions() {
+    document.getElementById('advancedModal').style.display = 'block';
+}
+
+function hideAdvancedOptions() {
+    document.getElementById('advancedModal').style.display = 'none';
+}
+
+function exportarDatos() {
+    alert('Función de exportación en desarrollo');
+    hideAdvancedOptions();
+}
+
+function archivarCurso() {
+    if (confirm('¿Estás seguro de que quieres archivar este curso?')) {
+        alert('Función de archivado en desarrollo');
+        hideAdvancedOptions();
+    }
+}
+
+function confirmarEliminacion() {
+    if (confirm('⚠️ ADVERTENCIA: Esta acción eliminará permanentemente el curso y TODOS sus datos.\n\n¿Estás absolutamente seguro?')) {
+        if (confirm('Esta es la última confirmación. ¿Realmente quieres eliminar el curso "@Model.Nombre"?')) {
+            alert('Función de eliminación en desarrollo');
+            hideAdvancedOptions();
+        }
+    }
+}
+
+// Cerrar modal al hacer click fuera
+window.onclick = function(event) {
+    const modal = document.getElementById('advancedModal');
+    if (event.target === modal) {
+        hideAdvancedOptions();
+    }
+}
+</script>
+
+<style>
+.configuracion-curso-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.configuracion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-content h1 {
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 2.2em;
+}
+
+.header-content p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.info-general-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.curso-overview {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.curso-icon {
+    font-size: 3em;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.curso-details h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.curso-codigo {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.3rem 1rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.curso-descripcion {
+    margin: 0.5rem 0;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.curso-meta {
+    margin-top: 0.5rem;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-overview {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.configuraciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.config-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.config-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.config-card.advanced {
+    border: 2px solid #f39c12;
+    background: linear-gradient(135deg, #fff9e6 0%, #fef3d9 100%);
+}
+
+.config-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.config-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.config-icon.gestion { background: #3498db; }
+.config-icon.ramos { background: #9b59b6; }
+.config-icon.estudiantes { background: #e74c3c; }
+.config-icon.clases { background: #2ecc71; }
+.config-icon.reportes { background: #f39c12; }
+.config-icon.avanzada { background: #34495e; }
+
+.config-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.config-card p {
+    color: #7f8c8d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.config-stats {
+    margin-bottom: 1rem;
+}
+
+.config-stat {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.config-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f39c12;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.config-actions {
+    margin-top: auto;
+}
+
+.acciones-rapidas {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.acciones-rapidas h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+}
+
+.acciones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.accion-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    text-decoration: none;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.accion-card:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.accion-card i {
+    font-size: 2rem;
+}
+
+.accion-card span {
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background-color: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+.btn-outline:hover {
+    background-color: #667eea;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-warning:hover {
+    background-color: #e67e22;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-header h4 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #adb5bd;
+}
+
+.modal-close:hover {
+    color: #6c757d;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.warning-section {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 5px;
+}
+
+.advanced-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.option-item {
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+}
+
+.option-item.danger {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+.option-item strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.option-item p {
+    margin: 0.5rem 0 1rem 0;
+    color: #6c757d;
+}
+
+.danger-text {
+    color: #721c24 !important;
+    font-weight: 600;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .configuracion-curso-container {
+        padding: 15px;
+    }
+
+    .configuracion-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .info-general-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .curso-overview {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stats-overview {
+        justify-content: center;
+    }
+
+    .configuraciones-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .acciones-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+}
+
+@@media (max-width: 480px) {
+    .acciones-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .curso-details h2 {
+        font-size: 1.5rem;
+    }
+    
+    .header-content h1 {
+        font-size: 1.8rem;
+    }
+}
+</style>

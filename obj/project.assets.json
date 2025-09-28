@@ -3282,11 +3282,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\csharp\\registroAsistencia\\registroAsistencia.csproj",
+      "projectUniqueName": "E:\\csharp\\registro_clonado\\registroAsistencia.csproj",
       "projectName": "registroAsistencia",
-      "projectPath": "E:\\csharp\\registroAsistencia\\registroAsistencia.csproj",
+      "projectPath": "E:\\csharp\\registro_clonado\\registroAsistencia.csproj",
       "packagesPath": "C:\\Users\\xinay\\.nuget\\packages\\",
-      "outputPath": "E:\\csharp\\registroAsistencia\\obj\\",
+      "outputPath": "E:\\csharp\\registro_clonado\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

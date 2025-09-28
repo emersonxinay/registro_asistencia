@@ -127,7 +127,10 @@ public class InMemoryDataService : IDataService
         {
             Id = id,
             Asignatura = dto.Asignatura,
-            InicioUtc = DateTime.UtcNow
+            InicioUtc = DateTime.UtcNow,
+            DocenteId = 1, // Usuario administrador por defecto en memoria
+            RamoId = dto.RamoId,
+            Descripcion = dto.Descripcion
         };
         _clases[id] = clase;
         return Task.FromResult(clase);
@@ -197,13 +200,26 @@ public class InMemoryDataService : IDataService
 
     public Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo)
     {
+        var clase = _clases.Values.FirstOrDefault(c => c.Id == claseId);
+        if (clase == null) return Task.FromResult(false);
+
+        var ahora = DateTime.UtcNow;
+        var minutosRetraso = (int)(ahora - clase.InicioUtc).TotalMinutes;
+        var estado = minutosRetraso <= 20 ? EstadoAsistencia.Presente : 
+                    (clase.FinUtc == null || ahora <= clase.FinUtc) ? EstadoAsistencia.Tardanza : EstadoAsistencia.Ausente;
+
         var asistencia = new Asistencia
         {
             Id = _asistencias.Count + 1,
             AlumnoId = alumnoId,
             ClaseId = claseId,
-            MarcadaUtc = DateTime.UtcNow,
-            Metodo = metodo
+            MarcadaUtc = ahora,
+            ClaseInicioUtc = clase.InicioUtc,
+            ClaseFinUtc = clase.FinUtc,
+            MinutosRetraso = Math.Max(0, minutosRetraso),
+            Estado = estado,
+            Metodo = MetodoRegistro.QrEstudiante,
+            EsRegistroManual = false
         };
         _asistencias.Add(asistencia);
         return Task.FromResult(true);

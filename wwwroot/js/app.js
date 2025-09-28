@@ -722,34 +722,36 @@ window.AnimationManager = {
         
         // Use event delegation for better performance
         document.addEventListener('mouseenter', (e) => {
-            if (e.target.closest('.quantum-btn')) {
+            if (e.target && e.target.closest && e.target.closest('.quantum-btn')) {
                 this.addMagneticEffect(e);
             }
         }, true);
         
         document.addEventListener('mouseleave', (e) => {
-            if (e.target.closest('.quantum-btn')) {
+            if (e.target && e.target.closest && e.target.closest('.quantum-btn')) {
                 this.removeMagneticEffect(e);
             }
         }, true);
         
         // Add tilt effect to cards with throttling
         document.addEventListener('mousemove', Utils.throttle((e) => {
-            const card = e.target.closest('.tilt-card');
-            if (card) {
-                this.handleTiltEffect(e);
+            if (e.target && e.target.closest) {
+                const card = e.target.closest('.tilt-card');
+                if (card) {
+                    this.handleTiltEffect(e);
+                }
             }
         }, 16), true); // ~60fps
         
         document.addEventListener('mouseleave', (e) => {
-            if (e.target.closest('.tilt-card')) {
+            if (e.target && e.target.closest && e.target.closest('.tilt-card')) {
                 this.resetTiltEffect(e);
             }
         }, true);
     },
 
     addMagneticEffect(e) {
-        const btn = e.target.closest('.quantum-btn');
+        const btn = e.target && e.target.closest ? e.target.closest('.quantum-btn') : null;
         if (!btn) return;
         
         btn.classList.add('magnetic-btn');
@@ -768,7 +770,7 @@ window.AnimationManager = {
     },
 
     removeMagneticEffect(e) {
-        const btn = e.target.closest('.quantum-btn');
+        const btn = e.target && e.target.closest ? e.target.closest('.quantum-btn') : null;
         if (!btn) return;
         
         btn.style.transform = '';
@@ -899,8 +901,11 @@ window.AnimationManager = {
     },
 
     createSkeletonLoaders() {
-        // Add skeleton states to tables while loading
+        // Add skeleton states to tables while loading (skip elements with data-no-skeleton)
         document.querySelectorAll('.loading-state').forEach(loader => {
+            if (loader.getAttribute('data-no-skeleton') === 'true') {
+                return; // Skip this element
+            }
             loader.innerHTML = `
                 <div class="skeleton skeleton-title"></div>
                 <div class="skeleton skeleton-text"></div>
@@ -1056,10 +1061,15 @@ class AsistenciasManager {
     }
 
     renderAsistencias(container, asistencias, claseId) {
-        if (!asistencias.length) {
+        console.log('renderAsistencias called with:', { asistencias, length: asistencias?.length, type: typeof asistencias, isArray: Array.isArray(asistencias) });
+        
+        if (!asistencias || !Array.isArray(asistencias) || asistencias.length === 0) {
+            console.log('No asistencias found or empty array');
             container.innerHTML = '<div class="text-center text-sm">No hay asistencias registradas</div>';
             return;
         }
+        
+        console.log('Rendering', asistencias.length, 'asistencias');
 
         const csvUrl = claseId ? `/api/asistencias/clase/${claseId}/csv` : '/api/asistencias/csv';
 
@@ -1363,7 +1373,7 @@ window.MobileManager = {
     setupTouchFeedback() {
         // Add haptic feedback for supported devices
         document.addEventListener('touchstart', (e) => {
-            const element = e.target.closest('.quantum-btn, .action-btn, .link-card');
+            const element = e.target && e.target.closest ? e.target.closest('.quantum-btn, .action-btn, .link-card') : null;
             if (element) {
                 // Add visual feedback
                 element.style.transform = 'scale(0.95)';
@@ -1377,7 +1387,7 @@ window.MobileManager = {
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
-            const element = e.target.closest('.quantum-btn, .action-btn, .link-card');
+            const element = e.target && e.target.closest ? e.target.closest('.quantum-btn, .action-btn, .link-card') : null;
             if (element) {
                 element.style.transform = '';
                 setTimeout(() => {
@@ -1458,7 +1468,7 @@ window.MobileManager = {
             
             if (tapLength < 500 && tapLength > 0) {
                 // Double tap detected
-                const target = e.target.closest('.quantum-card');
+                const target = e.target && e.target.closest ? e.target.closest('.quantum-card') : null;
                 if (target && !target.classList.contains('zoomed')) {
                     target.style.transform = 'scale(1.1)';
                     target.style.zIndex = '1000';

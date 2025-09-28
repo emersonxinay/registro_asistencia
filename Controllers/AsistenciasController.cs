@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using registroAsistencia.Models;
 using registroAsistencia.Services;
@@ -6,6 +7,7 @@ namespace registroAsistencia.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AsistenciasController : ControllerBase
 {
     private readonly IDataService _dataService;
@@ -39,6 +41,7 @@ public class AsistenciasController : ControllerBase
     }
 
     [HttpPost("alumno-scan")]
+    [AllowAnonymous]
     public async Task<IActionResult> AlumnoScan([FromBody] AlumnoScanDto dto)
     {
         try

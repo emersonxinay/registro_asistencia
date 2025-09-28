@@ -1,0 +1,623 @@
+@model AsistenciasEstudianteViewModel
+
+<div class="asistencias-estudiante-container">
+    <!-- Header -->
+    <div class="asistencias-header">
+        <div class="estudiante-info">
+            <div class="avatar">
+                @Model.EstudianteNombre.Substring(0, 1).ToUpper()
+            </div>
+            <div class="info-details">
+                <h1>Historial de Asistencias</h1>
+                <div class="estudiante-meta">
+                    <span class="nombre">@Model.EstudianteNombre</span>
+                    <span class="codigo">(@Model.EstudianteCodigo)</span>
+                    <span class="curso">📚 @Model.CursoNombre</span>
+                </div>
+            </div>
+        </div>
+        <div class="acciones-header">
+            <a href="/docente/estudiantes/@Model.EstudianteId/perfil?cursoId=@Model.CursoId" class="btn btn-outline">
+                <i class="fas fa-user"></i>
+                Ver Perfil
+            </a>
+            <a href="/docente/cursos/@Model.CursoId" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Curso
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen Estadísticas -->
+    <div class="resumen-stats">
+        <div class="stat-box presente">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-number">@Model.Asistencias.Count(a => a.Estado == EstadoAsistencia.Presente)</span>
+                <span class="stat-label">Presente</span>
+            </div>
+        </div>
+
+        <div class="stat-box tarde">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-number">@Model.Asistencias.Count(a => a.Estado == EstadoAsistencia.Tardanza)</span>
+                <span class="stat-label">Tarde</span>
+            </div>
+        </div>
+
+        <div class="stat-box ausente">
+            <div class="stat-icon">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-number">@Model.Asistencias.Count(a => a.Estado == EstadoAsistencia.Ausente)</span>
+                <span class="stat-label">Ausente</span>
+            </div>
+        </div>
+
+        <div class="stat-box total">
+            <div class="stat-icon">
+                <i class="fas fa-list"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-number">@Model.Asistencias.Count</span>
+                <span class="stat-label">Total</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y Búsqueda -->
+    <div class="filtros-section">
+        <div class="filtros-content">
+            <div class="filtro-grupo">
+                <label for="filtroEstado">Estado:</label>
+                <select id="filtroEstado" class="filtro-select">
+                    <option value="">Todos</option>
+                    <option value="Presente">Presente</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Ausente">Ausente</option>
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <label for="filtroRamo">Ramo:</label>
+                <select id="filtroRamo" class="filtro-select">
+                    <option value="">Todos los ramos</option>
+                    @foreach (var ramo in Model.Asistencias.GroupBy(a => a.RamoNombre).Select(g => g.Key).OrderBy(r => r))
+                    {
+                        <option value="@ramo">@ramo</option>
+                    }
+                </select>
+            </div>
+            <div class="filtro-grupo">
+                <input type="text" id="buscarClase" class="filtro-input" placeholder="Buscar por nombre de clase...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Asistencias -->
+    <div class="asistencias-section">
+        @if (Model.Asistencias.Any())
+        {
+            <div class="asistencias-list" id="asistenciasList">
+                @foreach (var asistencia in Model.Asistencias)
+                {
+                    <div class="asistencia-card @asistencia.Estado.ToString().ToLower()" 
+                         data-estado="@asistencia.Estado" 
+                         data-ramo="@asistencia.RamoNombre"
+                         data-clase="@asistencia.NombreClase.ToLower()">
+                        
+                        <div class="asistencia-header">
+                            <div class="clase-info">
+                                <h3>@asistencia.NombreClase</h3>
+                                <span class="ramo-badge">@asistencia.RamoNombre</span>
+                            </div>
+                            <div class="estado-badge @asistencia.Estado.ToString().ToLower()">
+                                @switch (asistencia.Estado)
+                                {
+                                    case EstadoAsistencia.Presente:
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Presente</span>
+                                        break;
+                                    case EstadoAsistencia.Tardanza:
+                                        <i class="fas fa-clock"></i>
+                                        <span>Tarde</span>
+                                        break;
+                                    case EstadoAsistencia.Ausente:
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Ausente</span>
+                                        break;
+                                }
+                            </div>
+                        </div>
+
+                        <div class="asistencia-details">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@asistencia.FechaClase.ToString("dddd, dd MMMM yyyy", new System.Globalization.CultureInfo("es-ES"))</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>@asistencia.FechaClase.ToString("HH:mm")</span>
+                            </div>
+                            @if (asistencia.Estado == EstadoAsistencia.Tardanza && asistencia.MinutosRetraso > 0)
+                            {
+                                <div class="detail-item retraso">
+                                    <i class="fas fa-stopwatch"></i>
+                                    <span>@asistencia.MinutosRetraso min de retraso</span>
+                                </div>
+                            }
+                            <div class="detail-item">
+                                <i class="fas fa-fingerprint"></i>
+                                <span>@asistencia.MetodoRegistro.ToString()</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-save"></i>
+                                <span>Registrado: @asistencia.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Mensaje cuando no hay resultados después del filtro -->
+            <div class="no-results" id="noResults" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No se encontraron resultados</h3>
+                <p>No hay asistencias que coincidan con los filtros aplicados.</p>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>Sin historial de asistencias</h3>
+                <p>Este estudiante aún no tiene registros de asistencia en este curso.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filtroEstado = document.getElementById('filtroEstado');
+    const filtroRamo = document.getElementById('filtroRamo');
+    const buscarClase = document.getElementById('buscarClase');
+    const asistenciasList = document.getElementById('asistenciasList');
+    const noResults = document.getElementById('noResults');
+
+    function filtrarAsistencias() {
+        const estadoSeleccionado = filtroEstado.value.toLowerCase();
+        const ramoSeleccionado = filtroRamo.value;
+        const textoBusqueda = buscarClase.value.toLowerCase();
+        
+        const cards = asistenciasList.querySelectorAll('.asistencia-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const estado = card.dataset.estado.toLowerCase();
+            const ramo = card.dataset.ramo;
+            const clase = card.dataset.clase;
+
+            const matchEstado = !estadoSeleccionado || estado === estadoSeleccionado;
+            const matchRamo = !ramoSeleccionado || ramo === ramoSeleccionado;
+            const matchTexto = !textoBusqueda || clase.includes(textoBusqueda);
+
+            if (matchEstado && matchRamo && matchTexto) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Mostrar/ocultar mensaje de no resultados
+        if (visibleCount === 0) {
+            asistenciasList.style.display = 'none';
+            noResults.style.display = 'block';
+        } else {
+            asistenciasList.style.display = 'block';
+            noResults.style.display = 'none';
+        }
+    }
+
+    // Agregar event listeners
+    filtroEstado.addEventListener('change', filtrarAsistencias);
+    filtroRamo.addEventListener('change', filtrarAsistencias);
+    buscarClase.addEventListener('input', filtrarAsistencias);
+});
+</script>
+
+<style>
+.asistencias-estudiante-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.asistencias-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.estudiante-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.avatar {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.info-details h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.estudiante-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.estudiante-meta span {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.acciones-header {
+    display: flex;
+    gap: 1rem;
+}
+
+.resumen-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.stat-box.presente::before { background: #28a745; }
+.stat-box.tarde::before { background: #ffc107; }
+.stat-box.ausente::before { background: #dc3545; }
+.stat-box.total::before { background: #6c757d; }
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.stat-box.presente .stat-icon { background: #28a745; }
+.stat-box.tarde .stat-icon { background: #ffc107; }
+.stat-box.ausente .stat-icon { background: #dc3545; }
+.stat-box.total .stat-icon { background: #6c757d; }
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.filtros-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.filtros-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filtro-grupo label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.filtro-select,
+.filtro-input {
+    padding: 0.75rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.filtro-select:focus,
+.filtro-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.asistencias-section {
+    margin-bottom: 2rem;
+}
+
+.asistencias-list {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.asistencia-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.asistencia-card.presente { border-left-color: #28a745; }
+.asistencia-card.tarde { border-left-color: #ffc107; }
+.asistencia-card.ausente { border-left-color: #dc3545; }
+
+.asistencia-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.asistencia-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.clase-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.ramo-badge {
+    background: #e9ecef;
+    color: #6c757d;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.estado-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.estado-badge.presente {
+    background: #d4edda;
+    color: #155724;
+}
+
+.estado-badge.tarde {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.estado-badge.ausente {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.asistencia-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.detail-item.retraso {
+    color: #856404;
+    font-weight: 600;
+}
+
+.detail-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.empty-state,
+.no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.empty-state i,
+.no-results i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+.empty-state h3,
+.no-results h3 {
+    margin-bottom: 1rem;
+    color: #495057;
+    font-size: 1.6rem;
+}
+
+.empty-state p,
+.no-results p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .asistencias-header {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .estudiante-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .acciones-header {
+        justify-content: center;
+    }
+
+    .resumen-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .filtros-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .asistencia-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .asistencia-details {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+@@media (max-width: 480px) {
+    .asistencias-estudiante-container {
+        padding: 15px;
+    }
+
+    .asistencias-header {
+        padding: 1.5rem;
+    }
+
+    .info-details h1 {
+        font-size: 1.6rem;
+    }
+
+    .resumen-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-box {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+</style>

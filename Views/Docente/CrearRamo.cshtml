@@ -1,0 +1,482 @@
+@model CrearRamoFormViewModel
+
+<div class="crear-ramo-container">
+    <div class="crear-ramo-header">
+        <div class="header-content">
+            <h1>📖 Crear Nuevo Ramo</h1>
+            <p>Añade un nuevo ramo al curso <strong>@Model.CursoNombre</strong> (@Model.CursoCodigo)</p>
+        </div>
+        <div class="header-actions">
+            <a href="/docente/cursos/@Model.CursoId" class="btn-secondary">
+                ← Volver al Curso
+            </a>
+        </div>
+    </div>
+
+    <!-- Información del Curso -->
+    <div class="curso-info">
+        <div class="curso-card">
+            <div class="curso-icon">📚</div>
+            <div class="curso-details">
+                <h3>@Model.CursoNombre</h3>
+                <span class="curso-code">@Model.CursoCodigo</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario para crear ramo -->
+    <form id="formCrearRamo" action="/docente/cursos/@Model.CursoId/ramos" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="form-sections">
+            <div class="form-section">
+                <div class="section-header">
+                    <h3>📝 Información del Ramo</h3>
+                    <p>Define los datos del nuevo ramo para este curso</p>
+                </div>
+                
+                <div class="section-content">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombre">
+                                <i data-lucide="book-open"></i>
+                                Nombre del Ramo *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="nombre" 
+                                name="Nombre" 
+                                placeholder="Ej: Álgebra Lineal"
+                                required
+                                maxlength="200"
+                                value="@Model.Nombre">
+                            <small>Nombre descriptivo del ramo/asignatura</small>
+                            @Html.ValidationMessageFor(m => m.Nombre, "", new { @class = "error-message" })
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="codigo">
+                                <i data-lucide="hash"></i>
+                                Código del Ramo *
+                            </label>
+                            <input 
+                                type="text" 
+                                id="codigo" 
+                                name="Codigo" 
+                                placeholder="Ej: ALG101"
+                                required
+                                maxlength="50"
+                                value="@Model.Codigo">
+                            <small>Código único identificativo del ramo</small>
+                            @Html.ValidationMessageFor(m => m.Codigo, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="descripcion">
+                            <i data-lucide="file-text"></i>
+                            Descripción (Opcional)
+                        </label>
+                        <textarea 
+                            id="descripcion" 
+                            name="Descripcion" 
+                            rows="4"
+                            maxlength="500"
+                            placeholder="Descripción detallada del ramo, objetivos, metodología...">@Model.Descripcion</textarea>
+                        <small>Información adicional sobre el ramo (máximo 500 caracteres)</small>
+                        @Html.ValidationMessageFor(m => m.Descripcion, "", new { @class = "error-message" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="action-left">
+                <a href="/docente/cursos/@Model.CursoId" class="btn-cancel">
+                    <i data-lucide="x"></i>
+                    Cancelar
+                </a>
+            </div>
+            <div class="action-right">
+                <button type="submit" class="btn-primary" id="btnCrearRamo">
+                    <i data-lucide="plus"></i>
+                    Crear Ramo
+                    <span class="loading-spinner" style="display: none;">
+                        <i data-lucide="loader-2"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Toast para mostrar mensajes -->
+<div id="toast" class="toast" style="display: none;"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formCrearRamo');
+    const submitBtn = document.getElementById('btnCrearRamo');
+    const spinner = submitBtn.querySelector('.loading-spinner');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Mostrar loading
+        submitBtn.disabled = true;
+        spinner.style.display = 'inline-block';
+        submitBtn.innerHTML = '<i data-lucide="loader-2"></i> Creando Ramo...';
+        
+        // Recopilar datos del formulario
+        const formData = new FormData(form);
+        
+        // Enviar datos como FormData al endpoint POST
+        fetch(form.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '/docente/cursos/@Model.CursoId';
+                }, 1500);
+            } else {
+                showToast(data.message || 'Error al crear el ramo', 'error');
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Error de conexión al crear el ramo', 'error');
+            resetButton();
+        });
+    });
+    
+    function resetButton() {
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+        submitBtn.innerHTML = '<i data-lucide="plus"></i> Crear Ramo';
+    }
+    
+    function showToast(message, type) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast toast-${type}`;
+        toast.style.display = 'block';
+        
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 4000);
+    }
+});
+</script>
+
+<style>
+.crear-ramo-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.crear-ramo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-content h1 {
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-size: 2.2em;
+}
+
+.header-content p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.curso-info {
+    margin-bottom: 30px;
+}
+
+.curso-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 4px solid #3498db;
+}
+
+.curso-icon {
+    font-size: 2.5em;
+    background: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.curso-details h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+}
+
+.curso-code {
+    background: #3498db;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.form-sections {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.form-section {
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px 25px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.section-header h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1.3em;
+}
+
+.section-header p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.95em;
+}
+
+.section-content {
+    padding: 25px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.95em;
+}
+
+.form-group label i {
+    color: #3498db;
+    font-size: 1em;
+}
+
+.form-group input,
+.form-group textarea {
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 12px 15px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: #fafbfc;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group small {
+    margin-top: 5px;
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 0.85em;
+    margin-top: 5px;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 1px solid #e1e8ed;
+}
+
+.btn-primary, .btn-secondary, .btn-cancel {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-cancel {
+    background: transparent;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+}
+
+.btn-cancel:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toast-success {
+    background: #27ae60;
+}
+
+.toast-error {
+    background: #e74c3c;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .crear-ramo-container {
+        padding: 15px;
+    }
+    
+    .crear-ramo-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .curso-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .action-left, .action-right {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@@media (max-width: 480px) {
+    .header-content h1 {
+        font-size: 1.8em;
+    }
+    
+    .section-content {
+        padding: 20px;
+    }
+    
+    .curso-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 2em;
+    }
+}
+</style>

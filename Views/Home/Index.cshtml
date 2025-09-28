@@ -1,0 +1,483 @@
+@{
+    ViewData["Title"] = "Bienvenido a QuantumAttend";
+    ViewData["Subtitle"] = "Sistema inteligente de registro de asistencia con tecnología QR";
+}
+
+@section Styles {
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 4rem 0;
+            margin: -2rem -2rem 3rem -2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .hero-stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .how-it-works {
+            margin: 4rem 0;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            font-size: 1.2rem;
+        }
+
+        .step-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .step-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            color: var(--accent);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 4rem 0;
+            padding: 3rem;
+            background: var(--surface);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-section {
+            margin: 4rem 0;
+            text-align: center;
+        }
+
+        .demo-video {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 3rem;
+            border: 2px dashed var(--border);
+            margin-top: 2rem;
+        }
+
+        .demo-placeholder {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        @@media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">QuantumAttend</h1>
+            <p class="hero-subtitle">
+                La forma más moderna e inteligente de gestionar asistencias estudiantiles
+            </p>
+            <p style="font-size: 1.1rem; opacity: 0.9; margin-bottom: 2rem;">
+                Utiliza códigos QR dinámicos y tecnología avanzada para hacer el registro de asistencia 
+                rápido, seguro y sin contacto físico.
+            </p>
+            
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="heroStudents">0</span>
+                    <span class="hero-stat-label">Estudiantes Registrados</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="heroClasses">0</span>
+                    <span class="hero-stat-label">Clases Programadas</span>
+                </div>
+                <div class="hero-stat">
+                    <span class="hero-stat-number" id="heroAttendance">0</span>
+                    <span class="hero-stat-label">Asistencias Registradas</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+                ¿Cómo Funciona?
+            </h2>
+            <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+                Un proceso simple de 4 pasos que revoluciona la forma de tomar asistencia
+            </p>
+        </div>
+        
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-icon">
+                    <i data-lucide="user-plus"></i>
+                </div>
+                <h3 class="step-title">Registrar Estudiantes</h3>
+                <p class="step-description">
+                    El docente registra a los estudiantes en el sistema. Cada estudiante obtiene 
+                    automáticamente un código QR único e intransferible.
+                </p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-icon">
+                    <i data-lucide="calendar-plus"></i>
+                </div>
+                <h3 class="step-title">Crear Clase</h3>
+                <p class="step-description">
+                    El docente crea una clase en el sistema especificando la asignatura y detalles. 
+                    La clase queda lista para recibir asistencias.
+                </p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-icon">
+                    <i data-lucide="qr-code"></i>
+                </div>
+                <h3 class="step-title">Generar QR de Clase</h3>
+                <p class="step-description">
+                    El docente genera un código QR temporal para la clase. Este QR se renueva 
+                    automáticamente cada 5 minutos para mayor seguridad.
+                </p>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-icon">
+                    <i data-lucide="smartphone"></i>
+                </div>
+                <h3 class="step-title">Escanear y Registrar</h3>
+                <p class="step-description">
+                    Los estudiantes escanean el QR de la clase con su teléfono, luego el sistema 
+                    lee su QR personal para registrar la asistencia automáticamente.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="mb-4">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+                Características Principales
+            </h2>
+            <p style="font-size: 1.1rem; color: var(--text-secondary);">
+                Tecnología avanzada al servicio de la educación moderna
+            </p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="shield-check"></i>
+                </div>
+                <h3 class="feature-title">Ultra Seguro</h3>
+                <p style="color: var(--text-secondary);">
+                    QRs únicos y temporales que se renuevan automáticamente. Imposible falsificar asistencias.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="zap"></i>
+                </div>
+                <h3 class="feature-title">Súper Rápido</h3>
+                <p style="color: var(--text-secondary);">
+                    Registro de asistencia en menos de 3 segundos. Sin listas, sin papeles, sin demoras.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="smartphone"></i>
+                </div>
+                <h3 class="feature-title">Sin Apps Especiales</h3>
+                <p style="color: var(--text-secondary);">
+                    Los estudiantes solo necesitan la cámara de su teléfono. Compatible con cualquier dispositivo.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="bar-chart-3"></i>
+                </div>
+                <h3 class="feature-title">Reportes Inteligentes</h3>
+                <p style="color: var(--text-secondary);">
+                    Estadísticas automáticas, exportación a Excel/CSV y análisis de tendencias de asistencia.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="clock"></i>
+                </div>
+                <h3 class="feature-title">Control de Tiempo</h3>
+                <p style="color: var(--text-secondary);">
+                    Registro con marca de tiempo precisa. Detecta asistencias tardías automáticamente.
+                </p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i data-lucide="cloud"></i>
+                </div>
+                <h3 class="feature-title">En la Nube</h3>
+                <p style="color: var(--text-secondary);">
+                    Acceso desde cualquier lugar, respaldos automáticos y sincronización en tiempo real.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+            ¿Listo para Empezar?
+        </h2>
+        <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">
+            Comienza a usar QuantumAttend ahora mismo. Solo toma unos minutos configurar tu primera clase.
+        </p>
+        
+        <div class="cta-buttons">
+            <a href="/alumnos" class="quantum-btn btn-primary btn-lg">
+                <i data-lucide="users"></i>
+                Gestionar Estudiantes
+            </a>
+            <a href="/clases" class="quantum-btn btn-success btn-lg">
+                <i data-lucide="plus-circle"></i>
+                Crear Primera Clase
+            </a>
+            <a href="/docente/scanner" class="quantum-btn btn-secondary btn-lg">
+                <i data-lucide="scan"></i>
+                Abrir Escáner
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Section -->
+<section class="demo-section">
+    <div class="container">
+        <h2 style="font-size: 2.2rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">
+            Ver en Acción
+        </h2>
+        <p style="font-size: 1.1rem; color: var(--text-secondary);">
+            Mira qué fácil es tomar asistencia con QuantumAttend
+        </p>
+        
+        <div class="demo-video">
+            <div class="demo-placeholder">
+                <i data-lucide="play-circle" style="font-size: 4rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <p>
+                    <strong>Video Tutorial Próximamente</strong><br>
+                    Mientras tanto, explora el sistema usando los enlaces de arriba
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load and display real statistics
+    try {
+        const [students, classes, attendances] = await Promise.all([
+            fetch('/api/alumnos').then(r => r.ok ? r.json() : []),
+            fetch('/api/clases').then(r => r.ok ? r.json() : []),
+            fetch('/api/asistencias').then(r => r.ok ? r.json() : [])
+        ]);
+        
+        // Animate counters
+        animateCounter('heroStudents', Array.isArray(students) ? students.length : 0);
+        animateCounter('heroClasses', Array.isArray(classes) ? classes.length : 0);
+        animateCounter('heroAttendance', Array.isArray(attendances) ? attendances.length : 0);
+        
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        // Set default values on error
+        document.getElementById('heroStudents').textContent = '0';
+        document.getElementById('heroClasses').textContent = '0';
+        document.getElementById('heroAttendance').textContent = '0';
+    }
+    
+    // Initialize icons
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+});
+
+function animateCounter(elementId, target) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const duration = 2000;
+    const step = target / (duration / 16);
+    let current = 0;
+    
+    const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(timer);
+        }
+        element.textContent = Math.floor(current);
+    }, 16);
+}
+</script>
+}

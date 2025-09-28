@@ -1,0 +1,430 @@
+@model DocenteDashboardViewModel
+
+<div class="docente-dashboard">
+    <div class="header-section">
+        <h1>🎓 Dashboard del Docente</h1>
+        <p class="subtitle">Bienvenido, @User.Identity!.Name</p>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-content">
+                <h3>@Model.Estadisticas.TotalCursos</h3>
+                <p>Cursos</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-content">
+                <h3>@Model.Estadisticas.TotalRamos</h3>
+                <p>Ramos</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <h3>@Model.Estadisticas.ClasesHoy</h3>
+                <p>Clases Hoy</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>@Model.Estadisticas.TotalEstudiantes</h3>
+                <p>Estudiantes</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="quick-actions">
+        <h2>🚀 Acciones Rápidas</h2>
+        <div class="actions-grid">
+            <a href="/workflow" class="action-btn primary">
+                <div class="action-icon">➕</div>
+                <div class="action-content">
+                    <h4>Crear Nueva Clase</h4>
+                    <p>Workflow paso a paso</p>
+                </div>
+            </a>
+            <a href="/docente/scanner" class="action-btn secondary">
+                <div class="action-icon">📱</div>
+                <div class="action-content">
+                    <h4>Scanner Asistencia</h4>
+                    <p>Escanear QR estudiantes</p>
+                </div>
+            </a>
+            <a href="/docente/cursos" class="action-btn tertiary">
+                <div class="action-icon">📊</div>
+                <div class="action-content">
+                    <h4>Gestionar Cursos</h4>
+                    <p>Ver y administrar</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Clases de Hoy -->
+    @if (Model.ClasesHoy.Any())
+    {
+        <div class="today-classes">
+            <h2>📅 Clases de Hoy</h2>
+            <div class="classes-list">
+                @foreach (var clase in Model.ClasesHoy)
+                {
+                    <div class="class-card @(clase.Activa ? "active" : "")">
+                        <div class="class-time">
+                            @clase.HoraInicio.ToString("HH:mm")
+                        </div>
+                        <div class="class-info">
+                            <h4>@clase.Nombre</h4>
+                            <p>@clase.RamoNombre - @clase.CursoNombre</p>
+                            <small>@clase.TotalAsistencias asistencias registradas</small>
+                        </div>
+                        <div class="class-actions">
+                            @if (clase.Activa)
+                            {
+                                <a href="/docente/scanner/@clase.Id" class="btn-small primary">Ver Scanner</a>
+                            }
+                            else
+                            {
+                                <span class="status-badge">Finalizada</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Mis Cursos -->
+    @if (Model.Cursos.Any())
+    {
+        <div class="my-courses">
+            <h2>📚 Mis Cursos</h2>
+            <div class="courses-grid">
+                @foreach (var curso in Model.Cursos)
+                {
+                    <div class="course-card">
+                        <div class="course-header">
+                            <h4>@curso.Nombre</h4>
+                            <span class="course-code">@curso.Codigo</span>
+                            @if (curso.EsPropietario)
+                            {
+                                <span class="owner-badge">👑 Propietario</span>
+                            }
+                        </div>
+                        <div class="course-stats">
+                            <p>@curso.TotalRamos ramos</p>
+                        </div>
+                        <div class="course-actions">
+                            <a href="/docente/cursos/@curso.Id" class="btn-small">Ver Detalle</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="view-all">
+                <a href="/docente/cursos" class="btn-outline">Ver Todos los Cursos</a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.docente-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-section {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header-section h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+    font-size: 2.5em;
+    margin-right: 20px;
+}
+
+.stat-content h3 {
+    font-size: 2em;
+    margin: 0;
+    font-weight: bold;
+}
+
+.stat-content p {
+    margin: 5px 0 0 0;
+    opacity: 0.9;
+}
+
+.quick-actions {
+    margin-bottom: 40px;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    border-color: #3498db;
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+}
+
+.action-btn.primary { border-color: #27ae60; }
+.action-btn.primary:hover { border-color: #229954; background: #f8fff9; }
+
+.action-btn.secondary { border-color: #3498db; }
+.action-btn.secondary:hover { border-color: #2980b9; background: #f8fcff; }
+
+.action-btn.tertiary { border-color: #f39c12; }
+.action-btn.tertiary:hover { border-color: #e67e22; background: #fffcf8; }
+
+.action-icon {
+    font-size: 2.5em;
+    margin-right: 15px;
+}
+
+.action-content h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+}
+
+.action-content p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.today-classes, .my-courses {
+    margin-bottom: 40px;
+}
+
+.classes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.class-card {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.class-card.active {
+    border-left: 5px solid #27ae60;
+    background: #f8fff9;
+}
+
+.class-card:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.class-time {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #3498db;
+    margin-right: 20px;
+    min-width: 80px;
+}
+
+.class-info {
+    flex: 1;
+}
+
+.class-info h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+}
+
+.class-info p {
+    margin: 0 0 5px 0;
+    color: #7f8c8d;
+}
+
+.class-info small {
+    color: #95a5a6;
+}
+
+.class-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.course-card {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.course-card:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.course-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.course-header h4 {
+    flex: 1;
+    margin: 0;
+    color: #2c3e50;
+}
+
+.course-code {
+    background: #ecf0f1;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.owner-badge {
+    background: #f1c40f;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.course-stats p {
+    margin: 0 0 15px 0;
+    color: #7f8c8d;
+}
+
+.btn-small {
+    background: #3498db;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background 0.3s ease;
+}
+
+.btn-small:hover {
+    background: #2980b9;
+}
+
+.btn-small.primary {
+    background: #27ae60;
+}
+
+.btn-small.primary:hover {
+    background: #229954;
+}
+
+.btn-outline {
+    border: 2px solid #3498db;
+    color: #3498db;
+    background: transparent;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+.view-all {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.status-badge {
+    background: #95a5a6;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+@@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .class-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .class-time {
+        margin: 0 0 10px 0;
+    }
+    
+    .courses-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>

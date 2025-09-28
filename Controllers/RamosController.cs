@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using registroAsistencia.Models;
 using registroAsistencia.Services;
@@ -6,6 +7,7 @@ namespace registroAsistencia.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class RamosController : ControllerBase
 {
     private readonly IDataService _dataService;
@@ -71,6 +73,8 @@ public class RamosController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
+
+    
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteRamo(int id)

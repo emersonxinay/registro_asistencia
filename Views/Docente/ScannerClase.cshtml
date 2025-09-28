@@ -1,0 +1,1337 @@
+@model ScannerClaseViewModel
+
+<div class="scanner-container">
+    <!-- Header del Scanner -->
+    <div class="scanner-header">
+        <div class="header-content">
+            <h1>📱 Escáner de Asistencia</h1>
+            <div class="class-info">
+                <h2>@Model.NombreClase</h2>
+                <p>@Model.CursoNombre - @Model.RamoNombre</p>
+                <span class="class-date">@Model.FechaHoraInicio.ToString("dddd, dd 'de' MMMM 'de' yyyy 'a las' HH:mm", new System.Globalization.CultureInfo("es-ES"))</span>
+            </div>
+        </div>
+        <div class="header-status">
+            <div class="status-badge @(Model.ClaseActiva ? "active" : "inactive")">
+                <span class="status-indicator"></span>
+                <span class="status-text">@(Model.ClaseActiva ? "Clase Activa" : "Clase Inactiva")</span>
+            </div>
+            @if (Model.ClaseActiva)
+            {
+                <div class="class-timer">
+                    <div class="timer-label">Tiempo restante:</div>
+                    <div id="class-countdown" class="timer-display">--:--</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Scanner Principal -->
+    <div class="scanner-section">
+        <div class="scanner-controls">
+            <div class="scanner-area">
+                <div id="scanner-placeholder" class="scanner-placeholder">
+                    <div class="scanner-icon">📷</div>
+                    <h3>Escáner de Códigos QR</h3>
+                    <p>Haz clic en "Iniciar Escáner" para comenzar a registrar asistencias</p>
+                    <button id="start-scanner" class="btn-primary scanner-btn">
+                        <i data-lucide="camera"></i>
+                        Iniciar Escáner
+                    </button>
+                </div>
+                <video id="scanner-video" class="scanner-video" style="display: none;" autoplay muted playsinline></video>
+                <canvas id="scanner-canvas" style="display: none;"></canvas>
+            </div>
+            
+            <div class="scanner-actions">
+                <button id="stop-scanner" class="btn-secondary" style="display: none;">
+                    <i data-lucide="square"></i>
+                    Detener Escáner
+                </button>
+                <button id="switch-camera" class="btn-outline" style="display: none;">
+                    <i data-lucide="rotate-cw"></i>
+                    Cambiar Cámara
+                </button>
+            </div>
+        </div>
+
+        <!-- Manual Input -->
+        <div class="manual-input">
+            <h4>📝 Registro Manual</h4>
+            <p>Ingresa el código de estudiante manualmente si no es posible escanear el QR</p>
+            <div class="input-group">
+                <input type="text" id="manual-code" placeholder="Código de estudiante" maxlength="20">
+                <button id="register-manual" class="btn-primary">
+                    <i data-lucide="user-plus"></i>
+                    Registrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Asistencias en Tiempo Real -->
+    <div class="attendance-panel">
+        <div class="panel-header">
+            <h3>👥 Asistencias Registradas</h3>
+            <div class="attendance-stats">
+                <span class="stat-item">
+                    <span class="stat-value" id="total-present">0</span>
+                    <span class="stat-label">Presentes</span>
+                </span>
+                <span class="stat-item">
+                    <span class="stat-value" id="total-late">0</span>
+                    <span class="stat-label">Tardanzas</span>
+                </span>
+                <span class="stat-item">
+                    <span class="stat-value" id="total-absent">0</span>
+                    <span class="stat-label">Ausentes</span>
+                </span>
+            </div>
+        </div>
+        
+        <div class="attendance-list" id="attendance-list">
+            <!-- Las asistencias se cargarán dinámicamente aquí -->
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="scanner-footer">
+        <a href="/docente/clases/@Model.ClaseId/asistencias" class="btn-secondary">
+            <i data-lucide="list"></i>
+            Ver Lista Completa
+        </a>
+        <a href="/workflow/clase-creada/@Model.ClaseId" class="btn-outline">
+            <i data-lucide="arrow-left"></i>
+            Volver a la Clase
+        </a>
+    </div>
+</div>
+
+<!-- Toast para notificaciones -->
+<div id="toast" class="toast" style="display: none;"></div>
+
+<!-- Modal para reporte final de asistencias -->
+<div id="final-report-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📊 Reporte Final de Asistencias</h2>
+            <span class="modal-close" onclick="closeFinalReport()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="final-stats">
+                <div class="final-stat-card">
+                    <div class="stat-number" id="final-present">0</div>
+                    <div class="stat-description">Presentes</div>
+                </div>
+                <div class="final-stat-card">
+                    <div class="stat-number" id="final-late">0</div>
+                    <div class="stat-description">Tardanzas</div>
+                </div>
+                <div class="final-stat-card">
+                    <div class="stat-number" id="final-absent">0</div>
+                    <div class="stat-description">Ausentes</div>
+                </div>
+            </div>
+            <div class="class-summary">
+                <h3>📋 Resumen de la Clase</h3>
+                <p><strong>Clase:</strong> @Model.NombreClase</p>
+                <p><strong>Curso:</strong> @Model.CursoNombre</p>
+                <p><strong>Ramo:</strong> @Model.RamoNombre</p>
+                <p><strong>Duración:</strong> <span id="class-duration">--</span></p>
+                <p><strong>Finalizada:</strong> <span id="class-end-time">--</span></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="exportFinalReport()">
+                <i data-lucide="download"></i>
+                Exportar CSV
+            </button>
+            <button class="btn-secondary" onclick="closeFinalReport()">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.scanner-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.scanner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+.class-timer {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.timer-label {
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timer-display {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #28a745;
+    font-family: 'Courier New', monospace;
+}
+
+.timer-display.warning {
+    color: #ffc107;
+}
+
+.timer-display.danger {
+    color: #dc3545;
+}
+
+.header-content h1 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 2.2em;
+}
+
+.class-info h2 {
+    color: #3498db;
+    margin: 0 0 8px 0;
+    font-size: 1.5em;
+}
+
+.class-info p {
+    color: #7f8c8d;
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+}
+
+.class-date {
+    color: #95a5a6;
+    font-size: 0.95em;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.status-badge.active {
+    background: #d5f4e6;
+    color: #27ae60;
+    border: 2px solid #27ae60;
+}
+
+.status-badge.inactive {
+    background: #fdf2e9;
+    color: #e67e22;
+    border: 2px solid #e67e22;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-badge.active .status-indicator {
+    animation: pulse 2s infinite;
+}
+
+@@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@@keyframes successFlash {
+    0% { 
+        background-color: transparent; 
+        transform: scale(1);
+    }
+    50% { 
+        background-color: rgba(39, 174, 96, 0.2); 
+        transform: scale(1.02);
+    }
+    100% { 
+        background-color: transparent; 
+        transform: scale(1);
+    }
+}
+
+.scanner-area.success-flash {
+    animation: successFlash 1s ease-in-out;
+}
+
+.scanner-section {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.scanner-controls {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.scanner-area {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.scanner-placeholder {
+    background: #f8f9fa;
+    border: 3px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.scanner-placeholder:hover {
+    border-color: #3498db;
+    background: #f4f8fb;
+}
+
+.scanner-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.scanner-placeholder h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.scanner-placeholder p {
+    color: #7f8c8d;
+    margin-bottom: 25px;
+}
+
+.scanner-video {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid #27ae60;
+}
+
+.scanner-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.manual-input {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    height: fit-content;
+}
+
+.manual-input h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.manual-input p {
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px 15px;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.attendance-panel {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.panel-header {
+    background: #f8f9fa;
+    padding: 25px 30px;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.attendance-stats {
+    display: flex;
+    gap: 25px;
+}
+
+.stat-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #3498db;
+}
+
+.stat-label {
+    font-size: 0.85em;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.attendance-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 20px 30px;
+}
+
+.attendance-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.attendance-item:last-child {
+    border-bottom: none;
+}
+
+.student-info h5 {
+    margin: 0 0 3px 0;
+    color: #2c3e50;
+}
+
+.student-info p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.attendance-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.attendance-status.presente {
+    background: #d5f4e6;
+    color: #27ae60;
+}
+
+.attendance-status.tardanza {
+    background: #fff3cd;
+    color: #f39c12;
+}
+
+.attendance-status.ausente {
+    background: #f8d7da;
+    color: #e74c3c;
+}
+
+.attendance-status.excusado {
+    background: #e2e3e5;
+    color: #6c757d;
+}
+
+.attendance-status.pendiente {
+    background: #cce5ff;
+    color: #007bff;
+}
+
+.scanner-footer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 20px;
+}
+
+.btn-primary, .btn-secondary, .btn-outline {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+.scanner-btn {
+    font-size: 1.1em;
+    padding: 15px 30px;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.toast.success {
+    background: #27ae60;
+}
+
+.toast.error {
+    background: #e74c3c;
+}
+
+.toast.warning {
+    background: #f39c12;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: modalShow 0.3s ease-out;
+}
+
+@@keyframes modalShow {
+    from { opacity: 0; transform: translateY(-50px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+.modal-close {
+    font-size: 2em;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    opacity: 0.7;
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.final-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.final-stat-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    border: 2px solid #e9ecef;
+}
+
+.stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 10px;
+}
+
+.stat-description {
+    color: #6c757d;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.class-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+
+.class-summary h3 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.class-summary p {
+    margin: 8px 0;
+    color: #555;
+}
+
+.modal-footer {
+    padding: 20px 30px;
+    background: #f8f9fa;
+    border-radius: 0 0 15px 15px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* Responsive */
+@@media (max-width: 968px) {
+    .scanner-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .scanner-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .attendance-stats {
+        justify-content: center;
+    }
+    
+    .panel-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+@@media (max-width: 768px) {
+    .scanner-container {
+        padding: 15px;
+    }
+    
+    .scanner-placeholder {
+        padding: 40px 20px;
+    }
+    
+    .scanner-icon {
+        font-size: 3em;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .scanner-footer {
+        flex-direction: column;
+    }
+    
+    .attendance-stats {
+        gap: 15px;
+    }
+}
+</style>
+
+<script>
+let scanner = null;
+let currentStream = null;
+let cameras = [];
+let currentCameraIndex = 0;
+
+let classTimer = null;
+let classEndTime = null;
+let classActive = @Model.ClaseActiva.ToString().ToLower();
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar iconos
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Event listeners
+    document.getElementById('start-scanner').addEventListener('click', startScanner);
+    document.getElementById('stop-scanner').addEventListener('click', stopScanner);
+    document.getElementById('switch-camera').addEventListener('click', switchCamera);
+    document.getElementById('register-manual').addEventListener('click', registerManual);
+    
+    // Enter key en input manual
+    document.getElementById('manual-code').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            registerManual();
+        }
+    });
+    
+    // Cargar asistencias iniciales
+    loadAttendances();
+    
+    // Auto-refresh cada 30 segundos
+    setInterval(loadAttendances, 30000);
+    
+    // Inicializar timer de clase si está activa
+    if (classActive) {
+        initializeClassTimer();
+    }
+});
+
+async function startScanner() {
+    try {
+        // Solicitar permisos de cámara
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        currentStream = stream;
+        
+        // Obtener lista de cámaras
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameras = devices.filter(device => device.kind === 'videoinput');
+        
+        // Mostrar video
+        const video = document.getElementById('scanner-video');
+        const placeholder = document.getElementById('scanner-placeholder');
+        
+        video.srcObject = stream;
+        video.style.display = 'block';
+        placeholder.style.display = 'none';
+        
+        // Mostrar controles
+        document.getElementById('stop-scanner').style.display = 'inline-flex';
+        if (cameras.length > 1) {
+            document.getElementById('switch-camera').style.display = 'inline-flex';
+        }
+        
+        // Iniciar detección de QR
+        startQRDetection(video);
+        
+        showToast('Escáner iniciado correctamente', 'success');
+        
+    } catch (error) {
+        console.error('Error al iniciar scanner:', error);
+        showToast('Error al acceder a la cámara. Verifica los permisos.', 'error');
+    }
+}
+
+function stopScanner() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+    }
+    
+    const video = document.getElementById('scanner-video');
+    const placeholder = document.getElementById('scanner-placeholder');
+    
+    video.style.display = 'none';
+    placeholder.style.display = 'block';
+    
+    document.getElementById('stop-scanner').style.display = 'none';
+    document.getElementById('switch-camera').style.display = 'none';
+    
+    if (scanner) {
+        clearInterval(scanner);
+        scanner = null;
+    }
+    
+    showToast('Escáner detenido', 'warning');
+}
+
+async function switchCamera() {
+    if (cameras.length <= 1) return;
+    
+    stopScanner();
+    
+    currentCameraIndex = (currentCameraIndex + 1) % cameras.length;
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+                deviceId: cameras[currentCameraIndex].deviceId,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        currentStream = stream;
+        const video = document.getElementById('scanner-video');
+        video.srcObject = stream;
+        
+        startQRDetection(video);
+        
+        showToast(`Cambiado a cámara ${currentCameraIndex + 1}`, 'success');
+        
+    } catch (error) {
+        console.error('Error al cambiar cámara:', error);
+        showToast('Error al cambiar de cámara', 'error');
+    }
+}
+
+function startQRDetection(video) {
+    const canvas = document.getElementById('scanner-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    scanner = setInterval(() => {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Aquí usarías una librería de detección de QR como jsQR
+            // Por simplicidad, simulamos la detección
+            // En implementación real, integrar con jsQR o similar
+        }
+    }, 100);
+}
+
+async function registerManual() {
+    const codeInput = document.getElementById('manual-code');
+    const code = codeInput.value.trim();
+    
+    if (!code) {
+        showToast('Por favor ingresa un código de estudiante', 'warning');
+        return;
+    }
+    
+    await registerAttendance(code);
+    codeInput.value = '';
+}
+
+async function registerAttendance(code) {
+    try {
+        const response = await fetch('/docente/api/scanner/escanear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ClaseId: @Model.ClaseId,
+                QrData: code
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Confirmación exitosa con sonido y animación
+            showSuccessConfirmation(result.estudiante);
+            loadAttendances();
+            
+            // Limpiar input manual
+            document.getElementById('manual-code').value = '';
+            
+        } else {
+            showToast(result.message || 'Error al registrar asistencia', 'error');
+            // Sonido de error
+            playErrorSound();
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('Error de conexión al registrar asistencia', 'error');
+        playErrorSound();
+    }
+}
+
+async function loadAttendances() {
+    try {
+        const response = await fetch(`/api/clases/@Model.ClaseId/asistencias`);
+        const asistencias = await response.json();
+        
+        const listContainer = document.getElementById('attendance-list');
+        
+        if (asistencias.length === 0) {
+            listContainer.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 40px;">Aún no hay asistencias registradas</p>';
+            updateStats([]); // Resetear estadísticas
+            return;
+        }
+        
+        listContainer.innerHTML = asistencias.map(asistencia => {
+            const estado = getEstadoAsistencia(asistencia);
+            const estadoClass = estado.toLowerCase();
+            const horaRegistro = asistencia.fechaHoraRegistro ? 
+                new Date(asistencia.fechaHoraRegistro).toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                }) : '';
+            
+            return `
+                <div class="attendance-item">
+                    <div class="student-info">
+                        <h5>${asistencia.alumnoNombre || asistencia.nombre || asistencia.Nombre}</h5>
+                        <p>Código: ${asistencia.alumnoCodigo || asistencia.codigo || asistencia.Codigo}</p>
+                        ${horaRegistro ? `<small>Registrado: ${horaRegistro}</small>` : ''}
+                        ${asistencia.minutosRetraso > 0 ? `<small>Retraso: ${asistencia.minutosRetraso} min</small>` : ''}
+                    </div>
+                    <div class="attendance-status ${estadoClass}">
+                        ${getStatusIcon(estado)} ${estado}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        updateStats(asistencias);
+        
+    } catch (error) {
+        console.error('Error cargando asistencias:', error);
+        showToast('Error al cargar asistencias', 'error');
+    }
+}
+
+function updateStats(asistencias = []) {
+    let presente = 0, tardanza = 0, ausente = 0;
+    
+    if (asistencias.length > 0) {
+        asistencias.forEach(asistencia => {
+            const estado = getEstadoAsistencia(asistencia);
+            switch (estado.toLowerCase()) {
+                case 'presente':
+                case 'excusado': // Contar excusados como presentes para estadísticas
+                    presente++;
+                    break;
+                case 'tardanza':
+                    tardanza++;
+                    break;
+                case 'ausente':
+                case 'pendiente': // Contar pendientes como ausentes temporalmente
+                    ausente++;
+                    break;
+            }
+        });
+    } else {
+        // Si no hay datos, contar desde el DOM
+        const items = document.querySelectorAll('.attendance-item');
+        items.forEach(item => {
+            const status = item.querySelector('.attendance-status');
+            if (status.classList.contains('presente') || status.classList.contains('excusado')) presente++;
+            else if (status.classList.contains('tardanza')) tardanza++;
+            else if (status.classList.contains('ausente') || status.classList.contains('pendiente')) ausente++;
+        });
+    }
+    
+    document.getElementById('total-present').textContent = presente;
+    document.getElementById('total-late').textContent = tardanza;
+    document.getElementById('total-absent').textContent = ausente;
+}
+
+function getStatusIcon(estado) {
+    switch (estado.toLowerCase()) {
+        case 'presente': return '✅';
+        case 'tardanza': return '⚠️';
+        case 'ausente': return '❌';
+        case 'excusado': return '📝';
+        case 'pendiente': return '⏱️';
+        default: return '❓';
+    }
+}
+
+function getEstadoAsistencia(asistencia) {
+    // Determinar el estado basado en la estructura de datos de asistencia
+    if (asistencia.estado !== undefined && asistencia.estado !== null) {
+        // Manejar el estado enum (puede venir como número o string)
+        if (typeof asistencia.estado === 'number') {
+            switch (asistencia.estado) {
+                case 1: return 'Presente';
+                case 2: return 'Tardanza';
+                case 3: return 'Ausente';
+                case 4: return 'Excusado';
+                case 5: return 'Pendiente';
+                default: return 'Presente';
+            }
+        } else {
+            // Si viene como string, usar directamente
+            return asistencia.estado;
+        }
+    } else if (asistencia.minutosRetraso > 0) {
+        return 'Tardanza';
+    } else {
+        return 'Presente';
+    }
+}
+
+function showSuccessConfirmation(estudiante) {
+    // Animación visual de éxito
+    const scannerArea = document.querySelector('.scanner-area');
+    scannerArea.classList.add('success-flash');
+    
+    // Remover la clase después de la animación
+    setTimeout(() => {
+        scannerArea.classList.remove('success-flash');
+    }, 1000);
+    
+    // Mensaje de confirmación detallado
+    const estadoText = estudiante.minutosRetraso > 0 ? 
+        `Tardanza (${estudiante.minutosRetraso} min)` : 
+        'Presente';
+    
+    const confirmationMessage = `🎉 ¡QR Reconocido! ${estudiante.nombre} - ${estadoText}`;
+    showToast(confirmationMessage, 'success');
+    
+    // Sonido de éxito
+    playSuccessSound();
+    
+    // Vibración si está disponible
+    if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+    }
+}
+
+function playSuccessSound() {
+    // Crear y reproducir sonido de éxito
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+function playErrorSound() {
+    // Crear y reproducir sonido de error
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.2);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.4);
+}
+
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 5000); // Aumentado a 5 segundos para mejor visibilidad
+}
+
+function initializeClassTimer() {
+    // Configurar el tiempo de fin de clase desde el modelo
+    const classEndTimeStr = '@Model.FechaHoraFin.ToString("yyyy-MM-ddTHH:mm:ss")';
+    classEndTime = new Date(classEndTimeStr);
+    
+    // Iniciar el timer
+    classTimer = setInterval(updateClassTimer, 1000);
+    updateClassTimer(); // Actualizar inmediatamente
+}
+
+function updateClassTimer() {
+    const now = new Date();
+    const timeLeft = classEndTime - now;
+    
+    if (timeLeft <= 0) {
+        // La clase ha terminado
+        endClass();
+        return;
+    }
+    
+    // Calcular horas, minutos y segundos restantes
+    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    
+    // Formatear el tiempo
+    const timeDisplay = hours > 0 ? 
+        `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}` :
+        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    const timerElement = document.getElementById('class-countdown');
+    if (timerElement) {
+        timerElement.textContent = timeDisplay;
+        
+        // Cambiar color según el tiempo restante
+        timerElement.className = 'timer-display';
+        if (timeLeft < 5 * 60 * 1000) { // Menos de 5 minutos
+            timerElement.classList.add('danger');
+        } else if (timeLeft < 15 * 60 * 1000) { // Menos de 15 minutos
+            timerElement.classList.add('warning');
+        }
+    }
+}
+
+function endClass() {
+    // Detener el timer
+    if (classTimer) {
+        clearInterval(classTimer);
+        classTimer = null;
+    }
+    
+    // Detener el scanner si está activo
+    if (currentStream) {
+        stopScanner();
+    }
+    
+    // Deshabilitar controles
+    disableAttendanceControls();
+    
+    // Mostrar reporte final
+    showFinalReport();
+    
+    // Actualizar estado visual
+    updateUIForClassEnd();
+}
+
+function disableAttendanceControls() {
+    // Deshabilitar botones de scanner
+    document.getElementById('start-scanner').disabled = true;
+    document.getElementById('register-manual').disabled = true;
+    document.getElementById('manual-code').disabled = true;
+    
+    // Cambiar texto de los controles
+    const scannerPlaceholder = document.getElementById('scanner-placeholder');
+    if (scannerPlaceholder && scannerPlaceholder.style.display !== 'none') {
+        scannerPlaceholder.innerHTML = `
+            <div class="scanner-icon">⏰</div>
+            <h3>Clase Finalizada</h3>
+            <p>El tiempo de clase ha terminado. Ya no se pueden registrar más asistencias.</p>
+        `;
+    }
+}
+
+function updateUIForClassEnd() {
+    // Actualizar el badge de estado
+    const statusBadge = document.querySelector('.status-badge');
+    const statusText = document.querySelector('.status-text');
+    const statusIndicator = document.querySelector('.status-indicator');
+    
+    if (statusBadge && statusText) {
+        statusBadge.className = 'status-badge inactive';
+        statusText.textContent = 'Clase Finalizada';
+        if (statusIndicator) {
+            statusIndicator.style.animation = 'none';
+        }
+    }
+    
+    // Actualizar el timer
+    const timerElement = document.getElementById('class-countdown');
+    if (timerElement) {
+        timerElement.textContent = '00:00';
+        timerElement.className = 'timer-display danger';
+    }
+}
+
+function showFinalReport() {
+    // Cargar estadísticas finales
+    loadAttendances().then(() => {
+        // Calcular estadísticas
+        const totalPresent = parseInt(document.getElementById('total-present').textContent);
+        const totalLate = parseInt(document.getElementById('total-late').textContent);
+        const totalAbsent = parseInt(document.getElementById('total-absent').textContent);
+        
+        // Llenar el modal con las estadísticas
+        document.getElementById('final-present').textContent = totalPresent;
+        document.getElementById('final-late').textContent = totalLate;
+        document.getElementById('final-absent').textContent = totalAbsent;
+        
+        // Calcular duración de la clase
+        const startTime = new Date('@Model.FechaHoraInicio.ToString("yyyy-MM-ddTHH:mm:ss")');
+        const endTime = new Date();
+        const duration = endTime - startTime;
+        const durationHours = Math.floor(duration / (1000 * 60 * 60));
+        const durationMinutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+        const durationText = durationHours > 0 ? 
+            `${durationHours}h ${durationMinutes}m` : 
+            `${durationMinutes}m`;
+        
+        document.getElementById('class-duration').textContent = durationText;
+        document.getElementById('class-end-time').textContent = endTime.toLocaleTimeString('es-ES');
+        
+        // Mostrar el modal
+        document.getElementById('final-report-modal').style.display = 'block';
+        
+        // Sonido de finalización
+        playClassEndSound();
+    });
+}
+
+function closeFinalReport() {
+    document.getElementById('final-report-modal').style.display = 'none';
+}
+
+function exportFinalReport() {
+    // Redirigir a la exportación CSV
+    window.open(`/api/clases/@Model.ClaseId/asistencias.csv`, '_blank');
+}
+
+function playClassEndSound() {
+    // Sonido especial para fin de clase
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Crear secuencia de tonos para indicar fin de clase
+    [800, 600, 500].forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.3);
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + index * 0.3);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + index * 0.3 + 0.5);
+        
+        oscillator.start(audioContext.currentTime + index * 0.3);
+        oscillator.stop(audioContext.currentTime + index * 0.3 + 0.5);
+    });
+}
+
+// Prevenir registro cuando la clase ha terminado
+const originalRegisterAttendance = registerAttendance;
+registerAttendance = async function(code) {
+    const now = new Date();
+    if (classEndTime && now >= classEndTime) {
+        showToast('La clase ha terminado. No se pueden registrar más asistencias.', 'error');
+        return;
+    }
+    return originalRegisterAttendance(code);
+};
+
+// Cleanup al salir de la página
+window.addEventListener('beforeunload', function() {
+    if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+    }
+    if (classTimer) {
+        clearInterval(classTimer);
+    }
+});
+</script>

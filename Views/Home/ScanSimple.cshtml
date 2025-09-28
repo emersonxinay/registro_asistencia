@@ -2,131 +2,339 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Asistencia - Clase @ViewBag.ClaseId</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Registro de Asistencia - QuantumAttend</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            font-family: Arial, sans-serif; 
-            background: #f0f2f5; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh;
             padding: 20px; 
             line-height: 1.6; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .container { 
-            max-width: 400px; 
-            margin: 0 auto; 
+            max-width: 450px; 
+            width: 100%;
             background: white; 
-            padding: 30px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            padding: 40px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            text-align: center;
         }
         .header { 
-            text-align: center; 
             margin-bottom: 30px; 
-            color: #2c3e50; 
+        }
+        .brand {
+            color: #667eea;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
         }
         .success-icon { 
-            font-size: 48px; 
+            font-size: 60px; 
             color: #27ae60; 
-            margin-bottom: 10px; 
+            margin-bottom: 15px; 
+            display: block;
+        }
+        .header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        .class-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        .class-info h3 {
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        .class-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .steps-section {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .steps-title {
+            text-align: center;
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .step-text {
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        .scanner-section {
+            background: #e8f4fd;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .scanner-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .scanner-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .scanner-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        .scanner-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .camera-container {
+            margin: 20px 0;
+            display: none;
+        }
+        .camera-view {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border-radius: 12px;
+            background: #000;
+            margin: 0 auto;
+        }
+        .manual-input {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
         }
         .form-group { 
             margin-bottom: 20px; 
+            text-align: left;
         }
         .form-label { 
             display: block; 
             margin-bottom: 8px; 
-            font-weight: bold; 
-            color: #34495e; 
+            font-weight: 600; 
+            color: #495057; 
         }
         .form-input { 
             width: 100%; 
             padding: 15px; 
-            border: 2px solid #bdc3c7; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            text-align: center; 
+            border: 2px solid #e9ecef; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: border-color 0.3s ease;
         }
         .form-input:focus { 
-            border-color: #3498db; 
+            border-color: #667eea; 
             outline: none; 
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         .btn { 
             width: 100%; 
             padding: 15px; 
-            background: #3498db; 
+            background: #27ae60; 
             color: white; 
             border: none; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            font-weight: bold; 
+            border-radius: 12px; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
             cursor: pointer; 
-            margin-top: 10px; 
+            transition: all 0.3s ease;
         }
         .btn:hover { 
-            background: #2980b9; 
+            background: #229954; 
+            transform: translateY(-2px);
         }
         .btn:disabled { 
             background: #95a5a6; 
             cursor: not-allowed; 
+            transform: none;
         }
         .message { 
             margin-top: 20px; 
             padding: 15px; 
-            border-radius: 8px; 
-            text-align: center; 
-            font-weight: bold; 
+            border-radius: 12px; 
+            font-weight: 600; 
         }
         .message.success { 
-            background: #d5f4e6; 
-            color: #27ae60; 
-            border: 1px solid #27ae60; 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
         }
         .message.error { 
-            background: #fadbd8; 
-            color: #e74c3c; 
-            border: 1px solid #e74c3c; 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
         }
         .help { 
-            margin-top: 20px; 
-            padding: 15px; 
-            background: #ecf0f1; 
-            border-radius: 8px; 
-            font-size: 14px; 
+            margin-top: 25px; 
+            padding: 20px; 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            font-size: 0.9rem; 
+            text-align: left;
         }
         .help h4 { 
-            margin-bottom: 10px; 
-            color: #2c3e50; 
+            margin-bottom: 15px; 
+            color: #495057; 
+            text-align: center;
         }
-        .loading { 
-            display: none; 
+        .help-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .help-icon {
+            color: #667eea;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @@keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .hidden { display: none !important; }
+        
+        @@media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            .header h2 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div class="success-icon">✅</div>
-            <h2>¡QR Escaneado!</h2>
-            <p>Clase ID: <strong>@ViewBag.ClaseId</strong></p>
+            <div class="brand">QuantumAttend</div>
+            <div class="success-icon">📱</div>
+            <h2>Registro de Asistencia</h2>
         </div>
 
-        <form id="scanForm">
-            <div class="form-group">
-                <label class="form-label">Tu ID de Alumno:</label>
-                <input type="number" id="alumnoId" class="form-input" min="1" required placeholder="Ejemplo: 1" autofocus>
+        <div class="class-info">
+            <h3>Clase Activa</h3>
+            <p>ID de Clase: <strong>@ViewBag.ClaseId</strong></p>
+            <p>Código de Sesión: <strong>@ViewBag.Nonce</strong></p>
+        </div>
+
+        <div class="steps-section">
+            <h3 class="steps-title">¿Cómo registrar tu asistencia?</h3>
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Haz clic en "Abrir Escáner" para activar la cámara</div>
             </div>
-            <button type="submit" class="btn" id="submitBtn">Registrar Asistencia</button>
-            <button type="button" class="btn loading" id="loadingBtn" disabled>Registrando...</button>
-        </form>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Apunta la cámara hacia tu código QR personal</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">Espera la confirmación de registro exitoso</div>
+            </div>
+        </div>
+
+        <div class="scanner-section">
+            <div class="scanner-icon">📸</div>
+            <h3 style="margin-bottom: 15px; color: #495057;">Escáner QR</h3>
+            <button type="button" class="scanner-btn" id="startScanBtn">
+                <span>📱</span> Abrir Escáner
+            </button>
+            <div class="camera-container" id="cameraContainer">
+                <video class="camera-view" id="cameraView" autoplay playsinline></video>
+            </div>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 10px;">
+                Necesitarás permitir el acceso a la cámara cuando te lo solicite el navegador
+            </p>
+        </div>
+
+        <div class="manual-input">
+            <h4 style="margin-bottom: 15px; color: #495057; text-align: center;">
+                ¿No tienes tu QR? Ingresa tu ID manualmente
+            </h4>
+            <form id="scanForm">
+                <div class="form-group">
+                    <label class="form-label">Tu ID de Estudiante:</label>
+                    <input type="number" id="alumnoId" class="form-input" min="1" required 
+                           placeholder="Ingresa tu ID de estudiante">
+                </div>
+                <button type="submit" class="btn" id="submitBtn">
+                    Registrar Asistencia
+                </button>
+                <button type="button" class="btn hidden" id="loadingBtn" disabled>
+                    <span class="loading-spinner"></span> Registrando...
+                </button>
+            </form>
+        </div>
 
         <div id="mensaje"></div>
 
         <div class="help">
-            <h4>💡 IDs de Prueba:</h4>
-            <p><strong>ID 1:</strong> Juan Pérez</p>
-            <p><strong>ID 2:</strong> María García</p>
-            <p><strong>ID 3:</strong> Carlos López</p>
+            <h4>🆘 ¿Necesitas ayuda?</h4>
+            <div class="help-item">
+                <span class="help-icon">❓</span>
+                <span>Si no tienes tu QR personal, contacta a tu profesor</span>
+            </div>
+            <div class="help-item">
+                <span class="help-icon">🔄</span>
+                <span>Si el escáner no funciona, usa el registro manual</span>
+            </div>
+            <div class="help-item">
+                <span class="help-icon">⚠️</span>
+                <span>Asegúrate de estar en la clase correcta antes de registrar</span>
+            </div>
         </div>
     </div>
 
@@ -134,12 +342,48 @@
         const claseId = @ViewBag.ClaseId;
         let currentNonce = '@ViewBag.Nonce';
         let isSubmitting = false;
+        let stream = null;
 
         const form = document.getElementById('scanForm');
         const submitBtn = document.getElementById('submitBtn');
         const loadingBtn = document.getElementById('loadingBtn');
         const mensajeDiv = document.getElementById('mensaje');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const cameraContainer = document.getElementById('cameraContainer');
+        const cameraView = document.getElementById('cameraView');
 
+        // Scanner functionality
+        startScanBtn.addEventListener('click', async function() {
+            try {
+                // Request camera permission
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment', // Back camera on mobile
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                cameraView.srcObject = stream;
+                cameraContainer.style.display = 'block';
+                startScanBtn.textContent = '🔍 Escaneando...';
+                startScanBtn.disabled = true;
+                
+                showMessage('Cámara activada. Apunta hacia tu código QR personal.', 'success');
+                
+                // Note: In a real implementation, you would integrate a QR code scanning library here
+                // For now, we'll show instructions for manual input
+                setTimeout(() => {
+                    showMessage('Para esta demo, usa el registro manual con tu ID de estudiante.', 'error');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                showMessage('No se pudo acceder a la cámara. Usa el registro manual.', 'error');
+            }
+        });
+
+        // Form submission for manual input
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -147,13 +391,13 @@
             
             const alumnoId = document.getElementById('alumnoId').value;
             if (!alumnoId) {
-                showMessage('Por favor ingresa tu ID de alumno', 'error');
+                showMessage('Por favor ingresa tu ID de estudiante', 'error');
                 return;
             }
 
             isSubmitting = true;
-            submitBtn.style.display = 'none';
-            loadingBtn.style.display = 'block';
+            submitBtn.classList.add('hidden');
+            loadingBtn.classList.remove('hidden');
 
             try {
                 console.log('Enviando registro:', { alumnoId, claseId, nonce: currentNonce });
@@ -173,28 +417,70 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    showMessage(result.mensaje || '¡Asistencia registrada exitosamente!', 'success');
+                    showMessage('🎉 ¡Asistencia registrada exitosamente! Tu presencia ha sido confirmada.', 'success');
                     form.reset();
+                    
+                    // Hide camera if active
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                        cameraContainer.style.display = 'none';
+                        startScanBtn.textContent = '📱 Abrir Escáner';
+                        startScanBtn.disabled = false;
+                    }
+                    
+                    // Auto-redirect after success (optional)
+                    setTimeout(() => {
+                        showMessage('Puedes cerrar esta ventana. ¡Gracias por registrar tu asistencia!', 'success');
+                    }, 3000);
+                    
                 } else {
-                    throw new Error(result.mensaje || 'Error al registrar');
+                    throw new Error(result.mensaje || 'Error al registrar asistencia');
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('Error: ' + error.message, 'error');
+                let errorMsg = error.message;
+                
+                // Provide helpful error messages
+                if (errorMsg.includes('alumno no encontrado')) {
+                    errorMsg = 'ID de estudiante no encontrado. Verifica tu número de ID.';
+                } else if (errorMsg.includes('clase no activa')) {
+                    errorMsg = 'Esta clase ya no está activa. Contacta a tu profesor.';
+                } else if (errorMsg.includes('ya registrada')) {
+                    errorMsg = 'Tu asistencia ya fue registrada para esta clase.';
+                }
+                
+                showMessage('❌ ' + errorMsg, 'error');
             } finally {
                 isSubmitting = false;
-                submitBtn.style.display = 'block';
-                loadingBtn.style.display = 'none';
+                submitBtn.classList.remove('hidden');
+                loadingBtn.classList.add('hidden');
             }
         });
 
         function showMessage(text, type) {
             mensajeDiv.innerHTML = '<div class="message ' + type + '">' + text + '</div>';
+            
+            // Auto-scroll to message
+            mensajeDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        // Cleanup camera on page unload
+        window.addEventListener('beforeunload', function() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        // Auto-focus on student ID input
+        document.getElementById('alumnoId').focus();
+
         // Log inicial
-        console.log('Página de scan cargada - Clase:', claseId, 'Nonce:', currentNonce);
+        console.log('📱 QuantumAttend - Página de registro cargada');
+        console.log('Clase:', claseId, 'Sesión:', currentNonce);
+        
+        // Show initial instructions
+        showMessage('👋 ¡Bienvenido! Usa el escáner QR o ingresa tu ID manualmente.', 'success');
     </script>
 </body>
 </html>

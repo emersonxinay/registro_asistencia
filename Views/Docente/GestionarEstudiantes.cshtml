@@ -1,0 +1,809 @@
+@model GestionarEstudiantesViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gestionar Estudiantes";
+}
+
+<div class="gestionar-estudiantes-container">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1>Gestionar Estudiantes</h1>
+                <div class="curso-info">
+                    <span class="curso-nombre">@Model.CursoNombre</span>
+                    <span class="curso-codigo">@Model.CursoCodigo</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">@Model.EstudiantesInscritos.Count</span>
+                    <span class="stat-label">Inscritos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">@Model.EstudiantesDisponibles.Count</span>
+                    <span class="stat-label">Disponibles</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de notificación -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <div class="content-grid">
+        <!-- Panel de estudiantes disponibles -->
+        <div class="panel estudiantes-disponibles">
+            <div class="panel-header">
+                <h2>
+                    <i class="fas fa-user-plus"></i>
+                    Estudiantes Disponibles
+                </h2>
+                <div class="search-box">
+                    <input type="text" id="searchDisponibles" placeholder="Buscar estudiantes..." class="search-input">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+            
+            <div class="panel-body">
+                @if (Model.EstudiantesDisponibles.Any())
+                {
+                    <div class="estudiantes-list" id="estudiantesDisponibles">
+                        @foreach (var estudiante in Model.EstudiantesDisponibles)
+                        {
+                            <div class="estudiante-card disponible" data-nombre="@estudiante.Nombre.ToLower()" data-codigo="@estudiante.Codigo.ToLower()">
+                                <div class="estudiante-info">
+                                    <div class="estudiante-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="estudiante-details">
+                                        <h3>@estudiante.Nombre</h3>
+                                        <span class="estudiante-codigo">@estudiante.Codigo</span>
+                                    </div>
+                                </div>
+                                <div class="estudiante-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="inscribirEstudiante(@estudiante.Id, '@estudiante.Nombre')">
+                                        <i class="fas fa-plus"></i>
+                                        Inscribir
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-user-check"></i>
+                        <h3>No hay estudiantes disponibles</h3>
+                        <p>Todos los estudiantes ya están inscritos en este curso.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Panel de estudiantes inscritos -->
+        <div class="panel estudiantes-inscritos">
+            <div class="panel-header">
+                <h2>
+                    <i class="fas fa-users"></i>
+                    Estudiantes Inscritos
+                </h2>
+                <div class="search-box">
+                    <input type="text" id="searchInscritos" placeholder="Buscar inscritos..." class="search-input">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+            
+            <div class="panel-body">
+                @if (Model.EstudiantesInscritos.Any())
+                {
+                    <div class="estudiantes-list" id="estudiantesInscritos">
+                        @foreach (var estudiante in Model.EstudiantesInscritos.OrderBy(e => e.Nombre))
+                        {
+                            <div class="estudiante-card inscrito" data-nombre="@estudiante.Nombre.ToLower()" data-codigo="@estudiante.Codigo.ToLower()">
+                                <div class="estudiante-info">
+                                    <div class="estudiante-avatar inscrito">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="estudiante-details">
+                                        <h3>@estudiante.Nombre</h3>
+                                        <span class="estudiante-codigo">@estudiante.Codigo</span>
+                                        <div class="inscripcion-info">
+                                            <small>
+                                                <i class="fas fa-calendar-plus"></i>
+                                                Inscrito: @estudiante.FechaInscripcion.ToString("dd/MM/yyyy")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="estudiante-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="verPerfilEstudiante(@estudiante.Id)" title="Ver Perfil">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm" onclick="desinscribirEstudiante(@estudiante.Id, '@estudiante.Nombre')" title="Desinscribir">
+                                        <i class="fas fa-user-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i class="fas fa-user-plus"></i>
+                        <h3>No hay estudiantes inscritos</h3>
+                        <p>Comienza agregando estudiantes desde la lista de disponibles.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones del pie -->
+    <div class="page-footer">
+        <div class="footer-actions">
+            <a href="@Url.Action("DetalleCurso", "Docente", new { id = Model.CursoId })" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Curso
+            </a>
+            
+            <div class="footer-stats">
+                <span class="stat-text">
+                    <strong>@Model.EstudiantesInscritos.Count</strong> estudiantes inscritos en el curso
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div id="confirmModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Confirmar Acción</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="modalMessage">¿Estás seguro de realizar esta acción?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button id="confirmButton" class="btn btn-primary">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.gestionar-estudiantes-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color, #4CAF50) 0%, var(--secondary-color, #45a049) 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-info h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+}
+
+.curso-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.curso-nombre {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.curso-codigo {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.header-stats {
+    display: flex;
+    gap: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.notification {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+}
+
+.notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f1b0b7;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.panel {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    height: fit-content;
+}
+
+.panel-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-header h2 {
+    margin: 0;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-input {
+    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    width: 250px;
+    font-size: 0.9rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary-color, #4CAF50);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+.search-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.panel-body {
+    padding: 1.5rem;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.estudiantes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.estudiante-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.estudiante-card.disponible {
+    background: #f8f9fa;
+    border-color: #e9ecef;
+}
+
+.estudiante-card.disponible:hover {
+    background: #e3f2fd;
+    border-color: #2196F3;
+    transform: translateY(-1px);
+}
+
+.estudiante-card.inscrito {
+    background: #f0f8f0;
+    border-color: #c8e6c9;
+}
+
+.estudiante-card.inscrito:hover {
+    background: #e8f5e8;
+    border-color: #81c784;
+    transform: translateY(-1px);
+}
+
+.estudiante-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.estudiante-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.estudiante-avatar.inscrito {
+    background: var(--primary-color, #4CAF50);
+    color: white;
+}
+
+.estudiante-details h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.estudiante-codigo {
+    font-family: 'Courier New', monospace;
+    background: #dee2e6;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #495057;
+}
+
+.inscripcion-info {
+    margin-top: 0.5rem;
+}
+
+.inscripcion-info small {
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.estudiante-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.page-footer {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-top: 1px solid #dee2e6;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-stats .stat-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-primary {
+    background-color: var(--primary-color, #4CAF50);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover, #45a049);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--primary-color, #4CAF50);
+    border: 1px solid var(--primary-color, #4CAF50);
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color, #4CAF50);
+    color: white;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    color: #333;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Animaciones */
+@@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+
+    .header-info h1 {
+        font-size: 2rem;
+    }
+
+    .curso-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+
+    .footer-actions {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .estudiante-card {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+/* Ocultar elementos filtrados */
+.estudiante-card.hidden {
+    display: none;
+}
+</style>
+
+<script>
+let currentAction = null;
+let currentStudentId = null;
+
+function inscribirEstudiante(estudianteId, nombre) {
+    showModal(
+        'Inscribir Estudiante',
+        `¿Deseas inscribir a <strong>${nombre}</strong> en este curso?`,
+        () => {
+            procesarInscripcion(estudianteId);
+        }
+    );
+}
+
+function desinscribirEstudiante(estudianteId, nombre) {
+    showModal(
+        'Desinscribir Estudiante',
+        `¿Deseas desinscribir a <strong>${nombre}</strong> de este curso?`,
+        () => {
+            procesarDesinscripcion(estudianteId);
+        }
+    );
+}
+
+function procesarInscripcion(estudianteId) {
+    const formData = new FormData();
+    formData.append('cursoId', @Model.CursoId);
+    formData.append('estudianteId', estudianteId);
+    formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+    fetch('/docente/cursos/@Model.CursoId/estudiantes/inscribir', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error de conexión', 'error');
+    });
+}
+
+function procesarDesinscripcion(estudianteId) {
+    const formData = new FormData();
+    formData.append('cursoId', @Model.CursoId);
+    formData.append('estudianteId', estudianteId);
+    formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+    fetch('/docente/cursos/@Model.CursoId/estudiantes/desinscribir', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Error de conexión', 'error');
+    });
+}
+
+function verPerfilEstudiante(estudianteId) {
+    window.open(`@Url.Action("PerfilEstudiante", "Docente")?id=${estudianteId}`, '_blank');
+}
+
+function showModal(title, message, onConfirm) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMessage').innerHTML = message;
+    document.getElementById('confirmButton').onclick = () => {
+        closeModal();
+        onConfirm();
+    };
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+function showNotification(message, type) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.style.display = 'block';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 5000);
+}
+
+// Funcionalidad de búsqueda
+function setupSearch() {
+    const searchDisponibles = document.getElementById('searchDisponibles');
+    const searchInscritos = document.getElementById('searchInscritos');
+
+    if (searchDisponibles) {
+        searchDisponibles.addEventListener('input', function() {
+            filterStudents('estudiantesDisponibles', this.value.toLowerCase());
+        });
+    }
+
+    if (searchInscritos) {
+        searchInscritos.addEventListener('input', function() {
+            filterStudents('estudiantesInscritos', this.value.toLowerCase());
+        });
+    }
+}
+
+function filterStudents(containerId, searchTerm) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const cards = container.querySelectorAll('.estudiante-card');
+    
+    cards.forEach(card => {
+        const nombre = card.getAttribute('data-nombre') || '';
+        const codigo = card.getAttribute('data-codigo') || '';
+        
+        if (nombre.includes(searchTerm) || codigo.includes(searchTerm)) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+}
+
+// Inicializar funcionalidades
+document.addEventListener('DOMContentLoaded', function() {
+    setupSearch();
+    
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+    
+    // Cerrar modal clickeando fuera
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+});
+</script>
+
+<!-- Token antiforgery para las peticiones AJAX -->
+@Html.AntiForgeryToken()

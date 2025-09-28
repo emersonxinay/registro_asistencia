@@ -1,0 +1,472 @@
+@model List<CursoDetalleViewModel>
+
+<div class="cursos-container">
+    <div class="cursos-header">
+        <div class="header-content">
+            <h1>📚 Mis Cursos</h1>
+            <p>Gestiona todos los cursos que tienes asignados o que has creado</p>
+        </div>
+        <div class="header-actions">
+            <a href="/docente/cursos/crear" class="btn-primary">
+                <i data-lucide="plus"></i>
+                Crear Nuevo Curso
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <h3>No tienes cursos disponibles</h3>
+            <p>Solicita a un administrador que te asigne cursos o crea uno nuevo.</p>
+            <div class="empty-actions">
+                <a href="/docente/cursos/crear" class="btn-primary">Crear Mi Primer Curso</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="cursos-grid">
+            @foreach (var curso in Model)
+            {
+                <div class="curso-card" data-curso-id="@curso.Id">
+                    <div class="curso-header">
+                        <div class="curso-title">
+                            <h3>@curso.Nombre</h3>
+                            <span class="curso-codigo">@curso.Codigo</span>
+                        </div>
+                        <div class="curso-badges">
+                            @if (curso.EsPropietario)
+                            {
+                                <span class="badge-owner">👑 Propietario</span>
+                            }
+                            else
+                            {
+                                <span class="badge-assigned">📋 Asignado</span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(curso.Descripcion))
+                    {
+                        <div class="curso-description">
+                            <p>@curso.Descripcion</p>
+                        </div>
+                    }
+
+                    <div class="curso-stats">
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <span class="stat-icon">📖</span>
+                                <span class="stat-label">Ramos:</span>
+                                <span class="stat-value">@curso.TotalRamos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">👥</span>
+                                <span class="stat-label">Estudiantes:</span>
+                                <span class="stat-value">@curso.TotalEstudiantes</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-item">
+                                <span class="stat-icon">📅</span>
+                                <span class="stat-label">Creado:</span>
+                                <span class="stat-value">@curso.FechaCreacion.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="curso-actions">
+                        <a href="/docente/cursos/@curso.Id" class="btn-secondary">
+                            <i data-lucide="eye"></i>
+                            Ver Detalle
+                        </a>
+                        <a href="/workflow/ramos/@curso.Id" class="btn-primary">
+                            <i data-lucide="plus-circle"></i>
+                            Crear Clase
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Estadísticas Resumen -->
+        <div class="cursos-summary">
+            <div class="summary-card">
+                <div class="summary-icon">📊</div>
+                <div class="summary-content">
+                    <h4>Resumen General</h4>
+                    <div class="summary-stats">
+                        <span><strong>@Model.Count</strong> cursos totales</span>
+                        <span><strong>@Model.Count(c => c.EsPropietario)</strong> cursos propios</span>
+                        <span><strong>@Model.Sum(c => c.TotalRamos)</strong> ramos totales</span>
+                        <span><strong>@Model.Sum(c => c.TotalEstudiantes)</strong> estudiantes totales</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.cursos-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.cursos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.header-content h1 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 2.2em;
+}
+
+.header-content p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.empty-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.8em;
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.cursos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.curso-card {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 15px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.curso-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border-color: #3498db;
+}
+
+.curso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.curso-title h3 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+    line-height: 1.3;
+}
+
+.curso-codigo {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.curso-badges {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-end;
+}
+
+.badge-owner {
+    background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
+}
+
+.badge-assigned {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+}
+
+.curso-description {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.curso-description p {
+    margin: 0;
+    color: #5a6c7d;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.curso-stats {
+    margin-bottom: 25px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.stat-icon {
+    font-size: 1.1em;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.stat-value {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.curso-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.curso-actions .btn-secondary,
+.curso-actions .btn-primary {
+    flex: 1;
+    justify-content: center;
+}
+
+.cursos-summary {
+    margin-top: 40px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.summary-icon {
+    font-size: 3em;
+    opacity: 0.9;
+}
+
+.summary-content h4 {
+    margin: 0 0 15px 0;
+    font-size: 1.4em;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.summary-stats span {
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+.summary-stats strong {
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* Botones */
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .cursos-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .header-actions {
+        justify-content: center;
+    }
+    
+    .cursos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .stat-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .stat-item {
+        justify-content: space-between;
+    }
+    
+    .curso-actions {
+        flex-direction: column;
+    }
+    
+    .summary-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@@media (max-width: 480px) {
+    .cursos-container {
+        padding: 15px;
+    }
+    
+    .curso-card {
+        padding: 20px;
+    }
+    
+    .summary-stats {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de entrada para las tarjetas
+    const cards = document.querySelectorAll('.curso-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s forwards`;
+    });
+    
+    // Inicializar iconos de Lucide
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+
+// Animación CSS
+const style = document.createElement('style');
+style.textContent = `
+    @@keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>

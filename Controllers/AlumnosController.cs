@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using registroAsistencia.Models;
 using registroAsistencia.Services;
 
@@ -6,6 +7,7 @@ namespace registroAsistencia.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AlumnosController : ControllerBase
 {
     private readonly IDataService _dataService;

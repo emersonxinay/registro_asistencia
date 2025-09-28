@@ -96,20 +96,48 @@ namespace registroAsistencia.Migrations
                     b.Property<int>("AlumnoId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("ClaseFinUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("ClaseId")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("ClaseInicioUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreadoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DocenteQueRegistroId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("EsRegistroManual")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("JustificacionManual")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("MarcadaUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Metodo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("Metodo")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinutosRetraso")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModificadoUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClaseId");
+
+                    b.HasIndex("DocenteQueRegistroId");
 
                     b.HasIndex("AlumnoId", "ClaseId")
                         .IsUnique();
@@ -134,6 +162,9 @@ namespace registroAsistencia.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("DocenteId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("FinUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -145,9 +176,42 @@ namespace registroAsistencia.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DocenteId");
+
                     b.HasIndex("RamoId");
 
                     b.ToTable("Clases");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.ConfiguracionAsistencia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ClaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LimitePresenteMinutos")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("MarcarAusenteAutomatico")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotificarTardanzas")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("PermiteRegistroManual")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClaseId")
+                        .IsUnique();
+
+                    b.ToTable("ConfiguracionesAsistencia");
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.Curso", b =>
@@ -186,6 +250,143 @@ namespace registroAsistencia.Migrations
                     b.ToTable("Cursos");
                 });
 
+            modelBuilder.Entity("registroAsistencia.Models.DocenteCurso", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("AsignadoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CursoId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DocenteId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("EsPropietario")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CursoId");
+
+                    b.HasIndex("DocenteId", "CursoId")
+                        .IsUnique();
+
+                    b.ToTable("DocenteCursos");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.DocenteRamo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("AsignadoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DocenteId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RamoId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RamoId");
+
+                    b.HasIndex("DocenteId", "RamoId")
+                        .IsUnique();
+
+                    b.ToTable("DocenteRamos");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.HorarioClase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Aula")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeSpan>("HoraFin")
+                        .HasColumnType("interval");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("interval");
+
+                    b.Property<int>("RamoId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RamoId");
+
+                    b.ToTable("HorarioClases");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.LogAuditoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("AsistenciaId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DatosAnteriores")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Justificacion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AsistenciaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("LogsAuditoria");
+                });
+
             modelBuilder.Entity("registroAsistencia.Models.QrClaseToken", b =>
                 {
                     b.Property<string>("Nonce")
@@ -203,6 +404,38 @@ namespace registroAsistencia.Migrations
                     b.HasIndex("ClaseId");
 
                     b.ToTable("QrClaseTokens");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.QrEstudiante", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("AlumnoId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("GeneradoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("QrData")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AlumnoId");
+
+                    b.HasIndex("QrData")
+                        .IsUnique();
+
+                    b.ToTable("QrEstudiantes");
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.Ramo", b =>
@@ -244,6 +477,60 @@ namespace registroAsistencia.Migrations
                     b.ToTable("Ramos");
                 });
 
+            modelBuilder.Entity("registroAsistencia.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CodigoDocente")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreadoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Departamento")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<bool>("EsAdministrador")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UltimoAccesoUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CodigoDocente")
+                        .IsUnique();
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("Usuarios");
+                });
+
             modelBuilder.Entity("registroAsistencia.Models.AlumnoCurso", b =>
                 {
                     b.HasOne("registroAsistencia.Models.Alumno", "Alumno")
@@ -265,27 +552,125 @@ namespace registroAsistencia.Migrations
 
             modelBuilder.Entity("registroAsistencia.Models.Asistencia", b =>
                 {
-                    b.HasOne("registroAsistencia.Models.Alumno", null)
+                    b.HasOne("registroAsistencia.Models.Alumno", "Alumno")
                         .WithMany()
                         .HasForeignKey("AlumnoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("registroAsistencia.Models.Clase", null)
+                    b.HasOne("registroAsistencia.Models.Clase", "Clase")
                         .WithMany()
                         .HasForeignKey("ClaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("registroAsistencia.Models.Usuario", "DocenteQueRegistro")
+                        .WithMany()
+                        .HasForeignKey("DocenteQueRegistroId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Alumno");
+
+                    b.Navigation("Clase");
+
+                    b.Navigation("DocenteQueRegistro");
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.Clase", b =>
                 {
+                    b.HasOne("registroAsistencia.Models.Usuario", "Docente")
+                        .WithMany("Clases")
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("registroAsistencia.Models.Ramo", "Ramo")
                         .WithMany("Clases")
                         .HasForeignKey("RamoId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("Docente");
+
                     b.Navigation("Ramo");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.ConfiguracionAsistencia", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Clase", "Clase")
+                        .WithOne()
+                        .HasForeignKey("registroAsistencia.Models.ConfiguracionAsistencia", "ClaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Clase");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.DocenteCurso", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Curso", "Curso")
+                        .WithMany()
+                        .HasForeignKey("CursoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("registroAsistencia.Models.Usuario", "Docente")
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Curso");
+
+                    b.Navigation("Docente");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.DocenteRamo", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Usuario", "Docente")
+                        .WithMany()
+                        .HasForeignKey("DocenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("registroAsistencia.Models.Ramo", "Ramo")
+                        .WithMany()
+                        .HasForeignKey("RamoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Docente");
+
+                    b.Navigation("Ramo");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.HorarioClase", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Ramo", "Ramo")
+                        .WithMany()
+                        .HasForeignKey("RamoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ramo");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.LogAuditoria", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Asistencia", "Asistencia")
+                        .WithMany()
+                        .HasForeignKey("AsistenciaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("registroAsistencia.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asistencia");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.QrClaseToken", b =>
@@ -295,6 +680,17 @@ namespace registroAsistencia.Migrations
                         .HasForeignKey("ClaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.QrEstudiante", b =>
+                {
+                    b.HasOne("registroAsistencia.Models.Alumno", "Alumno")
+                        .WithMany()
+                        .HasForeignKey("AlumnoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Alumno");
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.Ramo", b =>
@@ -321,6 +717,11 @@ namespace registroAsistencia.Migrations
                 });
 
             modelBuilder.Entity("registroAsistencia.Models.Ramo", b =>
+                {
+                    b.Navigation("Clases");
+                });
+
+            modelBuilder.Entity("registroAsistencia.Models.Usuario", b =>
                 {
                     b.Navigation("Clases");
                 });

@@ -1,0 +1,544 @@
+@model PerfilEstudianteViewModel
+
+<div class="perfil-estudiante-container">
+    <!-- Header del Estudiante -->
+    <div class="estudiante-header">
+        <div class="estudiante-info">
+            <div class="avatar-section">
+                <div class="avatar">
+                    @Model.Nombre.Substring(0, 1).ToUpper()
+                </div>
+            </div>
+            <div class="info-section">
+                <h1>@Model.Nombre</h1>
+                <div class="estudiante-meta">
+                    <span class="codigo">
+                        <i class="fas fa-id-card"></i>
+                        @Model.Codigo
+                    </span>
+                    <span class="curso">
+                        <i class="fas fa-graduation-cap"></i>
+                        @Model.CursoNombre
+                    </span>
+                    <span class="fecha-inscripcion">
+                        <i class="fas fa-calendar-plus"></i>
+                        Inscrito: @Model.FechaInscripcion.ToString("dd/MM/yyyy")
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="asistencia-general">
+            <div class="porcentaje-circle">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="transparent" stroke="#e9ecef" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="50" fill="transparent" stroke="@(Model.PorcentajeAsistencia >= 75 ? "#28a745" : Model.PorcentajeAsistencia >= 50 ? "#ffc107" : "#dc3545")" 
+                            stroke-width="8" stroke-linecap="round" 
+                            stroke-dasharray="@(314 * Model.PorcentajeAsistencia / 100) 314" 
+                            transform="rotate(-90 60 60)"/>
+                </svg>
+                <div class="porcentaje-text">
+                    <span class="numero">@Model.PorcentajeAsistencia.ToString("F1")%</span>
+                    <span class="label">Asistencia</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Detalladas -->
+    <div class="estadisticas-section">
+        <h2>📊 Estadísticas de Asistencia</h2>
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number">@Model.TotalClases</span>
+                    <span class="stat-label">Clases Totales</span>
+                </div>
+            </div>
+
+            <div class="stat-card presente">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number">@Model.ClasesPresente</span>
+                    <span class="stat-label">Presente</span>
+                </div>
+                <div class="stat-percentage">
+                    @(Model.TotalClases > 0 ? ((double)Model.ClasesPresente / Model.TotalClases * 100).ToString("F1") : "0")%
+                </div>
+            </div>
+
+            <div class="stat-card tarde">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number">@Model.ClasesTarde</span>
+                    <span class="stat-label">Tarde</span>
+                </div>
+                <div class="stat-percentage">
+                    @(Model.TotalClases > 0 ? ((double)Model.ClasesTarde / Model.TotalClases * 100).ToString("F1") : "0")%
+                </div>
+            </div>
+
+            <div class="stat-card ausente">
+                <div class="stat-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-number">@Model.ClasesAusente</span>
+                    <span class="stat-label">Ausente</span>
+                </div>
+                <div class="stat-percentage">
+                    @(Model.TotalClases > 0 ? ((double)Model.ClasesAusente / Model.TotalClases * 100).ToString("F1") : "0")%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso Visual -->
+    <div class="progreso-section">
+        <h3>Distribución de Asistencia</h3>
+        <div class="progress-bar-container">
+            <div class="progress-bar">
+                @if (Model.TotalClases > 0)
+                {
+                    <div class="progress-segment presente" style="width: @((double)Model.ClasesPresente / Model.TotalClases * 100)%"></div>
+                    <div class="progress-segment tarde" style="width: @((double)Model.ClasesTarde / Model.TotalClases * 100)%"></div>
+                    <div class="progress-segment ausente" style="width: @((double)Model.ClasesAusente / Model.TotalClases * 100)%"></div>
+                }
+            </div>
+            <div class="progress-legend">
+                <div class="legend-item">
+                    <div class="color-box presente"></div>
+                    <span>Presente (@Model.ClasesPresente)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box tarde"></div>
+                    <span>Tarde (@Model.ClasesTarde)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box ausente"></div>
+                    <span>Ausente (@Model.ClasesAusente)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas y Recomendaciones -->
+    @if (Model.PorcentajeAsistencia < 75)
+    {
+        <div class="alert-section">
+            @if (Model.PorcentajeAsistencia < 50)
+            {
+                <div class="alert danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="alert-content">
+                        <strong>Asistencia Crítica</strong>
+                        <p>El estudiante tiene un porcentaje de asistencia muy bajo (@Model.PorcentajeAsistencia.ToString("F1")%). Se recomienda contactar al estudiante.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="alert-content">
+                        <strong>Asistencia Baja</strong>
+                        <p>El estudiante está por debajo del 75% de asistencia (@Model.PorcentajeAsistencia.ToString("F1")%). Considere hacer seguimiento.</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Acciones -->
+    <div class="acciones-section">
+        <a href="/docente/estudiantes/@Model.Id/asistencias?cursoId=@Model.CursoId" class="btn btn-primary">
+            <i class="fas fa-list"></i>
+            Ver Historial de Asistencias
+        </a>
+        <a href="/docente/cursos/@Model.CursoId" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Volver al Curso
+        </a>
+    </div>
+</div>
+
+<style>
+.perfil-estudiante-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.estudiante-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.estudiante-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.info-section h1 {
+    margin: 0 0 1rem 0;
+    font-size: 2.2rem;
+    font-weight: 600;
+}
+
+.estudiante-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.estudiante-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+.asistencia-general {
+    position: relative;
+}
+
+.porcentaje-circle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.porcentaje-text {
+    position: absolute;
+    text-align: center;
+}
+
+.porcentaje-text .numero {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.porcentaje-text .label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.estadisticas-section {
+    margin-bottom: 2rem;
+}
+
+.estadisticas-section h2 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.stat-card.total::before { background: #6c757d; }
+.stat-card.presente::before { background: #28a745; }
+.stat-card.tarde::before { background: #ffc107; }
+.stat-card.ausente::before { background: #dc3545; }
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: white;
+}
+
+.stat-card.total .stat-icon { background: #6c757d; }
+.stat-card.presente .stat-icon { background: #28a745; }
+.stat-card.tarde .stat-icon { background: #ffc107; }
+.stat-card.ausente .stat-icon { background: #dc3545; }
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stat-percentage {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.progreso-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.progreso-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.progress-bar-container {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 1rem;
+}
+
+.progress-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-segment.presente { background: #28a745; }
+.progress-segment.tarde { background: #ffc107; }
+.progress-segment.ausente { background: #dc3545; }
+
+.progress-legend {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.color-box {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.color-box.presente { background: #28a745; }
+.color-box.tarde { background: #ffc107; }
+.color-box.ausente { background: #dc3545; }
+
+.alert-section {
+    margin-bottom: 2rem;
+}
+
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.alert.warning {
+    background: #fff3cd;
+    border-left-color: #ffc107;
+    color: #856404;
+}
+
+.alert.danger {
+    background: #f8d7da;
+    border-left-color: #dc3545;
+    color: #721c24;
+}
+
+.alert i {
+    font-size: 1.5rem;
+}
+
+.alert-content strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-content p {
+    margin: 0;
+    line-height: 1.4;
+}
+
+.acciones-section {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .estudiante-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 2rem;
+    }
+
+    .estudiante-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .info-section h1 {
+        font-size: 1.8rem;
+    }
+
+    .estudiante-meta {
+        align-items: center;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .progress-legend {
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .acciones-section {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@@media (max-width: 480px) {
+    .perfil-estudiante-container {
+        padding: 15px;
+    }
+
+    .estudiante-header {
+        padding: 1.5rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+
+    .progress-legend {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+}
+</style>

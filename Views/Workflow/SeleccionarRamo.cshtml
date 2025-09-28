@@ -1,0 +1,574 @@
+@model SeleccionarRamoViewModel
+
+<div class="workflow-container">
+    <!-- Header del Workflow -->
+    <div class="workflow-header">
+        <div class="workflow-breadcrumb">
+            <span class="step completed">1. Seleccionar Curso</span>
+            <span class="step active">2. Seleccionar Ramo</span>
+            <span class="step">3. Configurar Clase</span>
+            <span class="step">4. Clase Creada</span>
+        </div>
+        <h1>📖 Paso 2: Selecciona un Ramo</h1>
+        <p>Elige el ramo del curso <strong>@Model.Curso.Nombre</strong> para crear la clase</p>
+    </div>
+
+    <!-- Información del Curso Seleccionado -->
+    <div class="selected-course-info">
+        <div class="course-summary">
+            <div class="course-icon">📚</div>
+            <div class="course-details">
+                <h3>@Model.Curso.Nombre</h3>
+                <p class="course-code">@Model.Curso.Codigo</p>
+                @if (!string.IsNullOrEmpty(Model.Curso.Descripcion))
+                {
+                    <p class="course-description">@Model.Curso.Descripcion</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Ramos -->
+    <div class="ramos-selection">
+        @if (!Model.Ramos.Any())
+        {
+            <div class="no-ramos">
+                <div class="empty-state">
+                    <div class="empty-icon">📖</div>
+                    <h3>Este curso no tiene ramos asignados</h3>
+                    <p>Es necesario que el curso tenga al menos un ramo para poder crear una clase.</p>
+                    <div class="empty-actions">
+                        <a href="/admin/cursos/@Model.Curso.Id/ramos" class="btn-primary">
+                            Gestionar Ramos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="ramos-grid">
+                @foreach (var ramo in Model.Ramos)
+                {
+                    <div class="ramo-card" onclick="selectRamo(@ramo.Id, '@ramo.Nombre', @Model.Curso.Id)">
+                        <div class="ramo-header">
+                            <div class="ramo-icon">📚</div>
+                            <div class="ramo-title">
+                                <h3>@ramo.Nombre</h3>
+                                <span class="ramo-code">@ramo.Codigo</span>
+                            </div>
+                        </div>
+                        
+                        @if (!string.IsNullOrEmpty(ramo.Descripcion))
+                        {
+                            <div class="ramo-description">
+                                <p>@ramo.Descripcion</p>
+                            </div>
+                        }
+                        
+                        <div class="ramo-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">⏰</span>
+                                <span class="stat-text">@ramo.HorasSemanales hrs/semana</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📅</span>
+                                <span class="stat-text">@ramo.TotalClases clases creadas</span>
+                            </div>
+                        </div>
+                        
+                        <div class="ramo-actions">
+                            <button class="btn-select" onclick="selectRamo(@ramo.Id, '@ramo.Nombre', @Model.Curso.Id)">
+                                <span>Seleccionar Ramo</span>
+                                <span class="arrow">→</span>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Acciones del Workflow -->
+    <div class="workflow-actions">
+        <a href="/workflow" class="btn-secondary">
+            ← Cambiar Curso
+        </a>
+        
+        <div class="action-right">
+            @if (Model.Curso.EsPropietario)
+            {
+                <a href="/admin/cursos/@Model.Curso.Id/crear-ramo" class="btn-outline">
+                    + Crear Nuevo Ramo
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+function selectRamo(ramoId, ramoNombre, cursoId) {
+    // Mostrar loading
+    const card = event.currentTarget;
+    const originalContent = card.innerHTML;
+    card.innerHTML = `
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Configurando clase...</p>
+        </div>
+    `;
+    
+    // Navegar al siguiente paso
+    window.location.href = `/workflow/crear-clase?cursoId=${cursoId}&ramoId=${ramoId}`;
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.ramo-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in');
+    });
+});
+</script>
+
+<style>
+.workflow-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.workflow-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.workflow-breadcrumb {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.workflow-breadcrumb .step {
+    background: #f8f9fa;
+    color: #6c757d;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9em;
+    font-weight: 500;
+    position: relative;
+}
+
+.workflow-breadcrumb .step.completed {
+    background: #27ae60;
+    color: white;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.workflow-breadcrumb .step.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.workflow-header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.workflow-header p {
+    color: #7f8c8d;
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.selected-course-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 40px;
+    border-left: 5px solid #3498db;
+}
+
+.course-summary {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.course-icon {
+    font-size: 3em;
+    background: white;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.course-details h3 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.8em;
+}
+
+.course-code {
+    background: #3498db;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.course-description {
+    color: #5a6c7d;
+    font-size: 1.1em;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.ramos-selection {
+    margin-bottom: 40px;
+}
+
+.no-ramos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.empty-icon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+.empty-state h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.6em;
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    margin-bottom: 25px;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.ramos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 25px;
+}
+
+.ramo-card {
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 15px;
+    padding: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ramo-card:hover {
+    border-color: #3498db;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.15);
+}
+
+.ramo-card.fade-in {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ramo-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.ramo-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 1.8em;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.ramo-title {
+    flex: 1;
+}
+
+.ramo-title h3 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+    line-height: 1.3;
+}
+
+.ramo-code {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.ramo-description {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.ramo-description p {
+    margin: 0;
+    color: #5a6c7d;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.ramo-stats {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.stat-icon {
+    font-size: 1.1em;
+    color: #3498db;
+}
+
+.stat-text {
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.ramo-actions {
+    margin-top: auto;
+}
+
+.btn-select {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-select .arrow {
+    font-size: 1.2em;
+    transition: transform 0.3s ease;
+}
+
+.btn-select:hover .arrow {
+    transform: translateX(5px);
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.workflow-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.action-right {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-primary, .btn-secondary, .btn-outline {
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .workflow-breadcrumb {
+        gap: 10px;
+    }
+    
+    .workflow-breadcrumb .step {
+        font-size: 0.8em;
+        padding: 8px 15px;
+    }
+    
+    .course-summary {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .ramos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .ramo-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .workflow-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .action-right {
+        justify-content: center;
+    }
+}
+
+@@media (max-width: 480px) {
+    .workflow-container {
+        padding: 15px;
+    }
+    
+    .workflow-header h1 {
+        font-size: 2em;
+    }
+    
+    .selected-course-info {
+        padding: 20px;
+    }
+    
+    .ramo-card {
+        padding: 20px;
+    }
+    
+    .course-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2.5em;
+    }
+}
+</style>
