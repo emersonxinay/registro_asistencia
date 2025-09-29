@@ -263,6 +263,9 @@ E:\csharp\registro_clonado\obj\Debug\net9.0\registroAsistencia.RazorAssemblyInfo
 E:\csharp\registro_clonado\obj\Debug\net9.0\registroAsistencia.sourcelink.json
 E:\csharp\registro_clonado\obj\Debug\net9.0\scopedcss\bundle\registroAsistencia.styles.css
 E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\y5bqqfi2xg-b1al7632ef.gz
+E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\8jsq1i4v5d-jd72qo54sn.gz
+E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\n57h8i515h-iy3unu3z0t.gz
+E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\jtn4fv8qdp-p3w82w395p.gz
 E:\csharp\registro_clonado\obj\Debug\net9.0\staticwebassets.build.json
 E:\csharp\registro_clonado\obj\Debug\net9.0\staticwebassets.development.json
 E:\csharp\registro_clonado\obj\Debug\net9.0\staticwebassets.build.endpoints.json
@@ -278,5 +281,3 @@ E:\csharp\registro_clonado\obj\Debug\net9.0\refint\registroAsistencia.dll
 E:\csharp\registro_clonado\obj\Debug\net9.0\registroAsistencia.pdb
 E:\csharp\registro_clonado\obj\Debug\net9.0\registroAsistencia.genruntimeconfig.cache
 E:\csharp\registro_clonado\obj\Debug\net9.0\ref\registroAsistencia.dll
-E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\n57h8i515h-iy3unu3z0t.gz
-E:\csharp\registro_clonado\obj\Debug\net9.0\compressed\jtn4fv8qdp-p3w82w395p.gz

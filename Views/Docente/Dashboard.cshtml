@@ -1,103 +1,321 @@
 @model DocenteDashboardViewModel
 
-<div class="docente-dashboard">
-    <div class="header-section">
-        <h1>🎓 Dashboard del Docente</h1>
-        <p class="subtitle">Bienvenido, @User.Identity!.Name</p>
-    </div>
-
-    <!-- Estadísticas Rápidas -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-content">
-                <h3>@Model.Estadisticas.TotalCursos</h3>
-                <p>Cursos</p>
+<div class="modern-dashboard">
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <div class="welcome-avatar">
+                <i data-lucide="user-circle"></i>
+            </div>
+            <div class="welcome-content">
+                <h1>¡Bienvenido de vuelta!</h1>
+                <p class="welcome-message">@User.Identity!.Name</p>
+                <span class="current-date" id="currentDate"></span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon">📖</div>
-            <div class="stat-content">
-                <h3>@Model.Estadisticas.TotalRamos</h3>
-                <p>Ramos</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">📅</div>
-            <div class="stat-content">
-                <h3>@Model.Estadisticas.ClasesHoy</h3>
-                <p>Clases Hoy</p>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-                <h3>@Model.Estadisticas.TotalEstudiantes</h3>
-                <p>Estudiantes</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Acciones Rápidas -->
-    <div class="quick-actions">
-        <h2>🚀 Acciones Rápidas</h2>
-        <div class="actions-grid">
-            <a href="/workflow" class="action-btn primary">
-                <div class="action-icon">➕</div>
-                <div class="action-content">
-                    <h4>Crear Nueva Clase</h4>
-                    <p>Workflow paso a paso</p>
-                </div>
+        <div class="header-actions">
+            <a href="/workflow/cursos" class="btn-primary">
+                <i data-lucide="plus"></i>
+                <span>Nueva Clase</span>
             </a>
-            <a href="/docente/scanner" class="action-btn secondary">
-                <div class="action-icon">📱</div>
-                <div class="action-content">
-                    <h4>Scanner Asistencia</h4>
-                    <p>Escanear QR estudiantes</p>
-                </div>
-            </a>
-            <a href="/docente/cursos" class="action-btn tertiary">
-                <div class="action-icon">📊</div>
-                <div class="action-content">
-                    <h4>Gestionar Cursos</h4>
-                    <p>Ver y administrar</p>
-                </div>
+            <a href="/docente/scanner" class="btn-secondary">
+                <i data-lucide="qr-code"></i>
+                <span>Escáner</span>
             </a>
         </div>
     </div>
 
-    <!-- Clases de Hoy -->
-    @if (Model.ClasesHoy.Any())
-    {
-        <div class="today-classes">
-            <h2>📅 Clases de Hoy</h2>
-            <div class="classes-list">
-                @foreach (var clase in Model.ClasesHoy)
+    <!-- Quick Stats -->
+    <div class="stats-overview">
+        <div class="stat-card courses">
+            <div class="stat-visual">
+                <i data-lucide="book-open"></i>
+                <div class="stat-trend">
+                    <span class="trend-value">+2</span>
+                </div>
+            </div>
+            <div class="stat-data">
+                <span class="stat-number">@Model.Estadisticas.TotalCursos</span>
+                <span class="stat-label">Cursos Activos</span>
+            </div>
+        </div>
+
+        <div class="stat-card subjects">
+            <div class="stat-visual">
+                <i data-lucide="layers"></i>
+                <div class="stat-trend">
+                    <span class="trend-value">+5</span>
+                </div>
+            </div>
+            <div class="stat-data">
+                <span class="stat-number">@Model.Estadisticas.TotalRamos</span>
+                <span class="stat-label">Materias</span>
+            </div>
+        </div>
+
+        <div class="stat-card classes">
+            <div class="stat-visual">
+                <i data-lucide="calendar-days"></i>
+                <div class="stat-indicator active"></div>
+            </div>
+            <div class="stat-data">
+                <span class="stat-number">@Model.Estadisticas.ClasesHoy</span>
+                <span class="stat-label">Clases Hoy</span>
+            </div>
+        </div>
+
+        <div class="stat-card students">
+            <div class="stat-visual">
+                <i data-lucide="users"></i>
+                <div class="stat-trend">
+                    <span class="trend-value">89%</span>
+                </div>
+            </div>
+            <div class="stat-data">
+                <span class="stat-number">@Model.Estadisticas.TotalEstudiantes</span>
+                <span class="stat-label">Estudiantes</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Quick Actions Panel -->
+        <div class="dashboard-panel quick-actions-panel">
+            <div class="panel-header">
+                <h3>Acciones Rápidas</h3>
+                <p>Tareas frecuentes de un solo clic</p>
+            </div>
+            <div class="panel-content">
+                <div class="action-grid">
+                    <a href="/workflow/cursos" class="action-card primary">
+                        <div class="action-icon">
+                            <i data-lucide="plus-circle"></i>
+                        </div>
+                        <div class="action-details">
+                            <h4>Crear Clase</h4>
+                            <p>Workflow guiado paso a paso</p>
+                        </div>
+                        <div class="action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+
+                    <a href="/workflow/mis-clases" class="action-card">
+                        <div class="action-icon">
+                            <i data-lucide="calendar-check"></i>
+                        </div>
+                        <div class="action-details">
+                            <h4>Mis Clases</h4>
+                            <p>Ver todas las clases</p>
+                        </div>
+                        <div class="action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+
+                    <a href="/asistencias" class="action-card">
+                        <div class="action-icon">
+                            <i data-lucide="users-check"></i>
+                        </div>
+                        <div class="action-details">
+                            <h4>Ver Asistencias</h4>
+                            <p>Reportes detallados</p>
+                        </div>
+                        <div class="action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+
+                    <a href="/docente/scanner" class="action-card scanner">
+                        <div class="action-icon">
+                            <i data-lucide="qr-code"></i>
+                        </div>
+                        <div class="action-details">
+                            <h4>Escáner QR</h4>
+                            <p>Registrar asistencia</p>
+                        </div>
+                        <div class="action-arrow">
+                            <i data-lucide="arrow-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Today's Schedule Panel -->
+        <div class="dashboard-panel schedule-panel">
+            <div class="panel-header">
+                <h3>Agenda de Hoy</h3>
+                <p>Clases programadas para hoy</p>
+            </div>
+            <div class="panel-content">
+                @if (Model.ClasesHoy.Any())
                 {
-                    <div class="class-card @(clase.Activa ? "active" : "")">
-                        <div class="class-time">
-                            @clase.HoraInicio.ToString("HH:mm")
-                        </div>
-                        <div class="class-info">
-                            <h4>@clase.Nombre</h4>
-                            <p>@clase.RamoNombre - @clase.CursoNombre</p>
-                            <small>@clase.TotalAsistencias asistencias registradas</small>
-                        </div>
-                        <div class="class-actions">
-                            @if (clase.Activa)
-                            {
-                                <a href="/docente/scanner/@clase.Id" class="btn-small primary">Ver Scanner</a>
-                            }
-                            else
-                            {
-                                <span class="status-badge">Finalizada</span>
-                            }
-                        </div>
+                    <div class="schedule-list">
+                        @foreach (var clase in Model.ClasesHoy)
+                        {
+                            <div class="schedule-item @(clase.Activa ? "active" : "completed")">
+                                <div class="schedule-time">
+                                    <span class="time">@clase.HoraInicio.ToString("HH:mm")</span>
+                                    <div class="status-indicator"></div>
+                                </div>
+                                <div class="schedule-details">
+                                    <h4>@clase.Nombre</h4>
+                                    <p>@clase.RamoNombre</p>
+                                    <small>@clase.CursoNombre</small>
+                                </div>
+                                <div class="schedule-actions">
+                                    @if (clase.Activa)
+                                    {
+                                        <a href="/workflow/clase/@clase.Id/gestionar" class="btn-mini primary">
+                                            <i data-lucide="play"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge completed">
+                                            <i data-lucide="check"></i>
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">
+                        <i data-lucide="calendar-x"></i>
+                        <p>No tienes clases programadas para hoy</p>
+                        <a href="/workflow/cursos" class="btn-small">Crear Nueva Clase</a>
                     </div>
                 }
             </div>
         </div>
+
+        <!-- Recent Activity Panel -->
+        <div class="dashboard-panel activity-panel">
+            <div class="panel-header">
+                <h3>Actividad Reciente</h3>
+                <p>Últimas acciones realizadas</p>
+            </div>
+            <div class="panel-content">
+                <div class="activity-list">
+                    @if (Model.ClasesHoy.Any())
+                    {
+                        @foreach (var clase in Model.ClasesHoy.Take(5))
+                        {
+                            <div class="activity-item">
+                                <div class="activity-icon">
+                                    <i data-lucide="calendar-plus"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <p><strong>Clase de hoy:</strong> @clase.Nombre</p>
+                                    <small>@clase.HoraInicio.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="activity-action">
+                                    <a href="/workflow/clase/@clase.Id/asistencias" class="btn-link">Ver</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i data-lucide="activity"></i>
+                            <p>No hay actividad reciente</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shortcuts Bar -->
+    <div class="shortcuts-bar">
+        <div class="shortcuts-content">
+            <h4>Accesos Directos</h4>
+            <div class="shortcuts-grid">
+                <a href="/workflow/cursos" class="shortcut-item" title="Crear Nueva Clase">
+                    <i data-lucide="plus"></i>
+                    <span>Nueva Clase</span>
+                    <kbd>Ctrl+N</kbd>
+                </a>
+                <a href="/docente/scanner" class="shortcut-item" title="Abrir Escáner">
+                    <i data-lucide="qr-code"></i>
+                    <span>Escáner</span>
+                    <kbd>Ctrl+S</kbd>
+                </a>
+                <a href="/asistencias" class="shortcut-item" title="Ver Asistencias">
+                    <i data-lucide="users-check"></i>
+                    <span>Asistencias</span>
+                    <kbd>Ctrl+A</kbd>
+                </a>
+                <a href="/workflow/mis-clases" class="shortcut-item" title="Mis Clases">
+                    <i data-lucide="calendar-days"></i>
+                    <span>Mis Clases</span>
+                    <kbd>Ctrl+C</kbd>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Dashboard -->
+<script>
+// Update current date
+document.addEventListener('DOMContentLoaded', function() {
+    const dateElement = document.getElementById('currentDate');
+    if (dateElement) {
+        const now = new Date();
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+        dateElement.textContent = now.toLocaleDateString('es-ES', options);
     }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey) {
+            switch(e.key) {
+                case 'n':
+                    e.preventDefault();
+                    window.location.href = '/workflow/cursos';
+                    break;
+                case 's':
+                    e.preventDefault();
+                    window.location.href = '/docente/scanner';
+                    break;
+                case 'a':
+                    e.preventDefault();
+                    window.location.href = '/asistencias';
+                    break;
+                case 'c':
+                    e.preventDefault();
+                    window.location.href = '/workflow/mis-clases';
+                    break;
+            }
+        }
+    });
+
+    // Animate stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+    });
+
+    // Initialize lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+</script>
 
     <!-- Mis Cursos -->
     @if (Model.Cursos.Any())

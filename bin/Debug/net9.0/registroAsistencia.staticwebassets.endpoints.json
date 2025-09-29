@@ -301,6 +301,304 @@
       ]
     },
     {
+      "Route": "css/modern-ui.css",
+      "AssetFile": "css/modern-ui.css.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000245639892"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4070"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w=\""
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="
+        }
+      ]
+    },
+    {
+      "Route": "css/modern-ui.css",
+      "AssetFile": "css/modern-ui.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "25354"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="
+        }
+      ]
+    },
+    {
+      "Route": "css/modern-ui.css.gz",
+      "AssetFile": "css/modern-ui.css.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4070"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w="
+        }
+      ]
+    },
+    {
+      "Route": "css/modern-ui.jd72qo54sn.css",
+      "AssetFile": "css/modern-ui.css.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000245639892"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4070"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w=\""
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "jd72qo54sn"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="
+        },
+        {
+          "Name": "label",
+          "Value": "css/modern-ui.css"
+        }
+      ]
+    },
+    {
+      "Route": "css/modern-ui.jd72qo54sn.css",
+      "AssetFile": "css/modern-ui.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "25354"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "jd72qo54sn"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="
+        },
+        {
+          "Name": "label",
+          "Value": "css/modern-ui.css"
+        }
+      ]
+    },
+    {
+      "Route": "css/modern-ui.jd72qo54sn.css.gz",
+      "AssetFile": "css/modern-ui.css.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "4070"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 28 Sep 2025 20:17:45 GMT"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "jd72qo54sn"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-gu7BgkqNB6QYLUg5Q+fARrVt9OpYJKerWn8wChulm0w="
+        },
+        {
+          "Name": "label",
+          "Value": "css/modern-ui.css.gz"
+        }
+      ]
+    },
+    {
       "Route": "css/styles.css",
       "AssetFile": "css/styles.css.gz",
       "Selectors": [

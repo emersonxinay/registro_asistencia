@@ -48,17 +48,17 @@ public class AsistenciasController : ControllerBase
         {
             var clase = await _dataService.GetClaseAsync(dto.ClaseId);
             if (clase == null)
-                return BadRequest($"La clase {dto.ClaseId} no existe");
-            
+                return BadRequest(new { message = $"La clase {dto.ClaseId} no existe" });
+
             if (!clase.Activa)
-                return BadRequest("La clase no está activa");
+                return BadRequest(new { message = "La clase no está activa" });
 
             var alumno = await _dataService.GetAlumnoAsync(dto.AlumnoId);
             if (alumno == null)
-                return BadRequest($"El alumno con ID {dto.AlumnoId} no existe. Verifica tu ID de alumno.");
+                return BadRequest(new { message = $"El alumno con ID {dto.AlumnoId} no existe. Verifica tu ID de alumno." });
 
             if (!await _dataService.ValidarTokenAsync(dto.Nonce, dto.ClaseId))
-                return BadRequest("Token QR inválido o expirado. Escanea nuevamente el código QR.");
+                return BadRequest(new { message = "Token QR inválido o expirado. Escanea nuevamente el código QR." });
 
             await _dataService.ConsumeTokenAsync(dto.Nonce);
 
@@ -70,7 +70,59 @@ public class AsistenciasController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"Error al procesar la solicitud: {ex.Message}");
+            return BadRequest(new { message = $"Error al procesar la solicitud: {ex.Message}" });
+        }
+    }
+
+    // FUTURO: Endpoint para estudiantes autenticados (registro automático)
+    [HttpPost("alumno-scan-auto")]
+    [Authorize] // Requiere autenticación de estudiante cuando se implemente
+    public async Task<IActionResult> AlumnoScanAuto([FromBody] AlumnoScanAutoDto dto)
+    {
+        try
+        {
+            // Obtener ID del estudiante desde la autenticación
+            var alumnoIdFromAuth = GetCurrentStudentId(); // Método a implementar cuando haya auth de estudiantes
+
+            if (alumnoIdFromAuth == null)
+                return BadRequest(new { message = "No se pudo identificar al estudiante autenticado" });
+
+            var clase = await _dataService.GetClaseAsync(dto.ClaseId);
+            if (clase == null)
+                return BadRequest(new { message = $"La clase {dto.ClaseId} no existe" });
+
+            if (!clase.Activa)
+                return BadRequest(new { message = "La clase no está activa" });
+
+            if (!await _dataService.ValidarTokenAsync(dto.Nonce, dto.ClaseId))
+                return BadRequest(new { message = "Token QR inválido o expirado. Escanea nuevamente el código QR." });
+
+            await _dataService.ConsumeTokenAsync(dto.Nonce);
+
+            var alumno = await _dataService.GetAlumnoAsync(alumnoIdFromAuth.Value);
+            if (alumno == null)
+                return BadRequest(new { message = "Estudiante no encontrado en el sistema" });
+
+            if (await _dataService.ExisteAsistenciaAsync(alumnoIdFromAuth.Value, dto.ClaseId))
+                return Ok(new {
+                    mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente.",
+                    automatic = true
+                });
+
+            await _dataService.RegistrarAsistenciaAsync(alumnoIdFromAuth.Value, dto.ClaseId, "ALUMNO_ESCANEA_AUTO");
+            return Ok(new {
+                mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada automáticamente.",
+                automatic = true,
+                studentInfo = new {
+                    id = alumno.Id,
+                    nombre = alumno.Nombre,
+                    codigo = alumno.Codigo
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Error al procesar la solicitud automática: {ex.Message}" });
         }
     }
 
@@ -140,4 +192,24 @@ public class AsistenciasController : ControllerBase
         var normalBytes = _csvService.GenerateAsistenciasCsv(asistenciasClase);
         return File(normalBytes, "text/csv; charset=utf-8", $"asistencias-clase-{claseId}.csv");
     }
+
+    // FUTURO: Método para obtener ID de estudiante autenticado
+    // Este método deberá implementarse cuando se agregue el sistema de autenticación de estudiantes
+    private int? GetCurrentStudentId()
+    {
+        // TODO: Implementar cuando se agregue autenticación de estudiantes
+        // Ejemplo de implementación futura:
+        // var studentIdClaim = User.FindFirst("StudentId")?.Value;
+        // return int.TryParse(studentIdClaim, out int studentId) ? studentId : null;
+
+        return null; // Por ahora retorna null hasta que se implemente auth de estudiantes
+    }
+}
+
+// DTO para registro automático de estudiantes autenticados
+public class AlumnoScanAutoDto
+{
+    public int ClaseId { get; set; }
+    public string Nonce { get; set; } = "";
+    // No necesita AlumnoId porque se obtiene de la autenticación
 }

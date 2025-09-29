@@ -3,34 +3,143 @@
     ViewData["Subtitle"] = $"Clase {ViewBag.ClaseId}";
 }
 
-<div class="card" style="max-width: 600px; margin: 0 auto;">
-    <div class="card-header text-center">
-        <h2 class="card-title">Registrar Asistencia</h2>
-        <p class="card-description">Ingresa tu ID de alumno para marcar tu asistencia</p>
+<div class="scan-container">
+    <!-- QR Scanner Section -->
+    <div class="scanner-section">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="card-title">Escanear QR de la Clase</h2>
+                <p class="card-description">Usa tu cámara para escanear el código QR</p>
+            </div>
+
+            <div class="scanner-controls">
+                <button id="startScanBtn" class="btn btn-primary">
+                    <i data-lucide="camera" class="btn-icon"></i>
+                    Iniciar Escáner
+                </button>
+                <button id="stopScanBtn" class="btn btn-secondary" style="display: none;">
+                    <i data-lucide="camera-off" class="btn-icon"></i>
+                    Detener Escáner
+                </button>
+            </div>
+
+            <div id="scannerContainer" style="display: none;">
+                <video id="qrVideo" playsinline></video>
+                <div class="scanner-overlay">
+                    <div class="scanner-frame"></div>
+                    <p class="scanner-help">Apunta tu cámara al código QR</p>
+                </div>
+            </div>
+
+            <div id="scanStatus" class="scan-feedback"></div>
+        </div>
     </div>
 
-    <form id="asistenciaForm">
-        <div class="form-group">
-            <label class="form-label" for="alumnoId">ID del Alumno</label>
-            <input type="number" id="alumnoId" name="alumnoId" class="form-input" min="1" required 
-                   placeholder="Ingresa tu ID de alumno" autofocus>
+    <!-- Manual Entry Section -->
+    <div class="manual-section">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="card-title">Registro Manual</h3>
+                <p class="card-description">O ingresa tu ID manualmente</p>
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <!-- Usuario autenticado - mostrar info y opción automática -->
+                <div class="user-authenticated">
+                    <div class="auth-info">
+                        <i data-lucide="user-check" class="auth-icon"></i>
+                        <div>
+                            <p class="auth-name">Sesión activa: @User.Identity.Name</p>
+                            <p class="auth-note">Registro automático disponible</p>
+                        </div>
+                    </div>
+                    <button id="autoRegisterBtn" class="btn btn-success" onclick="registrarAutomatico()" style="margin-top: 10px;">
+                        <i data-lucide="zap" class="btn-icon"></i>
+                        Registrar Automáticamente
+                    </button>
+                    <div class="auth-separator">
+                        <span>o</span>
+                    </div>
+                </div>
+            }
+
+            <form id="asistenciaForm">
+                <div class="form-group">
+                    <label class="form-label" for="alumnoId">ID del Alumno</label>
+                    <input type="number" id="alumnoId" name="alumnoId" class="form-input" min="1" required
+                           placeholder="Ingresa tu ID de alumno" autofocus>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Marcar Asistencia</button>
+            </form>
+
+            <div id="mensaje" class="mt-4"></div>
+
+            <div class="qr-info mt-4">
+                <p><strong>Clase ID:</strong> @ViewBag.ClaseId</p>
+                <p class="text-xs">Token de seguridad activo</p>
+            </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary">Marcar Asistencia</button>
-    </form>
-
-    <div id="mensaje" class="mt-4"></div>
-
-    <div class="qr-info mt-4">
-        <p><strong>Clase ID:</strong> @ViewBag.ClaseId</p>
-        <p class="text-xs">Token de seguridad activo</p>
     </div>
 </div>
 
 @section Scripts {
+<script src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 <script>
     let currentNonce = "@ViewBag.Nonce";
     const claseId = @ViewBag.ClaseId;
+    let qrScanner = null;
+    let isScanning = false;
+    let audioContext = null;
+
+    // Inicializar audio para feedback
+    async function initAudio() {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Audio no disponible');
+        }
+    }
+
+    // Reproducir sonido de éxito/error
+    function playSound(success = true) {
+        if (!audioContext) return;
+
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(success ? 800 : 400, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    // Mostrar notificaciones de estado
+    function showScanStatus(message, isSuccess = true, isScanning = false) {
+        const statusDiv = document.getElementById('scanStatus');
+        statusDiv.className = `scan-feedback ${isSuccess ? 'success' : 'error'} ${isScanning ? 'scanning' : ''}`;
+        statusDiv.innerHTML = `
+            <i data-lucide="${isSuccess ? 'check-circle' : 'x-circle'}" class="status-icon"></i>
+            <span>${message}</span>
+        `;
+
+        // Re-renderizar íconos
+        if (window.lucide) lucide.createIcons();
+
+        // Auto-ocultar después de 5 segundos si no está escaneando
+        if (!isScanning) {
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+                statusDiv.className = 'scan-feedback';
+            }, 5000);
+        }
+    }
 
     async function renovarNonce() {
         const r = await fetch(`/api/clases/${claseId}/qr`);
@@ -42,10 +151,150 @@
         return j;
     }
 
+    // Procesar código QR escaneado
+    async function processQRCode(qrData) {
+        if (!qrData || qrData.trim() === '') return;
+
+        showScanStatus('Procesando código QR...', true, false);
+        playSound(true);
+
+        // Parar el escáner temporalmente
+        if (qrScanner) {
+            await qrScanner.stop();
+            isScanning = false;
+            toggleScannerUI(false);
+        }
+
+        try {
+            // Extraer nonce del QR (formato: URL con nonce=...)
+            let extractedNonce = currentNonce;
+            if (qrData.includes('nonce=')) {
+                const parts = qrData.split('nonce=');
+                if (parts.length >= 2) {
+                    extractedNonce = parts[1].split('&')[0]; // Solo tomar el nonce, ignorar otros parámetros
+                    currentNonce = extractedNonce;
+                }
+            }
+
+            // Obtener alumnoId del formulario
+            const alumnoIdInput = document.getElementById('alumnoId');
+            const alumnoId = alumnoIdInput.value;
+
+            if (!alumnoId) {
+                showScanStatus('Por favor ingresa tu ID de alumno primero', false);
+                playSound(false);
+                return;
+            }
+
+            const response = await fetch('/api/asistencias/alumno-scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    alumnoId: parseInt(alumnoId),
+                    claseId: claseId,
+                    nonce: extractedNonce
+                })
+            });
+
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('Error parsing JSON:', jsonError);
+                throw new Error('Respuesta del servidor inválida. Inténtalo de nuevo.');
+            }
+
+            if (response.ok) {
+                showScanStatus(result.mensaje || '¡Asistencia registrada exitosamente!', true);
+                playSound(true);
+
+                // Limpiar formulario
+                document.getElementById('asistenciaForm').reset();
+
+                // Mostrar mensaje en la sección manual también
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Asistencia registrada exitosamente'}</div>`;
+            } else {
+                throw new Error(result.message || result.mensaje || 'Error al registrar asistencia');
+            }
+
+        } catch (error) {
+            showScanStatus(`Error: ${error.message}`, false);
+            playSound(false);
+        }
+    }
+
+    // Alternar UI del escáner
+    function toggleScannerUI(scanning) {
+        const startBtn = document.getElementById('startScanBtn');
+        const stopBtn = document.getElementById('stopScanBtn');
+        const container = document.getElementById('scannerContainer');
+
+        if (scanning) {
+            startBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-flex';
+            container.style.display = 'block';
+            showScanStatus('Escáner activo - Busca el código QR', true, true);
+        } else {
+            startBtn.style.display = 'inline-flex';
+            stopBtn.style.display = 'none';
+            container.style.display = 'none';
+        }
+    }
+
+    // Iniciar escáner
+    async function startScanner() {
+        if (isScanning) return;
+
+        try {
+            await initAudio();
+
+            const videoElement = document.getElementById('qrVideo');
+
+            qrScanner = new QrScanner(
+                videoElement,
+                result => processQRCode(result.data),
+                {
+                    onDecodeError: error => {
+                        // No mostrar errores de decodificación constantes
+                    },
+                    highlightScanRegion: true,
+                    highlightCodeOutline: true,
+                    maxScansPerSecond: 5
+                }
+            );
+
+            await qrScanner.start();
+            isScanning = true;
+            toggleScannerUI(true);
+
+        } catch (error) {
+            showScanStatus(`Error al acceder a la cámara: ${error.message}`, false);
+            playSound(false);
+        }
+    }
+
+    // Detener escáner
+    async function stopScanner() {
+        if (!isScanning || !qrScanner) return;
+
+        try {
+            await qrScanner.stop();
+            isScanning = false;
+            toggleScannerUI(false);
+            showScanStatus('Escáner detenido', true);
+        } catch (error) {
+            console.error('Error al detener escáner:', error);
+        }
+    }
+
+    // Registro manual
     async function marcarAsistencia(reintentado = false) {
         const alumnoId = document.getElementById('alumnoId').value;
         const mensajeDiv = document.getElementById('mensaje');
-        
+
         if (!alumnoId) {
             mensajeDiv.innerHTML = '<div class="status status-error">Por favor ingresa tu ID de alumno</div>';
             return;
@@ -64,15 +313,22 @@
                 })
             });
 
-            const result = await response.json();
-            
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('Error parsing JSON:', jsonError);
+                throw new Error('Respuesta del servidor inválida. Inténtalo de nuevo.');
+            }
+
             if (response.ok) {
                 mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Asistencia registrada exitosamente'}</div>`;
                 document.getElementById('asistenciaForm').reset();
+                playSound(true);
             } else {
-                throw new Error(result.message || 'Error al registrar asistencia');
+                throw new Error(result.message || result.mensaje || 'Error al registrar asistencia');
             }
-            
+
         } catch (error) {
             if (!reintentado && /nonce/i.test(error.message)) {
                 try {
@@ -85,19 +341,95 @@
                 }
             }
             mensajeDiv.innerHTML = `<div class="status status-error">Error: ${error.message}</div>`;
+            playSound(false);
         }
     }
 
-    // Evento del formulario
+    // Eventos
+    document.getElementById('startScanBtn').addEventListener('click', startScanner);
+    document.getElementById('stopScanBtn').addEventListener('click', stopScanner);
     document.getElementById('asistenciaForm').addEventListener('submit', (e) => {
         e.preventDefault();
         marcarAsistencia(false);
     });
 
-    // Renovar nonce al cargar para minimizar expiraciones
+    // Limpiar al salir de la página
+    window.addEventListener('beforeunload', () => {
+        if (qrScanner) {
+            qrScanner.destroy();
+        }
+    });
+
+    // Función para registro automático (usuarios autenticados)
+    async function registrarAutomatico() {
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <text>
+            try {
+                showScanStatus('Procesando registro automático...', true, false);
+
+                const response = await fetch('/api/asistencias/alumno-scan-auto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        claseId: claseId,
+                        nonce: currentNonce
+                    })
+                });
+
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    console.error('Error parsing JSON:', jsonError);
+                    throw new Error('Respuesta del servidor inválida. Inténtalo de nuevo.');
+                }
+
+                if (response.ok) {
+                    showScanStatus(result.mensaje || '¡Asistencia registrada automáticamente!', true);
+                    playSound(true);
+
+                    // Mostrar mensaje en la sección manual también
+                    const mensajeDiv = document.getElementById('mensaje');
+                    mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Asistencia registrada automáticamente'}</div>`;
+
+                    // Mostrar información del estudiante si está disponible
+                    if (result.studentInfo) {
+                        const studentInfo = result.studentInfo;
+                        mensajeDiv.innerHTML += `
+                            <div class="student-details">
+                                <p><strong>Estudiante:</strong> ${studentInfo.nombre} (${studentInfo.codigo})</p>
+                                <p><strong>ID:</strong> ${studentInfo.id}</p>
+                            </div>
+                        `;
+                    }
+
+                } else {
+                    throw new Error(result.message || result.mensaje || 'Error en registro automático');
+                }
+
+            } catch (error) {
+                showScanStatus(`Error en registro automático: ${error.message}`, false);
+                playSound(false);
+                console.error('Error en registro automático:', error);
+            }
+            </text>
+        }
+        else
+        {
+            <text>
+            showScanStatus('Función no disponible - Se requiere autenticación', false);
+            playSound(false);
+            </text>
+        }
+    }
+
+    // Renovar nonce al cargar
     (async () => {
-        try { 
-            await renovarNonce(); 
+        try {
+            await renovarNonce();
         } catch(_) {
             // Si falla, usa el nonce inicial de la URL
         }
@@ -106,13 +438,398 @@
 }
 
 <style>
+    /* Mobile-first responsive design */
+    .scan-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0.75rem;
+        min-height: 100vh;
+    }
+
+    /* Tablet and desktop */
+    @@media (min-width: 768px) {
+        .scan-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            padding: 1rem;
+        }
+    }
+
+    /* Large desktop */
+    @@media (min-width: 1024px) {
+        .scan-container {
+            gap: 3rem;
+            padding: 2rem;
+        }
+    }
+
+    .scanner-section, .manual-section {
+        min-height: auto;
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid #e1e8ed;
+    }
+
+    .card {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .card-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .card-description {
+        color: #7f8c8d;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .scanner-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin: 1rem 0;
+    }
+
+    /* Tablet and desktop scanner controls */
+    @@media (min-width: 768px) {
+        .scanner-controls {
+            flex-direction: row;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .scanner-section, .manual-section {
+            min-height: 400px;
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+        }
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 12px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        width: 100%;
+        min-height: 48px; /* Touch-friendly for mobile */
+    }
+
+    .btn-icon {
+        width: 1.2rem;
+        height: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-1px);
+    }
+
+    #scannerContainer {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    /* Desktop scanner container */
+    @@media (min-width: 768px) {
+        .btn {
+            width: auto;
+            min-width: 160px;
+        }
+
+        #scannerContainer {
+            max-width: 400px;
+            border-radius: 8px;
+        }
+    }
+
+    #qrVideo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .scanner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        pointer-events: none;
+    }
+
+    .scanner-frame {
+        width: 180px;
+        height: 180px;
+        border: 3px solid #22c55e;
+        border-radius: 12px;
+        position: relative;
+        animation: scanner-pulse 2s infinite;
+    }
+
+    /* Mobile scanner frame adjustments */
+    @@media (max-width: 767px) {
+        .scanner-frame {
+            width: 160px;
+            height: 160px;
+            border-width: 2px;
+        }
+    }
+
+    /* Desktop scanner frame */
+    @@media (min-width: 768px) {
+        .scanner-frame {
+            width: 200px;
+            height: 200px;
+        }
+    }
+
+    .scanner-frame::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        border: 2px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        animation: scanner-sweep 2s infinite;
+    }
+
+    @@keyframes scanner-pulse {
+        0%, 100% { border-color: #22c55e; }
+        50% { border-color: #16a34a; }
+    }
+
+    @@keyframes scanner-sweep {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
+    }
+
+    .scanner-help {
+        margin-top: 1rem;
+        color: white;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        text-align: center;
+        max-width: 280px;
+    }
+
+    /* Mobile scanner help */
+    @@media (max-width: 767px) {
+        .scanner-help {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            max-width: 240px;
+        }
+    }
+
+    .scan-feedback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .scan-feedback.success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .scan-feedback.error {
+        background: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .scan-feedback.scanning {
+        background: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+        animation: scanning-pulse 1.5s infinite;
+    }
+
+    @@keyframes scanning-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .status-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .user-authenticated {
+        background: #f0f9ff;
+        border: 1px solid #0ea5e9;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .auth-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* Mobile auth info */
+    @@media (max-width: 767px) {
+        .auth-info {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.75rem;
+        }
+
+        .auth-icon {
+            width: 1.5rem !important;
+            height: 1.5rem !important;
+        }
+    }
+
+    .auth-icon {
+        width: 2rem;
+        height: 2rem;
+        color: #0ea5e9;
+        flex-shrink: 0;
+    }
+
+    .auth-name {
+        font-weight: 600;
+        color: #0c4a6e;
+        margin: 0;
+    }
+
+    .auth-note {
+        font-size: 0.875rem;
+        color: #0369a1;
+        margin: 0;
+    }
+
+    .auth-separator {
+        text-align: center;
+        margin: 15px 0;
+        position: relative;
+    }
+
+    .auth-separator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e9ecef;
+    }
+
+    .auth-separator span {
+        background: #f0f9ff;
+        padding: 0 15px;
+        color: #0369a1;
+        font-size: 0.875rem;
+        position: relative;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .student-details {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 0.9em;
+    }
+
+    .student-details p {
+        margin: 5px 0;
+        color: #495057;
+    }
+
     .qr-info {
         background: var(--background);
         padding: 1rem;
         border-radius: 8px;
         text-align: center;
     }
-    
+
     .status {
         padding: 0.75rem 1rem;
         border-radius: 8px;
@@ -137,5 +854,131 @@
         background: #fef3c7;
         color: #d97706;
         border: 1px solid #fed7aa;
+    }
+
+    /* Form improvements */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fff;
+        min-height: 48px;
+        box-sizing: border-box;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.75rem;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    /* QR info styles */
+    .qr-info {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    /* Notification styles */
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 90vw;
+        margin: 0 auto;
+    }
+
+    /* Mobile-specific responsive adjustments */
+    @@media (max-width: 767px) {
+        .scan-container {
+            padding: 0.5rem;
+            gap: 1rem;
+        }
+
+        .scanner-section, .manual-section {
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+            padding: 16px;
+            min-height: 52px;
+        }
+
+        .form-label {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .qr-info {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .notification {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            font-size: 1rem;
+            min-height: 52px;
+        }
+
+        .status {
+            padding: 1rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+
+        .student-details {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Tablet adjustments */
+    @@media (min-width: 768px) and (max-width: 1023px) {
+        .scan-container {
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .scanner-section, .manual-section {
+            padding: 1.25rem;
+        }
     }
 </style>

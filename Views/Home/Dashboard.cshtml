@@ -1,2305 +1,1197 @@
 @{
-    ViewData["Title"] = "Dashboard";
-    ViewData["Subtitle"] = "Sistema de registro de asistencia con tecnología QR avanzada";
+    ViewData["Title"] = "Dashboard - QuantumAttend";
+    ViewData["Subtitle"] = "Centro de Control Inteligente";
 }
 
-<!-- Hero Section -->
-<section class="quantum-grid grid-hero mb-4 stagger-parent">
-    <!-- Main Control Panel -->
-    <div class="quantum-card hero-card hover-reveal tilt-card">
-        <div class="card-header">
-            <div class="card-icon pulse-effect" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
-                <i data-lucide="command"></i>
-            </div>
-            <h2 class="card-title text-reveal">
-                <span>Centro</span> <span>de</span> <span>Control</span>
-            </h2>
-            <p class="card-subtitle slide-reveal">
-                <span class="slide-reveal-content">Gestiona estudiantes y clases con tecnología QR de nueva generación</span>
-            </p>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <div class="action-grid">
-                <button class="action-btn btn-primary scale-hover magnetic-btn" id="quickCreateStudent">
-                    <i data-lucide="user-plus"></i>
-                    <span>Nuevo Estudiante</span>
-                </button>
-                <button class="action-btn btn-secondary scale-hover magnetic-btn" id="quickCreateClass">
-                    <i data-lucide="plus-circle"></i>
-                    <span>Nueva Clase</span>
-                </button>
-                <button class="action-btn btn-success scale-hover magnetic-btn" id="generateQR">
-                    <i data-lucide="qr-code"></i>
-                    <span>Generar QR</span>
-                </button>
-                <button class="action-btn btn-warning scale-hover magnetic-btn" id="scannerMode">
-                    <i data-lucide="scan"></i>
-                    <span>Escáner</span>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Live Stats Panel -->
-    <div class="quantum-card stats-panel hover-reveal">
-        <div class="card-header">
-            <h3 class="card-title">Métricas en Vivo</h3>
-            <div class="live-indicator">
-                <div class="pulse-dot"></div>
-                <span>Tiempo Real</span>
-            </div>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="metric-card">
-                <div class="metric-icon" style="background: linear-gradient(135deg, var(--primary), #4f46e5);">
-                    <i data-lucide="users"></i>
+@section Styles {
+    <style>
+        /* Dashboard Expert-Level Design System */
+        .expert-dashboard {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .dashboard-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+
+        .dashboard-container {
+            position: relative;
+            z-index: 1;
+            padding: var(--space-6);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Header with Glassmorphism */
+        .dashboard-hero {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation: slideInFromTop 0.8s ease-out;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-6);
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: white;
+            margin: 0 0 var(--space-2) 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-weight: 400;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .stat-bubble {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: var(--space-4) var(--space-5);
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-bubble:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            animation: countUp 2s ease-out;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin: var(--space-1) 0 0 0;
+        }
+
+        /* Smart Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .control-panel {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-4);
+        }
+
+        /* Expert Cards with Advanced Interactions */
+        .expert-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: var(--space-6);
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .expert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .expert-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .expert-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .expert-card:hover .card-icon::before {
+            left: 100%;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin: var(--space-1) 0 0 0;
+        }
+
+        /* Interactive Action Buttons */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-3);
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-4);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+        }
+
+        .action-btn.accent {
+            background: linear-gradient(135deg, var(--accent-color), #0891b2);
+        }
+
+        .action-btn.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-btn span {
+            position: relative;
+            z-index: 1;
+            font-size: 0.875rem;
+        }
+
+        /* Smart Forms with Advanced UX */
+        .smart-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            font-size: 0.875rem;
+        }
+
+        .smart-input {
+            width: 100%;
+            padding: var(--space-4);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .smart-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .smart-input:focus + .input-effect {
+            width: 100%;
+        }
+
+        .input-effect {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .smart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .smart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .smart-btn:active {
+            transform: translateY(0);
+        }
+
+        .smart-btn.loading {
+            pointer-events: none;
+        }
+
+        .smart-btn .btn-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Live Metrics with Advanced Visualizations */
+        .metrics-panel {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+            border-radius: 20px;
+            padding: var(--space-6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metrics-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .metrics-header {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-6);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .metrics-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: var(--space-5);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 var(--space-1) 0;
+            animation: countUp 2s ease-out;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+            margin-top: var(--space-2);
+            font-size: 0.875rem;
+        }
+
+        .metric-trend.positive { color: #10b981; }
+        .metric-trend.negative { color: #ef4444; }
+        .metric-trend.neutral { color: #6b7280; }
+
+        /* Quick Actions Floating Panel */
+        .floating-actions {
+            position: fixed;
+            bottom: var(--space-6);
+            right: var(--space-6);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .floating-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .floating-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+
+        .floating-btn.secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+        }
+
+        /* Animations */
+        @@keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .dashboard-container {
+                padding: var(--space-4);
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-actions {
+                bottom: var(--space-4);
+                right: var(--space-4);
+            }
+        }
+
+        /* Success/Error States */
+        .status-message {
+            padding: var(--space-4);
+            border-radius: 12px;
+            margin-top: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 500;
+            animation: slideInFromBottom 0.5s ease-out;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @@keyframes slideInFromBottom {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+}
+
+<!-- Expert-Level Dashboard -->
+<div class="expert-dashboard">
+    <div class="dashboard-overlay"></div>
+
+    <div class="dashboard-container">
+        <!-- Hero Section with Glassmorphism -->
+        <div class="dashboard-hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">Centro de Control</h1>
+                    <p class="hero-subtitle">
+                        Gestiona tu ecosistema educativo con inteligencia artificial y tecnología QR avanzada
+                    </p>
                 </div>
-                <div class="metric-content">
-                    <div class="metric-value" id="liveStudentCount">0</div>
-                    <div class="metric-label">Estudiantes</div>
-                    <div class="metric-change positive">
-                        <i data-lucide="trending-up"></i>
-                        <span id="studentGrowth">+0%</span>
+
+                <div class="hero-stats">
+                    <div class="stat-bubble" onclick="navigateToSection('students')">
+                        <div class="stat-value" id="heroStudentCount">0</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                    <div class="stat-bubble" onclick="navigateToSection('classes')">
+                        <div class="stat-value" id="heroClassCount">0</div>
+                        <div class="stat-label">Clases Activas</div>
+                    </div>
+                    <div class="stat-bubble" onclick="navigateToSection('attendance')">
+                        <div class="stat-value" id="heroAttendanceCount">0</div>
+                        <div class="stat-label">Asistencias Hoy</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="metric-card">
-                <div class="metric-icon" style="background: linear-gradient(135deg, var(--success), #059669);">
-                    <i data-lucide="check-circle"></i>
+        </div>
+
+        <!-- Smart Control Panel -->
+        <div class="control-panel">
+            <!-- Quick Actions -->
+            <div class="expert-card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light));">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Acciones Rápidas</h3>
+                        <p class="card-subtitle">Ejecuta tareas comunes con un clic</p>
+                    </div>
                 </div>
-                <div class="metric-content">
-                    <div class="metric-value" id="liveAttendanceCount">0</div>
-                    <div class="metric-label">Asistencias Hoy</div>
-                    <div class="metric-change positive">
-                        <i data-lucide="trending-up"></i>
-                        <span id="attendanceGrowth">+0%</span>
+
+                <div class="action-grid">
+                    <a href="/alumnos" class="action-btn" data-action="students">
+                        <i data-lucide="users"></i>
+                        <span>Estudiantes</span>
+                    </a>
+                    <a href="/workflow/cursos" class="action-btn secondary" data-action="new-class">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Nueva Clase</span>
+                    </a>
+                    <a href="/clases" class="action-btn accent" data-action="qr-generator">
+                        <i data-lucide="qr-code"></i>
+                        <span>Generar QR</span>
+                    </a>
+                    <a href="/docente/scanner" class="action-btn warning" data-action="scanner">
+                        <i data-lucide="scan"></i>
+                        <span>Escáner</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Live Metrics -->
+            <div class="expert-card metrics-panel">
+                <div class="metrics-header">
+                    <h3 class="card-title">Métricas en Tiempo Real</h3>
+                    <div class="live-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>En vivo</span>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--primary-color), #4f46e5);">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="metric-trend positive">
+                                <i data-lucide="trending-up"></i>
+                                <span id="studentTrend">+12%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveStudentCount">0</div>
+                        <div class="metric-label">Total Estudiantes</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                                <i data-lucide="check-circle"></i>
+                            </div>
+                            <div class="metric-trend positive">
+                                <i data-lucide="trending-up"></i>
+                                <span id="attendanceTrend">+8%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveAttendanceCount">0</div>
+                        <div class="metric-label">Asistencias Hoy</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--accent-color), #0891b2);">
+                                <i data-lucide="activity"></i>
+                            </div>
+                            <div class="metric-trend neutral">
+                                <i data-lucide="minus"></i>
+                                <span id="activeTrend">0%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveActiveCount">0</div>
+                        <div class="metric-label">Clases Activas</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="metric-card">
-                <div class="metric-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2);">
-                    <i data-lucide="book-open"></i>
-                </div>
-                <div class="metric-content">
-                    <div class="metric-value" id="liveClassCount">0</div>
-                    <div class="metric-label">Clases Activas</div>
-                    <div class="metric-change neutral">
-                        <i data-lucide="minus"></i>
-                        <span id="classGrowth">0%</span>
+        </div>
+
+        <!-- Smart Management Section -->
+        <div class="dashboard-grid">
+            <!-- Student Management -->
+            <div class="expert-card" id="students-section">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        <i data-lucide="graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestión Inteligente de Estudiantes</h3>
+                        <p class="card-subtitle">Registro automático con generación de QR</p>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- Management Section -->
-<section class="quantum-grid grid-2 mb-4">
-    <!-- Student Management -->
-    <div class="quantum-card management-card">
-        <div class="card-header">
-            <div class="card-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white;">
-                <i data-lucide="graduation-cap"></i>
+                <form id="studentForm" class="smart-form">
+                    <div class="form-group">
+                        <label class="form-label" for="studentCode">Código del Estudiante</label>
+                        <input type="text" id="studentCode" name="codigo" class="smart-input" required
+                               placeholder="EST001" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="studentName">Nombre Completo</label>
+                        <input type="text" id="studentName" name="nombre" class="smart-input" required
+                               placeholder="Juan Pérez García" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="submit" class="smart-btn" id="studentSubmitBtn">
+                        <i data-lucide="user-plus"></i>
+                        <span>Crear Estudiante</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <div id="studentStatus"></div>
             </div>
-            <h3 class="card-title">Gestión de Estudiantes</h3>
-            <p class="card-subtitle">Registro y administración con QR automático</p>
-        </div>
-        
-        <form id="studentForm" class="quantum-form">
-            <div class="form-group">
-                <label class="form-label" for="studentCode">Código del Estudiante</label>
-                <input type="text" id="studentCode" name="codigo" class="quantum-input" required 
-                       placeholder="EST001" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="studentName">Nombre Completo</label>
-                <input type="text" id="studentName" name="nombre" class="quantum-input" required 
-                       placeholder="Juan Pérez García" autocomplete="off">
-            </div>
-            <button type="submit" class="quantum-btn btn-primary btn-lg">
-                <i data-lucide="user-plus"></i>
-                Crear Estudiante
-                <div class="btn-loader hidden">
-                    <div class="spinner-ring"></div>
+
+            <!-- Class Management -->
+            <div class="expert-card" id="classes-section">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestión Avanzada de Clases</h3>
+                        <p class="card-subtitle">Crea y administra clases con IA</p>
+                    </div>
                 </div>
-            </button>
-        </form>
-        
-        <div id="studentStatus" class="mt-2"></div>
-    </div>
 
-    <!-- Class Management -->
-    <div class="quantum-card management-card">
-        <div class="card-header">
-            <div class="card-icon" style="background: linear-gradient(135deg, var(--success), #059669); color: white;">
-                <i data-lucide="book-open"></i>
+                <form id="classForm" class="smart-form">
+                    <div class="form-group">
+                        <label class="form-label" for="className">Nombre de la Asignatura</label>
+                        <input type="text" id="className" name="asignatura" class="smart-input" required
+                               placeholder="Matemáticas Avanzadas" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="submit" class="smart-btn" id="classSubmitBtn" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Crear Clase</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <div id="classStatus"></div>
             </div>
-            <h3 class="card-title">Gestión de Clases</h3>
-            <p class="card-subtitle">Crea y administra tus clases académicas</p>
-        </div>
-        
-        <form id="classForm" class="quantum-form">
-            <div class="form-group">
-                <label class="form-label" for="className">Nombre de la Asignatura</label>
-                <input type="text" id="className" name="asignatura" class="quantum-input" required 
-                       placeholder="Matemáticas Avanzadas" autocomplete="off">
-            </div>
-            <button type="submit" class="quantum-btn btn-success btn-lg">
-                <i data-lucide="plus-circle"></i>
-                Crear Clase
-                <div class="btn-loader hidden">
-                    <div class="spinner-ring"></div>
+
+            <!-- QR Generator -->
+            <div class="expert-card" id="qr-section" style="grid-column: 1 / -1;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--accent-color), #0891b2);">
+                        <i data-lucide="qr-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Generador QR Inteligente</h3>
+                        <p class="card-subtitle">Códigos QR dinámicos con seguridad avanzada y auto-renovación</p>
+                    </div>
                 </div>
-            </button>
-        </form>
-        
-        <div id="classStatus" class="mt-2"></div>
-    </div>
-</section>
 
-<!-- QR Generation Section -->
-<section class="quantum-card qr-section mb-4">
-    <div class="card-header">
-        <div class="card-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2); color: white;">
-            <i data-lucide="qr-code"></i>
-        </div>
-        <h3 class="card-title">Generador QR Dinámico</h3>
-        <p class="card-subtitle">Crea códigos QR inteligentes con expiración automática</p>
-    </div>
-    
-    <div class="qr-controls">
-        <div class="form-group">
-            <label class="form-label" for="qrClassSelect">Seleccionar Clase</label>
-            <select id="qrClassSelect" class="quantum-input quantum-select">
-                <option value="">🎯 Elige una clase para generar QR...</option>
-            </select>
-        </div>
-        <button type="button" class="quantum-btn btn-primary btn-lg" id="generateQRBtn" disabled>
-            <i data-lucide="zap"></i>
-            Generar QR Inteligente
-            <div class="btn-loader hidden">
-                <div class="spinner-ring"></div>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: var(--space-4); align-items: end;">
+                    <div class="form-group">
+                        <label class="form-label" for="qrClassSelect">Seleccionar Clase Activa</label>
+                        <select id="qrClassSelect" class="smart-input">
+                            <option value="">🎯 Elige una clase para generar QR...</option>
+                        </select>
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="button" class="smart-btn" id="generateQRBtn" disabled
+                            style="background: linear-gradient(135deg, var(--accent-color), #0891b2); height: fit-content;">
+                        <i data-lucide="zap"></i>
+                        <span>Generar QR</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </div>
+
+                <div id="qrStatus"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <button class="floating-btn primary" onclick="navigateToSection('students')" title="Gestión de Estudiantes">
+            <i data-lucide="users"></i>
+        </button>
+        <button class="floating-btn secondary" onclick="navigateToSection('classes')" title="Nueva Clase">
+            <i data-lucide="plus"></i>
         </button>
     </div>
-    
-    <div class="qr-instructions hidden" id="qrInstructions">
-        <div class="quantum-alert alert-info">
-            <i data-lucide="info"></i>
-            <div>
-                <strong>🚀 QR Inteligente Generado</strong>
-                <ul class="instruction-list">
-                    <li>Los estudiantes escanean con cualquier app QR</li>
-                    <li>Se abre automáticamente el formulario de registro</li>
-                    <li>QR se auto-renueva cada 5 minutos por seguridad</li>
-                    <li>Incluye validación de tiempo real</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div id="qrContainer" class="qr-display-area hidden">
-        <!-- QR will be displayed here -->
-    </div>
-</section>
-
-<!-- Courses and Subjects Section -->
-<section class="quantum-grid grid-2 mb-4">
-    <!-- Course Management -->
-    <div class="quantum-card management-card">
-        <div class="card-header">
-            <div class="card-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2); color: white;">
-                <i data-lucide="folder-plus"></i>
-            </div>
-            <h3 class="card-title">Gestión de Cursos</h3>
-            <p class="card-subtitle">Crea y administra cursos para estudiantes</p>
-        </div>
-        
-        <form id="courseForm" class="quantum-form">
-            <div class="form-group">
-                <label class="form-label" for="courseCode">Código del Curso</label>
-                <input type="text" id="courseCode" name="codigo" class="quantum-input" required 
-                       placeholder="INF-2024" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="courseName">Nombre del Curso</label>
-                <input type="text" id="courseName" name="nombre" class="quantum-input" required 
-                       placeholder="Ingeniería en Informática" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="courseDesc">Descripción (Opcional)</label>
-                <textarea id="courseDesc" name="descripcion" class="quantum-input" 
-                          placeholder="Descripción del curso..." rows="3"></textarea>
-            </div>
-            <button type="submit" class="quantum-btn btn-primary btn-lg">
-                <i data-lucide="folder-plus"></i>
-                Crear Curso
-                <div class="btn-loader hidden">
-                    <div class="spinner-ring"></div>
-                </div>
-            </button>
-        </form>
-        
-        <div id="courseStatus" class="mt-2"></div>
-    </div>
-
-    <!-- Subject Management -->
-    <div class="quantum-card management-card">
-        <div class="card-header">
-            <div class="card-icon" style="background: linear-gradient(135deg, var(--warning), #d97706); color: white;">
-                <i data-lucide="book-plus"></i>
-            </div>
-            <h3 class="card-title">Gestión de Ramos</h3>
-            <p class="card-subtitle">Crea ramos asociados a cursos</p>
-        </div>
-        
-        <form id="subjectForm" class="quantum-form">
-            <div class="form-group">
-                <label class="form-label" for="subjectCourse">Curso</label>
-                <select id="subjectCourse" name="cursoId" class="quantum-input quantum-select" required>
-                    <option value="">Selecciona un curso...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="subjectCode">Código del Ramo</label>
-                <input type="text" id="subjectCode" name="codigo" class="quantum-input" required 
-                       placeholder="MAT-001" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="subjectName">Nombre del Ramo</label>
-                <input type="text" id="subjectName" name="nombre" class="quantum-input" required 
-                       placeholder="Matemáticas I" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="subjectDesc">Descripción (Opcional)</label>
-                <textarea id="subjectDesc" name="descripcion" class="quantum-input" 
-                          placeholder="Descripción del ramo..." rows="2"></textarea>
-            </div>
-            <button type="submit" class="quantum-btn btn-warning btn-lg">
-                <i data-lucide="book-plus"></i>
-                Crear Ramo
-                <div class="btn-loader hidden">
-                    <div class="spinner-ring"></div>
-                </div>
-            </button>
-        </form>
-        
-        <div id="subjectStatus" class="mt-2"></div>
-    </div>
-</section>
-
-<!-- Data Tables Section -->
-<section class="quantum-grid grid-2 mb-4">
-    <!-- Students Table -->
-    <div class="quantum-card table-card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="card-title">Estudiantes Registrados</h3>
-                    <p class="card-subtitle">Listado completo con códigos QR</p>
-                </div>
-                <button class="quantum-btn btn-sm btn-secondary" id="refreshStudents">
-                    <i data-lucide="refresh-cw"></i>
-                    Actualizar
-                </button>
-            </div>
-        </div>
-        
-        <div class="quantum-table-container">
-            <div id="studentsTableContainer">
-                <div class="loading-state">
-                    <div class="quantum-spinner">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                    </div>
-                    <p>Cargando estudiantes...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Classes Table -->
-    <div class="quantum-card table-card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="card-title">Clases del Sistema</h3>
-                    <p class="card-subtitle">Administra y monitorea tus clases</p>
-                </div>
-                <button class="quantum-btn btn-sm btn-secondary" id="refreshClasses">
-                    <i data-lucide="refresh-cw"></i>
-                    Actualizar
-                </button>
-            </div>
-        </div>
-        
-        <div class="quantum-table-container">
-            <div id="classesTableContainer">
-                <div class="loading-state">
-                    <div class="quantum-spinner">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                    </div>
-                    <p>Cargando clases...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Courses and Subjects Tables -->
-<section class="quantum-grid grid-2 mb-4">
-    <!-- Courses Table -->
-    <div class="quantum-card table-card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="card-title">Cursos del Sistema</h3>
-                    <p class="card-subtitle">Administra los cursos disponibles</p>
-                </div>
-                <button class="quantum-btn btn-sm btn-secondary" id="refreshCourses">
-                    <i data-lucide="refresh-cw"></i>
-                    Actualizar
-                </button>
-            </div>
-        </div>
-        
-        <div class="quantum-table-container">
-            <div id="coursesTableContainer">
-                <div class="loading-state">
-                    <div class="quantum-spinner">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                    </div>
-                    <p>Cargando cursos...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Subjects Table -->
-    <div class="quantum-card table-card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h3 class="card-title">Ramos del Sistema</h3>
-                    <p class="card-subtitle">Administra los ramos por curso</p>
-                </div>
-                <button class="quantum-btn btn-sm btn-secondary" id="refreshSubjects">
-                    <i data-lucide="refresh-cw"></i>
-                    Actualizar
-                </button>
-            </div>
-        </div>
-        
-        <div class="quantum-table-container">
-            <div id="subjectsTableContainer">
-                <div class="loading-state">
-                    <div class="quantum-spinner">
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                        <div class="spinner-ring"></div>
-                    </div>
-                    <p>Cargando ramos...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Quick Links Section -->
-<section class="quantum-card links-section">
-    <div class="card-header">
-        <div class="card-icon" style="background: linear-gradient(135deg, var(--warning), #d97706); color: white;">
-            <i data-lucide="external-link"></i>
-        </div>
-        <h3 class="card-title">Enlaces Rápidos</h3>
-        <p class="card-subtitle">Acceso directo a funcionalidades avanzadas</p>
-    </div>
-    
-    <div class="links-grid">
-        <a href="/asistencias" class="link-card">
-            <div class="link-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
-                <i data-lucide="clipboard-list"></i>
-            </div>
-            <div class="link-content">
-                <h4>Todas las Asistencias</h4>
-                <p>Ver registro completo de asistencias</p>
-            </div>
-            <i data-lucide="arrow-right" class="link-arrow"></i>
-        </a>
-        
-        <a href="/api/asistencias/csv" class="link-card">
-            <div class="link-icon" style="background: linear-gradient(135deg, var(--success), #059669);">
-                <i data-lucide="download"></i>
-            </div>
-            <div class="link-content">
-                <h4>Exportar CSV</h4>
-                <p>Descargar datos en formato CSV</p>
-            </div>
-            <i data-lucide="arrow-right" class="link-arrow"></i>
-        </a>
-        
-        <a href="/docente/scanner" class="link-card featured">
-            <div class="link-icon" style="background: linear-gradient(135deg, var(--accent), #0891b2);">
-                <i data-lucide="scan-line"></i>
-            </div>
-            <div class="link-content">
-                <h4>Escáner Docente</h4>
-                <p>Interfaz avanzada de escaneo QR</p>
-            </div>
-            <i data-lucide="arrow-right" class="link-arrow"></i>
-        </a>
-        
-        <a href="/swagger" target="_blank" class="link-card">
-            <div class="link-icon" style="background: linear-gradient(135deg, var(--warning), #d97706);">
-                <i data-lucide="code-2"></i>
-            </div>
-            <div class="link-content">
-                <h4>Documentación API</h4>
-                <p>Explorar endpoints de la API</p>
-            </div>
-            <i data-lucide="external-link" class="link-arrow"></i>
-        </a>
-    </div>
-</section>
-
+</div>
 
 @section Scripts {
-<script>
-// Dashboard state management
-const Dashboard = {
-    data: {
-        students: [],
-        classes: [],
-        courses: [],
-        subjects: [],
-        stats: {
-            totalStudents: 0,
-            activeClasses: 0,
-            todayAttendance: 0
-        }
-    },
-    cache: {
-        studentsTable: null,
-        classesTable: null,
-        lastUpdate: 0
-    },
-    timers: {
-        statsUpdate: null,
-        qrRefresh: null,
-        countdown: null
-    },
-    
-    async init() {
-        console.log('🚀 Initializing QuantumAttend Dashboard...');
-        
-        // Initialize components
-        await this.loadInitialData();
-        this.setupEventListeners();
-        this.startRealTimeUpdates();
-        
-        // Initialize icons
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-        
-        console.log('✅ Dashboard initialized successfully');
-    },
-    
-    async loadInitialData() {
-        const loader = document.getElementById('globalLoader');
-        if (loader) loader.classList.add('show');
-        
-        try {
-            // Load data only if not recently updated (5 seconds cache)
-            const now = Date.now();
-            if (now - this.cache.lastUpdate > 5000) {
-                await Promise.all([
-                    this.loadStudents(),
-                    this.loadClasses(),
-                    this.loadCourses(),
-                    this.loadSubjects(),
-                    this.updateStats()
-                ]);
-                this.cache.lastUpdate = now;
+    <script>
+        // Expert-Level Dashboard Controller
+        class ExpertDashboard {
+            constructor() {
+                this.metrics = {
+                    students: 0,
+                    classes: 0,
+                    attendance: 0
+                };
+                this.initialize();
             }
-        } catch (error) {
-            console.error('❌ Error loading initial data:', error);
-            this.showError('Error cargando datos iniciales');
-        } finally {
-            if (loader) loader.classList.remove('show');
-        }
-    },
-    
-    async loadStudents() {
-        try {
-            const students = await Utils.request('/api/alumnos');
-            if (Array.isArray(students)) {
-                this.data.students = students;
-                this.renderStudentsTable();
-                this.populateClassSelect();
-            } else {
-                console.warn('Students data is not an array:', students);
-                this.data.students = [];
-            }
-        } catch (error) {
-            console.error('Error loading students:', error);
-            this.showError(document.body, 'Error cargando estudiantes: ' + error.message);
-        }
-    },
-    
-    async loadClasses() {
-        try {
-            const classes = await Utils.request('/api/clases');
-            if (Array.isArray(classes)) {
-                this.data.classes = classes;
-                this.renderClassesTable();
-                this.populateClassSelect();
-            } else {
-                console.warn('Classes data is not an array:', classes);
-                this.data.classes = [];
-            }
-        } catch (error) {
-            console.error('Error loading classes:', error);
-            this.showError(document.body, 'Error cargando clases: ' + error.message);
-        }
-    },
-    
-    async loadCourses() {
-        try {
-            const courses = await Utils.request('/api/cursos');
-            if (Array.isArray(courses)) {
-                this.data.courses = courses;
-                this.renderCoursesTable();
-                this.populateCourseSelects();
-            } else {
-                console.warn('Courses data is not an array:', courses);
-                this.data.courses = [];
-            }
-        } catch (error) {
-            console.error('Error loading courses:', error);
-            this.showError(document.body, 'Error cargando cursos: ' + error.message);
-        }
-    },
-    
-    async loadSubjects() {
-        try {
-            const subjects = await Utils.request('/api/ramos');
-            if (Array.isArray(subjects)) {
-                this.data.subjects = subjects;
-                this.renderSubjectsTable();
-            } else {
-                console.warn('Subjects data is not an array:', subjects);
-                this.data.subjects = [];
-            }
-        } catch (error) {
-            console.error('Error loading subjects:', error);
-            this.showError(document.body, 'Error cargando ramos: ' + error.message);
-        }
-    },
-    
-    renderStudentsTable() {
-        const container = document.getElementById('studentsTableContainer');
-        if (!container) return;
-        
-        // Check if we need to re-render
-        const currentHash = JSON.stringify(this.data.students).slice(0, 50);
-        if (this.cache.studentsTable === currentHash) return;
-        this.cache.studentsTable = currentHash;
-        
-        if (this.data.students.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="users" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay estudiantes registrados</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza agregando tu primer estudiante</p>
-                    <button class="quantum-btn btn-primary" onclick="Dashboard.showAddStudentModal()">
-                        <i data-lucide="user-plus"></i>
-                        Agregar Primer Estudiante
-                    </button>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
 
-        // Add search and filter bar
-        const searchBarHTML = `
-            <div class="search-filter-bar">
-                <div class="search-input">
-                    <i data-lucide="search" class="search-icon"></i>
-                    <input type="text" class="quantum-input" placeholder="Buscar estudiantes..." 
-                           id="studentSearch" onkeyup="Dashboard.filterStudents()">
-                </div>
-                <button class="quantum-btn btn-primary" onclick="Dashboard.showAddStudentModal()">
-                    <i data-lucide="user-plus"></i>
-                    Nuevo Estudiante
-                </button>
-            </div>
-        `;
-        
-        const tableHTML = `
-            ${searchBarHTML}
-            <table class="quantum-table" id="studentsTable">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="selectAllStudents" onchange="Dashboard.selectAllStudents(this.checked)">
-                        </th>
-                        <th onclick="Dashboard.sortStudents('codigo')" style="cursor: pointer;">
-                            Código <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
-                        </th>
-                        <th onclick="Dashboard.sortStudents('nombre')" style="cursor: pointer;">
-                            Nombre <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
-                        </th>
-                        <th>QR</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.data.students.map(student => `
-                        <tr class="student-row" data-id="${student.id}" data-codigo="${student.codigo.toLowerCase()}" data-nombre="${student.nombre.toLowerCase()}">
-                            <td>
-                                <input type="checkbox" class="student-checkbox" value="${student.id}">
-                            </td>
-                            <td>
-                                <code class="code-badge">${student.codigo}</code>
-                            </td>
-                            <td>
-                                <div class="student-info">
-                                    <strong>${student.nombre}</strong>
-                                    <small>ID: ${student.id}</small>
-                                </div>
-                            </td>
-                            <td>
-                                ${student.qrAlumnoBase64 ? 
-                                    `<button class="status-badge success" onclick="Dashboard.showStudentQR(${student.id})">
-                                        <i data-lucide="qr-code" style="width: 12px; height: 12px;"></i> Ver QR
-                                    </button>` : 
-                                    '<span class="status-badge warning">⚠ Generando...</span>'
-                                }
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editStudent(${student.id})" 
-                                            title="Editar estudiante">
-                                        <i data-lucide="edit-3"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.showStudentQR(${student.id}, event)"
-                                            title="Ver QR">
-                                        <i data-lucide="qr-code"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteStudent(${student.id})"
-                                            title="Eliminar estudiante">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            <div class="table-footer" id="studentsFooter" style="display: none;">
-                <div class="bulk-actions">
-                    <span id="selectedCount">0 estudiantes seleccionados</span>
-                    <button class="quantum-btn btn-danger btn-sm" onclick="Dashboard.bulkDeleteStudents()">
-                        <i data-lucide="trash-2"></i>
-                        Eliminar Seleccionados
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = tableHTML;
-        lucide.createIcons();
-    },
-    
-    renderClassesTable() {
-        const container = document.getElementById('classesTableContainer');
-        if (!container) return;
-        
-        // Check if we need to re-render
-        const currentHash = JSON.stringify(this.data.classes).slice(0, 50);
-        if (this.cache.classesTable === currentHash) return;
-        this.cache.classesTable = currentHash;
-        
-        if (this.data.classes.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="book-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay clases registradas</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza programando tu primera clase</p>
-                    <button class="quantum-btn btn-primary" onclick="Dashboard.showAddClassModal()">
-                        <i data-lucide="plus-circle"></i>
-                        Crear Primera Clase
-                    </button>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
+            async initialize() {
+                await this.loadInitialData();
+                this.bindEvents();
+                this.startRealTimeUpdates();
+                this.initializeAnimations();
 
-        // Add search and filter bar for classes
-        const searchBarHTML = `
-            <div class="search-filter-bar">
-                <div class="search-input">
-                    <i data-lucide="search" class="search-icon"></i>
-                    <input type="text" class="quantum-input" placeholder="Buscar clases..." 
-                           id="classSearch" onkeyup="Dashboard.filterClasses()">
-                </div>
-                <div class="filter-select">
-                    <select class="quantum-input quantum-select" id="statusFilter" onchange="Dashboard.filterClasses()">
-                        <option value="">Todos los estados</option>
-                        <option value="active">Activas</option>
-                        <option value="closed">Cerradas</option>
-                    </select>
-                </div>
-                <button class="quantum-btn btn-primary" onclick="Dashboard.showAddClassModal()">
-                    <i data-lucide="plus-circle"></i>
-                    Nueva Clase
-                </button>
-            </div>
-        `;
-        
-        const tableHTML = `
-            ${searchBarHTML}
-            <table class="quantum-table" id="classesTable">
-                <thead>
-                    <tr>
-                        <th>
-                            <input type="checkbox" id="selectAllClasses" onchange="Dashboard.selectAllClasses(this.checked)">
-                        </th>
-                        <th onclick="Dashboard.sortClasses('asignatura')" style="cursor: pointer;">
-                            Asignatura <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
-                        </th>
-                        <th>Estado</th>
-                        <th onclick="Dashboard.sortClasses('inicioUtc')" style="cursor: pointer;">
-                            Inicio <i data-lucide="arrow-up-down" style="width: 12px; height: 12px;"></i>
-                        </th>
-                        <th>QR</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.data.classes.map(cls => {
-                        const statusFilter = cls.activa ? 'active' : 'closed';
-                        
-                        return `
-                            <tr class="class-row" data-id="${cls.id}"
-                                data-asignatura="${cls.asignatura.toLowerCase()}"
-                                data-status="${statusFilter}"
-                                data-inicio="${cls.inicioUtc}">
-                                <td>
-                                    <input type="checkbox" class="class-checkbox" value="${cls.id}">
-                                </td>
-                                <td>
-                                    <div class="class-info">
-                                        <strong>${cls.asignatura}</strong>
-                                        <small>ID: ${cls.id}</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    ${cls.activa ? 
-                                        '<span class="status-badge success">🟢 Activa</span>' : 
-                                        '<span class="status-badge danger">🔴 Cerrada</span>'
-                                    }
-                                </td>
-                                <td>
-                                    <time class="timestamp">
-                                        ${new Date(cls.inicioUtc).toLocaleString('es-ES', {
-                                            dateStyle: 'short',
-                                            timeStyle: 'short'
-                                        })}
-                                    </time>
-                                </td>
-                                <td>
-                                    ${cls.activa ? `
-                                        <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.generateClassQR(${cls.id})"
-                                                title="Generar QR">
-                                            <i data-lucide="qr-code"></i>
-                                            QR
-                                        </button>
-                                    ` : `
-                                        <span class="status-badge warning">Sin QR</span>
-                                    `}
-                                </td>
-                                <td>
-                                    <div class="action-buttons">
-                                        ${cls.activa ? `
-                                            <button class="quantum-btn btn-sm btn-warning" onclick="Dashboard.closeClass(${cls.id})"
-                                                    title="Cerrar clase">
-                                                <i data-lucide="lock"></i>
-                                            </button>
-                                        ` : `
-                                            <button class="quantum-btn btn-sm btn-success" onclick="Dashboard.reopenClass(${cls.id})"
-                                                    title="Reabrir clase">
-                                                <i data-lucide="unlock"></i>
-                                            </button>
-                                        `}
-                                        <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editClass(${cls.id})"
-                                                title="Editar clase">
-                                            <i data-lucide="edit-3"></i>
-                                        </button>
-                                        <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewClassAttendance(${cls.id})"
-                                                title="Ver asistencia">
-                                            <i data-lucide="users"></i>
-                                        </button>
-                                        <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteClass(${cls.id})"
-                                                title="Eliminar clase">
-                                            <i data-lucide="trash-2"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-            <div class="table-footer" id="classesFooter" style="display: none;">
-                <div class="bulk-actions">
-                    <span id="selectedClassCount">0 clases seleccionadas</span>
-                    <button class="quantum-btn btn-danger btn-sm" onclick="Dashboard.bulkDeleteClasses()">
-                        <i data-lucide="trash-2"></i>
-                        Eliminar Seleccionadas
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = tableHTML;
-        lucide.createIcons();
-    },
-    
-    renderCoursesTable() {
-        const container = document.getElementById('coursesTableContainer');
-        if (!container) return;
-        
-        if (this.data.courses.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="folder-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay cursos registrados</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza creando tu primer curso</p>
-                    <button class="quantum-btn btn-primary" onclick="document.getElementById('courseCode').focus()">
-                        <i data-lucide="folder-plus"></i>
-                        Crear Primer Curso
-                    </button>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
-        
-        const tableHTML = `
-            <table class="quantum-table">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Ramos</th>
-                        <th>Estudiantes</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.data.courses.map(course => `
-                        <tr>
-                            <td>
-                                <code class="code-badge">${course.codigo}</code>
-                            </td>
-                            <td>
-                                <div class="course-info">
-                                    <strong>${course.nombre}</strong>
-                                    <small>ID: ${course.id}</small>
-                                </div>
-                            </td>
-                            <td>
-                                ${course.activo ? 
-                                    '<span class="status-badge success">🟢 Activo</span>' : 
-                                    '<span class="status-badge danger">🔴 Inactivo</span>'
-                                }
-                            </td>
-                            <td>
-                                <span class="metric-value">${course.ramos?.length || 0}</span>
-                            </td>
-                            <td>
-                                <span class="metric-value">${course.alumnoCursos?.filter(ac => ac.activo).length || 0}</span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editCourse(${course.id})" 
-                                            title="Editar curso">
-                                        <i data-lucide="edit-3"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewCourseStudents(${course.id})"
-                                            title="Ver estudiantes">
-                                        <i data-lucide="users"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteCourse(${course.id})"
-                                            title="Eliminar curso">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-        lucide.createIcons();
-    },
-    
-    renderSubjectsTable() {
-        const container = document.getElementById('subjectsTableContainer');
-        if (!container) return;
-        
-        if (this.data.subjects.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i data-lucide="book-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
-                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">No hay ramos registrados</h3>
-                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Comienza creando tu primer ramo</p>
-                    <button class="quantum-btn btn-primary" onclick="document.getElementById('subjectCourse').focus()">
-                        <i data-lucide="book-plus"></i>
-                        Crear Primer Ramo
-                    </button>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
-        
-        const tableHTML = `
-            <table class="quantum-table">
-                <thead>
-                    <tr>
-                        <th>Curso</th>
-                        <th>Código</th>
-                        <th>Nombre</th>
-                        <th>Estado</th>
-                        <th>Clases</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.data.subjects.map(subject => `
-                        <tr>
-                            <td>
-                                <div class="course-info">
-                                    <strong>${subject.curso?.nombre || 'N/A'}</strong>
-                                    <small>${subject.curso?.codigo || 'N/A'}</small>
-                                </div>
-                            </td>
-                            <td>
-                                <code class="code-badge">${subject.codigo}</code>
-                            </td>
-                            <td>
-                                <div class="subject-info">
-                                    <strong>${subject.nombre}</strong>
-                                    <small>ID: ${subject.id}</small>
-                                </div>
-                            </td>
-                            <td>
-                                ${subject.activo ? 
-                                    '<span class="status-badge success">🟢 Activo</span>' : 
-                                    '<span class="status-badge danger">🔴 Inactivo</span>'
-                                }
-                            </td>
-                            <td>
-                                <span class="metric-value">${subject.clases?.length || 0}</span>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="quantum-btn btn-sm btn-secondary" onclick="Dashboard.editSubject(${subject.id})" 
-                                            title="Editar ramo">
-                                        <i data-lucide="edit-3"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-primary" onclick="Dashboard.viewSubjectClasses(${subject.id})"
-                                            title="Ver clases">
-                                        <i data-lucide="book-open"></i>
-                                    </button>
-                                    <button class="quantum-btn btn-sm btn-danger" onclick="Dashboard.confirmDeleteSubject(${subject.id})"
-                                            title="Eliminar ramo">
-                                        <i data-lucide="trash-2"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        container.innerHTML = tableHTML;
-        lucide.createIcons();
-    },
-    
-    populateClassSelect() {
-        const select = document.getElementById('qrClassSelect');
-        if (!select) return;
-        
-        const activeClasses = this.data.classes.filter(cls => cls.activa);
-        
-        select.innerHTML = '<option value="">🎯 Elige una clase para generar QR...</option>';
-        
-        activeClasses.forEach(cls => {
-            const option = document.createElement('option');
-            option.value = cls.id;
-            option.textContent = `${cls.asignatura} (ID: ${cls.id})`;
-            select.appendChild(option);
-        });
-        
-        // Enable/disable generate button
-        const btn = document.getElementById('generateQRBtn');
-        if (btn) {
-            select.addEventListener('change', () => {
-                btn.disabled = !select.value;
-            });
-        }
-    },
-    
-    populateCourseSelects() {
-        const select = document.getElementById('subjectCourse');
-        if (!select) return;
-        
-        select.innerHTML = '<option value="">Selecciona un curso...</option>';
-        
-        this.data.courses.filter(course => course.activo).forEach(course => {
-            const option = document.createElement('option');
-            option.value = course.id;
-            option.textContent = `${course.nombre} (${course.codigo})`;
-            select.appendChild(option);
-        });
-    },
-    
-    setupEventListeners() {
-        // Student form
-        const studentForm = document.getElementById('studentForm');
-        if (studentForm) {
-            studentForm.addEventListener('submit', this.handleStudentSubmit.bind(this));
-        }
-        
-        // Class form  
-        const classForm = document.getElementById('classForm');
-        if (classForm) {
-            classForm.addEventListener('submit', this.handleClassSubmit.bind(this));
-        }
-        
-        // Course form
-        const courseForm = document.getElementById('courseForm');
-        if (courseForm) {
-            courseForm.addEventListener('submit', this.handleCourseSubmit.bind(this));
-        }
-        
-        // Subject form
-        const subjectForm = document.getElementById('subjectForm');
-        if (subjectForm) {
-            subjectForm.addEventListener('submit', this.handleSubjectSubmit.bind(this));
-        }
-        
-        // QR Generation
-        const generateBtn = document.getElementById('generateQRBtn');
-        if (generateBtn) {
-            generateBtn.addEventListener('click', this.handleQRGeneration.bind(this));
-        }
-        
-        // Refresh buttons
-        const refreshStudents = document.getElementById('refreshStudents');
-        if (refreshStudents) {
-            refreshStudents.addEventListener('click', () => this.loadStudents());
-        }
-        
-        const refreshClasses = document.getElementById('refreshClasses');
-        if (refreshClasses) {
-            refreshClasses.addEventListener('click', () => this.loadClasses());
-        }
-        
-        const refreshCourses = document.getElementById('refreshCourses');
-        if (refreshCourses) {
-            refreshCourses.addEventListener('click', () => this.loadCourses());
-        }
-        
-        const refreshSubjects = document.getElementById('refreshSubjects');
-        if (refreshSubjects) {
-            refreshSubjects.addEventListener('click', () => this.loadSubjects());
-        }
-        
-        // Quick action buttons
-        const quickButtons = {
-            quickCreateStudent: () => document.getElementById('studentCode')?.focus(),
-            quickCreateClass: () => document.getElementById('className')?.focus(),
-            generateQR: () => document.getElementById('qrClassSelect')?.focus(),
-            scannerMode: () => window.open('/docente/scanner', '_blank')
-        };
-        
-        Object.entries(quickButtons).forEach(([id, handler]) => {
-            const btn = document.getElementById(id);
-            if (btn) btn.addEventListener('click', handler);
-        });
-    },
-    
-    async handleStudentSubmit(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const btn = form.querySelector('button[type="submit"]');
-        const loader = btn.querySelector('.btn-loader');
-        const status = document.getElementById('studentStatus');
-        
-        // Show loading state
-        btn.disabled = true;
-        loader?.classList.remove('hidden');
-        
-        try {
-            const student = await Utils.request('/api/alumnos', {
-                method: 'POST',
-                body: JSON.stringify({
-                    codigo: formData.get('codigo'),
-                    nombre: formData.get('nombre')
-                })
-            });
-            
-            // Success
-            form.reset();
-            this.showSuccess(status, '✅ Estudiante creado exitosamente');
-            await this.loadStudents();
-            await this.updateStats();
-            
-            // Animate the new student
-            setTimeout(() => {
-                const row = document.querySelector(`[data-id="${student.id}"]`);
-                if (row) {
-                    row.style.background = 'linear-gradient(90deg, rgba(99, 102, 241, 0.1), transparent)';
-                    setTimeout(() => row.style.background = '', 2000);
+                // Initialize Lucide icons
+                lucide.createIcons();
+
+                console.log('🚀 Expert Dashboard initialized');
+            }
+
+            async loadInitialData() {
+                try {
+                    const [students, classes, attendances] = await Promise.all([
+                        this.fetchData('/api/alumnos'),
+                        this.fetchData('/api/clases'),
+                        this.fetchData('/api/asistencias')
+                    ]);
+
+                    this.metrics.students = students?.length || 0;
+                    this.metrics.classes = classes?.filter(c => c.activa).length || 0;
+
+                    // Calculate today's attendance
+                    const today = new Date().toDateString();
+                    this.metrics.attendance = attendances?.filter(a => {
+                        try {
+                            return new Date(a.marcadaUtc).toDateString() === today;
+                        } catch {
+                            return false;
+                        }
+                    }).length || 0;
+
+                    this.updateMetrics();
+                    await this.loadActiveClasses();
+                } catch (error) {
+                    console.error('Error loading initial data:', error);
+                    this.showError('Error al cargar datos iniciales');
                 }
-            }, 500);
-            
-        } catch (error) {
-            this.showError(status, error.message || 'Error al crear estudiante');
-        } finally {
-            btn.disabled = false;
-            loader?.classList.add('hidden');
-        }
-    },
-    
-    async handleClassSubmit(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const btn = form.querySelector('button[type="submit"]');
-        const loader = btn.querySelector('.btn-loader');
-        const status = document.getElementById('classStatus');
-        
-        // Show loading state
-        btn.disabled = true;
-        loader?.classList.remove('hidden');
-        
-        try {
-            const cls = await Utils.request('/api/clases', {
-                method: 'POST',
-                body: JSON.stringify({
-                    asignatura: formData.get('asignatura')
-                })
-            });
-            
-            // Success
-            form.reset();
-            this.showSuccess(status, '✅ Clase creada exitosamente');
-            await this.loadClasses();
-            await this.updateStats();
-            
-        } catch (error) {
-            this.showError(status, error.message || 'Error al crear clase');
-        } finally {
-            btn.disabled = false;
-            loader?.classList.add('hidden');
-        }
-    },
-    
-    async handleQRGeneration() {
-        const select = document.getElementById('qrClassSelect');
-        const btn = document.getElementById('generateQRBtn');
-        const container = document.getElementById('qrContainer');
-        const instructions = document.getElementById('qrInstructions');
-        const loader = btn.querySelector('.btn-loader');
-        
-        const classId = select?.value;
-        if (!classId) return;
-        
-        // Show loading
-        btn.disabled = true;
-        loader?.classList.remove('hidden');
-        
-        try {
-            const qrData = await Utils.request(`/api/clases/${classId}/qr`);
-            
-            // Show QR
-            container.innerHTML = `
-                <div class="qr-display">
-                    <img src="data:image/png;base64,${qrData.base64Png}" 
-                         alt="QR Code" class="qr-image" />
-                    <div class="qr-info">
-                        <h4>📱 QR para ${qrData.claseInfo.asignatura}</h4>
-                        <p><strong>Expira:</strong> ${new Date(qrData.expiraUtc).toLocaleTimeString()}</p>
-                        <p><strong>URL:</strong> <code>${qrData.url}</code></p>
-                    </div>
-                </div>
-            `;
-            
-            container.classList.remove('hidden');
-            container.classList.add('active');
-            instructions?.classList.remove('hidden');
-            
-            // Scroll to QR
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-        } catch (error) {
-            this.showError(document.body, error.message || 'Error generando QR');
-        } finally {
-            btn.disabled = false;
-            loader?.classList.add('hidden');
-        }
-    },
-    
-    async handleCourseSubmit(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const btn = form.querySelector('button[type="submit"]');
-        const loader = btn.querySelector('.btn-loader');
-        const status = document.getElementById('courseStatus');
-        
-        btn.disabled = true;
-        loader?.classList.remove('hidden');
-        
-        try {
-            const course = await Utils.request('/api/cursos', {
-                method: 'POST',
-                body: JSON.stringify({
-                    codigo: formData.get('codigo'),
-                    nombre: formData.get('nombre'),
-                    descripcion: formData.get('descripcion') || null
-                })
-            });
-            
-            form.reset();
-            this.showSuccess(status, '✅ Curso creado exitosamente');
-            await this.loadCourses();
-            await this.updateStats();
-            
-        } catch (error) {
-            this.showError(status, error.message || 'Error al crear curso');
-        } finally {
-            btn.disabled = false;
-            loader?.classList.add('hidden');
-        }
-    },
-    
-    async handleSubjectSubmit(e) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const formData = new FormData(form);
-        const btn = form.querySelector('button[type="submit"]');
-        const loader = btn.querySelector('.btn-loader');
-        const status = document.getElementById('subjectStatus');
-        
-        btn.disabled = true;
-        loader?.classList.remove('hidden');
-        
-        try {
-            const subject = await Utils.request('/api/ramos', {
-                method: 'POST',
-                body: JSON.stringify({
-                    cursoId: parseInt(formData.get('cursoId')),
-                    codigo: formData.get('codigo'),
-                    nombre: formData.get('nombre'),
-                    descripcion: formData.get('descripcion') || null
-                })
-            });
-            
-            form.reset();
-            this.showSuccess(status, '✅ Ramo creado exitosamente');
-            await this.loadSubjects();
-            await this.updateStats();
-            
-        } catch (error) {
-            this.showError(status, error.message || 'Error al crear ramo');
-        } finally {
-            btn.disabled = false;
-            loader?.classList.add('hidden');
-        }
-    },
-    
-    async updateStats() {
-        try {
-            const [students, classes] = await Promise.all([
-                Utils.request('/api/alumnos'),
-                Utils.request('/api/clases')
-            ]);
-            
-            if (Array.isArray(students) && Array.isArray(classes)) {
-                this.data.stats.totalStudents = students.length;
-                this.data.stats.activeClasses = classes.filter(c => c && c.activa).length;
-                
-                // Update UI
-                this.animateCounter('liveStudentCount', this.data.stats.totalStudents);
-                this.animateCounter('liveClassCount', this.data.stats.activeClasses);
-                
-                // Update header stats
-                this.animateCounter('totalStudents', this.data.stats.totalStudents);
-                this.animateCounter('activeClasses', this.data.stats.activeClasses);
-            } else {
-                console.warn('Invalid data received for stats update');
             }
-            
-        } catch (error) {
-            console.error('Error updating stats:', error);
-            // Don't show error to user for background stats update
+
+            async fetchData(url) {
+                const response = await fetch(url);
+                return response.ok ? await response.json() : [];
+            }
+
+            updateMetrics() {
+                // Update hero stats with animation
+                this.animateValue('heroStudentCount', this.metrics.students);
+                this.animateValue('heroClassCount', this.metrics.classes);
+                this.animateValue('heroAttendanceCount', this.metrics.attendance);
+
+                // Update live metrics
+                this.animateValue('liveStudentCount', this.metrics.students);
+                this.animateValue('liveAttendanceCount', this.metrics.attendance);
+                this.animateValue('liveActiveCount', this.metrics.classes);
+            }
+
+            animateValue(elementId, endValue, duration = 2000) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                const startValue = 0;
+                const startTime = performance.now();
+
+                const updateValue = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing function for smooth animation
+                    const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+                    const currentValue = Math.round(startValue + (endValue - startValue) * easeOutCubic);
+
+                    element.textContent = currentValue;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateValue);
+                    }
+                };
+
+                requestAnimationFrame(updateValue);
+            }
+
+            async loadActiveClasses() {
+                try {
+                    const classes = await this.fetchData('/api/clases');
+                    const activeClasses = classes.filter(c => c.activa);
+
+                    const select = document.getElementById('qrClassSelect');
+                    select.innerHTML = '<option value="">🎯 Elige una clase para generar QR...</option>';
+
+                    activeClasses.forEach(clase => {
+                        const option = document.createElement('option');
+                        option.value = clase.id;
+                        option.textContent = clase.nombreCompleto || clase.asignatura;
+                        select.appendChild(option);
+                    });
+
+                    // Enable/disable QR button
+                    document.getElementById('generateQRBtn').disabled = activeClasses.length === 0;
+                } catch (error) {
+                    console.error('Error loading active classes:', error);
+                }
+            }
+
+            bindEvents() {
+                // Student form
+                document.getElementById('studentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createStudent();
+                });
+
+                // Class form
+                document.getElementById('classForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createClass();
+                });
+
+                // QR generation
+                document.getElementById('generateQRBtn').addEventListener('click', () => {
+                    this.generateQR();
+                });
+
+                // QR class selection
+                document.getElementById('qrClassSelect').addEventListener('change', (e) => {
+                    document.getElementById('generateQRBtn').disabled = !e.target.value;
+                });
+            }
+
+            async createStudent() {
+                const form = document.getElementById('studentForm');
+                const submitBtn = document.getElementById('studentSubmitBtn');
+                const statusDiv = document.getElementById('studentStatus');
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    const formData = new FormData(form);
+                    const data = {
+                        codigo: formData.get('codigo'),
+                        nombre: formData.get('nombre')
+                    };
+
+                    const response = await fetch('/api/alumnos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showSuccess(statusDiv, `✅ Estudiante "${result.nombre}" creado exitosamente`);
+                        form.reset();
+                        this.metrics.students++;
+                        this.updateMetrics();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al crear estudiante');
+                    }
+                } catch (error) {
+                    this.showError(statusDiv, '❌ ' + error.message);
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            async createClass() {
+                const form = document.getElementById('classForm');
+                const submitBtn = document.getElementById('classSubmitBtn');
+                const statusDiv = document.getElementById('classStatus');
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    const formData = new FormData(form);
+                    const data = {
+                        asignatura: formData.get('asignatura')
+                    };
+
+                    const response = await fetch('/api/clases', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showSuccess(statusDiv, `✅ Clase "${result.asignatura}" creada exitosamente`);
+                        form.reset();
+                        this.metrics.classes++;
+                        this.updateMetrics();
+                        await this.loadActiveClasses();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al crear clase');
+                    }
+                } catch (error) {
+                    this.showError(statusDiv, '❌ ' + error.message);
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            async generateQR() {
+                const select = document.getElementById('qrClassSelect');
+                const submitBtn = document.getElementById('generateQRBtn');
+                const statusDiv = document.getElementById('qrStatus');
+
+                if (!select.value) {
+                    this.showError(statusDiv, '❌ Selecciona una clase primero');
+                    return;
+                }
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    // Open QR in new window
+                    const qrUrl = `/clases/${select.value}/qr`;
+                    window.open(qrUrl, '_blank', 'width=600,height=700');
+
+                    this.showSuccess(statusDiv, '✅ QR generado y abierto en nueva ventana');
+                } catch (error) {
+                    this.showError(statusDiv, '❌ Error al generar QR');
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            setLoading(button, loading) {
+                const loader = button.querySelector('.btn-loader');
+                const span = button.querySelector('span');
+
+                if (loading) {
+                    button.classList.add('loading');
+                    loader.style.display = 'block';
+                    span.style.opacity = '0';
+                } else {
+                    button.classList.remove('loading');
+                    loader.style.display = 'none';
+                    span.style.opacity = '1';
+                }
+            }
+
+            showSuccess(container, message) {
+                if (typeof container === 'string') {
+                    console.log(message);
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="status-message success">
+                        <i data-lucide="check-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            showError(container, message) {
+                if (typeof container === 'string') {
+                    console.error(message);
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="status-message error">
+                        <i data-lucide="x-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            startRealTimeUpdates() {
+                // Update metrics every 30 seconds
+                setInterval(() => {
+                    this.loadInitialData();
+                }, 30000);
+            }
+
+            initializeAnimations() {
+                // Stagger animations for cards
+                const cards = document.querySelectorAll('.expert-card');
+                cards.forEach((card, index) => {
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.style.animation = 'slideInFromTop 0.8s ease-out forwards';
+                });
+            }
         }
-    },
-    
-    animateCounter(elementId, targetValue) {
-        const element = document.getElementById(elementId);
-        if (!element) return;
-        
-        const currentValue = parseInt(element.textContent) || 0;
-        const safeTargetValue = Math.max(0, targetValue || 0); // Prevent negative values
-        
-        if (currentValue === safeTargetValue) return; // Skip if no change
-        
-        // Prevent animation if element is already animating
-        if (element.dataset.animating === 'true') {
-            element.textContent = safeTargetValue;
-            return;
-        }
-        
-        element.dataset.animating = 'true';
-        
-        // Use requestAnimationFrame for better performance
-        const startTime = performance.now();
-        const duration = 500; // Fixed duration for smoother animation
-        
-        const animate = (timestamp) => {
-            const progress = Math.min((timestamp - startTime) / duration, 1);
-            const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-            const current = Math.round(currentValue + (safeTargetValue - currentValue) * easeProgress);
-            
-            // Ensure we don't go negative
-            element.textContent = Math.max(0, current);
-            
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // Ensure final value is correct
-                element.textContent = safeTargetValue;
-                element.dataset.animating = 'false';
-                
-                // Brief highlight on completion
-                element.style.color = 'var(--success)';
+
+        // Global functions
+        function navigateToSection(section) {
+            const element = document.getElementById(`${section}-section`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.transform = 'scale(1.02)';
                 setTimeout(() => {
-                    element.style.color = '';
+                    element.style.transform = 'scale(1)';
                 }, 300);
             }
-        };
-        
-        requestAnimationFrame(animate);
-    },
-    
-    startRealTimeUpdates() {
-        // Clear existing timers
-        this.clearTimers();
-        
-        // Update stats every 60 seconds (reduced from 30)
-        this.timers.statsUpdate = setInterval(() => {
-            // Only update if page is visible
-            if (!document.hidden) {
-                this.updateStats();
-            }
-        }, 60000);
-        
-        // Update timestamp displays every 2 minutes (reduced frequency)
-        setInterval(() => {
-            if (!document.hidden) {
-                const timestamps = document.querySelectorAll('.timestamp');
-                timestamps.forEach(el => {
-                    const date = new Date(el.dateTime || el.textContent);
-                    if (date && !isNaN(date)) {
-                        el.textContent = date.toLocaleString('es-ES', {
-                            dateStyle: 'short',
-                            timeStyle: 'short'
-                        });
-                    }
-                });
-            }
-        }, 120000);
-    },
-    
-    clearTimers() {
-        Object.values(this.timers).forEach(timer => {
-            if (timer) clearInterval(timer);
+        }
+
+        // Initialize dashboard when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.expertDashboard = new ExpertDashboard();
         });
-        this.timers = {
-            statsUpdate: null,
-            qrRefresh: null,
-            countdown: null
-        };
-    },
-    
-    showSuccess(container, message) {
-        if (!container) container = document.body;
-        
-        const alert = document.createElement('div');
-        alert.className = 'quantum-alert alert-success';
-        alert.innerHTML = `
-            <i data-lucide="check-circle"></i>
-            <span>${message}</span>
-        `;
-        
-        if (container === document.body) {
-            container.appendChild(alert);
-            setTimeout(() => alert.remove(), 5000);
-        } else {
-            container.innerHTML = '';
-            container.appendChild(alert);
-            setTimeout(() => container.innerHTML = '', 5000);
-        }
-        
-        lucide.createIcons();
-    },
-    
-    showError(container, message) {
-        console.error('Dashboard Error:', message);
-        
-        if (!container) container = document.body;
-        
-        try {
-            const alert = document.createElement('div');
-            alert.className = 'quantum-alert alert-danger';
-            alert.innerHTML = `
-                <i data-lucide="alert-circle"></i>
-                <span>${message}</span>
-            `;
-            
-            if (container === document.body) {
-                container.appendChild(alert);
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.remove();
-                    }
-                }, 5000);
-            } else {
-                container.innerHTML = '';
-                container.appendChild(alert);
-                setTimeout(() => {
-                    if (container) {
-                        container.innerHTML = '';
-                    }
-                }, 5000);
-            }
-            
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        } catch (error) {
-            console.error('Error showing error message:', error);
-        }
-    },
-    
-    // Action methods
-    async deleteStudent(id) {
-        if (!confirm('¿Estás seguro de eliminar este estudiante?')) return;
-        
-        try {
-            await Utils.request(`/api/alumnos/${id}`, { method: 'DELETE' });
-            this.showSuccess(document.body, 'Estudiante eliminado exitosamente');
-            await this.loadStudents();
-            await this.updateStats();
-        } catch (error) {
-            this.showError(document.body, error.message || 'Error al eliminar estudiante');
-        }
-    },
-    
-    async deleteClass(id) {
-        if (!confirm('¿Estás seguro de eliminar esta clase?')) return;
-        
-        try {
-            await Utils.request(`/api/clases/${id}`, { method: 'DELETE' });
-            this.showSuccess(document.body, 'Clase eliminada exitosamente');
-            await this.loadClasses();
-            await this.updateStats();
-        } catch (error) {
-            this.showError(document.body, error.message || 'Error al eliminar clase');
-        }
-    },
-    
-    async closeClass(id) {
-        if (!confirm('¿Cerrar esta clase? No se podrán registrar más asistencias.')) return;
-        
-        try {
-            await Utils.request(`/api/clases/${id}/cerrar`, { method: 'POST' });
-            this.showSuccess(document.body, 'Clase cerrada exitosamente');
-            await this.loadClasses();
-            await this.updateStats();
-        } catch (error) {
-            this.showError(document.body, error.message || 'Error al cerrar clase');
-        }
-    },
-    
-    generateClassQR(id) {
-        const select = document.getElementById('qrClassSelect');
-        if (select) {
-            select.value = id;
-            select.dispatchEvent(new Event('change'));
-            document.getElementById('generateQRBtn')?.click();
-        }
-    },
-
-    // ============================================================================
-    // 🎭 ADVANCED CRUD OPERATIONS
-    // ============================================================================
-
-    // Student CRUD Operations
-    showAddStudentModal() {
-        this.showStudentModal();
-    },
-
-    showStudentModal(student = null) {
-        const isEdit = !!student;
-        const modalHTML = `
-            <div class="modal-overlay" id="studentModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <i data-lucide="${isEdit ? 'edit-3' : 'user-plus'}"></i>
-                            ${isEdit ? 'Editar Estudiante' : 'Nuevo Estudiante'}
-                        </h2>
-                        <button class="modal-close" onclick="Dashboard.closeModal('studentModal')">
-                            <i data-lucide="x"></i>
-                        </button>
-                    </div>
-                    <form class="modal-body" onsubmit="Dashboard.handleStudentFormSubmit(event, ${isEdit})">
-                        ${isEdit ? `<input type="hidden" name="id" value="${student.id}">` : ''}
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label required" for="editStudentCode">Código del Estudiante</label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="editStudentCode" name="codigo" 
-                                           class="quantum-input" required 
-                                           value="${isEdit ? student.codigo : ''}"
-                                           placeholder="Ej: EST001"
-                                           pattern="[A-Za-z0-9]+"
-                                           onkeyup="Dashboard.validateStudentCode(this)">
-                                    <i data-lucide="hash" class="input-icon"></i>
-                                </div>
-                                <div class="form-error" id="codeError">El código debe ser único y alfanumérico</div>
-                                <div class="form-success" id="codeSuccess">Código disponible</div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label required" for="editStudentName">Nombre Completo</label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="editStudentName" name="nombre" 
-                                           class="quantum-input" required 
-                                           value="${isEdit ? student.nombre : ''}"
-                                           placeholder="Ej: Juan Pérez García"
-                                           onkeyup="Dashboard.validateStudentName(this)">
-                                    <i data-lucide="user" class="input-icon"></i>
-                                </div>
-                                <div class="form-error" id="nameError">El nombre debe tener al menos 3 caracteres</div>
-                                <div class="form-success" id="nameSuccess">Nombre válido</div>
-                            </div>
-                        </div>
-                        
-                        <div class="progress-bar" id="saveProgress" style="display: none;">
-                            <div class="progress-fill" style="width: 0%"></div>
-                        </div>
-                        
-                        <div class="modal-footer">
-                            <button type="button" class="quantum-btn btn-secondary" onclick="Dashboard.closeModal('studentModal')">
-                                <i data-lucide="x"></i>
-                                Cancelar
-                            </button>
-                            <button type="submit" class="quantum-btn btn-primary" id="saveStudentBtn">
-                                <i data-lucide="save"></i>
-                                ${isEdit ? 'Actualizar' : 'Crear'} Estudiante
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        `;
-
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        const modal = document.getElementById('studentModal');
-        setTimeout(() => modal.classList.add('show'), 10);
-        
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-        
-        // Focus first input
-        setTimeout(() => {
-            document.getElementById('editStudentCode').focus();
-        }, 300);
-    },
-
-    async editStudent(id) {
-        try {
-            const student = this.data.students.find(s => s.id === id);
-            if (student) {
-                this.showStudentModal(student);
-            } else {
-                Utils.showNotification('Estudiante no encontrado', 'error');
-            }
-        } catch (error) {
-            Utils.showNotification('Error al cargar estudiante: ' + error.message, 'error');
-        }
-    },
-
-    async handleStudentFormSubmit(event, isEdit = false) {
-        event.preventDefault();
-        
-        const form = event.target;
-        const formData = new FormData(form);
-        const btn = document.getElementById('saveStudentBtn');
-        const progress = document.getElementById('saveProgress');
-        
-        // Show loading state
-        btn.classList.add('loading');
-        btn.disabled = true;
-        progress.style.display = 'block';
-        
-        // Animate progress
-        let progressValue = 0;
-        const progressInterval = setInterval(() => {
-            progressValue += Math.random() * 20;
-            if (progressValue > 90) progressValue = 90;
-            progress.querySelector('.progress-fill').style.width = progressValue + '%';
-        }, 100);
-
-        try {
-            const studentData = {
-                codigo: formData.get('codigo'),
-                nombre: formData.get('nombre')
-            };
-
-            let response;
-            if (isEdit) {
-                const id = formData.get('id');
-                response = await Utils.request(`/api/alumnos/${id}`, {
-                    method: 'PUT',
-                    body: JSON.stringify(studentData)
-                });
-            } else {
-                response = await Utils.request('/api/alumnos', {
-                    method: 'POST',
-                    body: JSON.stringify(studentData)
-                });
-            }
-            
-            // Complete progress
-            clearInterval(progressInterval);
-            progress.querySelector('.progress-fill').style.width = '100%';
-            
-            // Success
-            Utils.showNotification(
-                `✅ Estudiante ${isEdit ? 'actualizado' : 'creado'} exitosamente`, 
-                'success'
-            );
-            
-            // Close modal and refresh
-            setTimeout(() => {
-                this.closeModal('studentModal');
-                this.loadStudents();
-                this.updateStats();
-            }, 500);
-            
-        } catch (error) {
-            clearInterval(progressInterval);
-            Utils.showNotification('Error: ' + error.message, 'error');
-        } finally {
-            btn.classList.remove('loading');
-            btn.disabled = false;
-            setTimeout(() => {
-                progress.style.display = 'none';
-                progress.querySelector('.progress-fill').style.width = '0%';
-            }, 1000);
-        }
-    },
-
-    validateStudentCode(input) {
-        const code = input.value.trim();
-        const error = document.getElementById('codeError');
-        const success = document.getElementById('codeSuccess');
-        
-        if (code.length < 3) {
-            input.classList.remove('success');
-            input.classList.add('invalid');
-            error.classList.add('show');
-            success.classList.remove('show');
-            return false;
-        }
-        
-        // Check if code exists
-        const exists = this.data.students.some(s => s.codigo.toLowerCase() === code.toLowerCase());
-        if (exists) {
-            input.classList.remove('success');
-            input.classList.add('invalid');
-            error.textContent = 'Este código ya existe';
-            error.classList.add('show');
-            success.classList.remove('show');
-            return false;
-        }
-        
-        input.classList.remove('invalid');
-        input.classList.add('success');
-        error.classList.remove('show');
-        success.classList.add('show');
-        return true;
-    },
-
-    validateStudentName(input) {
-        const name = input.value.trim();
-        const error = document.getElementById('nameError');
-        const success = document.getElementById('nameSuccess');
-        
-        if (name.length < 3) {
-            input.classList.remove('success');
-            input.classList.add('invalid');
-            error.classList.add('show');
-            success.classList.remove('show');
-            return false;
-        }
-        
-        input.classList.remove('invalid');
-        input.classList.add('success');
-        error.classList.remove('show');
-        success.classList.add('show');
-        return true;
-    },
-
-    async deleteStudent(id) {
-        try {
-            await Utils.request(`/api/alumnos/${id}`, {
-                method: 'DELETE'
-            });
-            
-            Utils.showNotification('✅ Estudiante eliminado exitosamente', 'success');
-            
-            // Refresh data
-            this.loadStudents();
-            this.updateStats();
-            
-        } catch (error) {
-            Utils.showNotification('Error al eliminar estudiante: ' + error.message, 'error');
-        }
-    },
-
-    confirmDeleteStudent(id) {
-        const student = this.data.students.find(s => s.id === id);
-        if (!student) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Estudiante?',
-            message: `¿Estás seguro de que deseas eliminar a <strong>${student.nombre}</strong> (${student.codigo})? Esta acción no se puede deshacer.`,
-            icon: 'user-x',
-            confirmText: 'Sí, Eliminar',
-            cancelText: 'Cancelar',
-            onConfirm: () => this.deleteStudent(id)
-        });
-    },
-
-    async bulkDeleteStudents() {
-        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-        const ids = Array.from(checkboxes).map(cb => cb.value);
-        
-        if (ids.length === 0) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Estudiantes?',
-            message: `¿Estás seguro de que deseas eliminar ${ids.length} estudiantes seleccionados? Esta acción no se puede deshacer.`,
-            icon: 'users-x',
-            confirmText: `Sí, Eliminar ${ids.length}`,
-            cancelText: 'Cancelar',
-            onConfirm: async () => {
-                const btn = document.getElementById('confirmBtn');
-                btn.classList.add('loading');
-                btn.disabled = true;
-                
-                try {
-                    // Delete all selected students
-                    await Promise.all(ids.map(id => 
-                        Utils.request(`/api/alumnos/${id}`, { method: 'DELETE' })
-                    ));
-                    
-                    Utils.showNotification(`✅ ${ids.length} estudiantes eliminados exitosamente`, 'success');
-                    
-                    // Refresh data
-                    this.loadStudents();
-                    this.updateStats();
-                    
-                } catch (error) {
-                    Utils.showNotification('Error al eliminar estudiantes: ' + error.message, 'error');
-                }
-            }
-        });
-    },
-
-    showStudentQR(id, event) {
-        // Prevent event bubbling
-        if (event) {
-            event.stopPropagation();
-            event.preventDefault();
-        }
-        
-        const student = this.data.students.find(s => s.id === id);
-        if (!student || !student.qrAlumnoBase64) {
-            Utils.showNotification('QR no disponible para este estudiante', 'warning');
-            return;
-        }
-        
-        const modalHTML = `
-            <div class="modal-overlay" id="qrModal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">
-                            <i data-lucide="qr-code"></i>
-                            QR de ${student.nombre}
-                        </h2>
-                        <button class="modal-close" onclick="Dashboard.closeModal('qrModal')">
-                            <i data-lucide="x"></i>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <div class="qr-display">
-                            <img src="data:image/png;base64,${student.qrAlumnoBase64}" 
-                                 alt="QR de ${student.nombre}" 
-                                 style="max-width: 300px; border-radius: 16px; box-shadow: var(--shadow-lg);">
-                        </div>
-                        <div style="margin-top: 1.5rem;">
-                            <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">${student.nombre}</h4>
-                            <code class="code-badge">${student.codigo}</code>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="quantum-btn btn-secondary" onclick="Dashboard.downloadStudentQR(${id})">
-                            <i data-lucide="download"></i>
-                            Descargar QR
-                        </button>
-                        <button class="quantum-btn btn-primary" onclick="Dashboard.closeModal('qrModal')">
-                            <i data-lucide="check"></i>
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        const modal = document.getElementById('qrModal');
-        setTimeout(() => modal.classList.add('show'), 10);
-        
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    },
-
-    downloadStudentQR(id) {
-        const student = this.data.students.find(s => s.id === id);
-        if (!student || !student.qrAlumnoBase64) return;
-        
-        try {
-            const link = document.createElement('a');
-            link.download = `QR-${student.codigo}-${student.nombre.replace(/[^a-z0-9]/gi, '_')}.png`;
-            link.href = `data:image/png;base64,${student.qrAlumnoBase64}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            Utils.showNotification('QR descargado exitosamente', 'success');
-        } catch (error) {
-            Utils.showNotification('Error al descargar QR', 'error');
-        }
-    },
-
-    // Search and Filter Functions with debouncing
-    filterStudents() {
-        if (!this._debouncedFilterStudents) {
-            this._debouncedFilterStudents = this.debounce(() => {
-                const searchTerm = document.getElementById('studentSearch')?.value.toLowerCase() || '';
-                const rows = document.querySelectorAll('#studentsTable .student-row');
-                
-                rows.forEach(row => {
-                    const codigo = row.getAttribute('data-codigo');
-                    const nombre = row.getAttribute('data-nombre');
-                    const matches = codigo.includes(searchTerm) || nombre.includes(searchTerm);
-                    
-                    row.style.display = matches ? '' : 'none';
-                    
-                    if (matches && searchTerm) {
-                        row.classList.add('search-highlight');
-                        setTimeout(() => row.classList.remove('search-highlight'), 1000);
-                    }
-                });
-            }, 300);
-        }
-        
-        this._debouncedFilterStudents();
-    },
-
-    sortStudents(field) {
-        // Implementation for sorting
-        this.data.students.sort((a, b) => {
-            if (field === 'codigo') return a.codigo.localeCompare(b.codigo);
-            if (field === 'nombre') return a.nombre.localeCompare(b.nombre);
-            return 0;
-        });
-        this.renderStudentsTable();
-    },
-
-    selectAllStudents(checked) {
-        const checkboxes = document.querySelectorAll('.student-checkbox');
-        checkboxes.forEach(cb => cb.checked = checked);
-        this.updateBulkActions();
-    },
-
-    updateBulkActions() {
-        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
-        const footer = document.getElementById('studentsFooter');
-        const count = document.getElementById('selectedCount');
-        
-        if (checkboxes.length > 0) {
-            footer.style.display = 'flex';
-            count.textContent = `${checkboxes.length} estudiantes seleccionados`;
-        } else {
-            footer.style.display = 'none';
-        }
-    },
-
-    // ============================================================================
-    // 🎓 CLASS CRUD OPERATIONS  
-    // ============================================================================
-
-    async editClass(id) {
-        Utils.showNotification('Funcionalidad de edición de clases en desarrollo', 'info');
-    },
-
-    async deleteClass(id) {
-        try {
-            await Utils.request(`/api/clases/${id}`, {
-                method: 'DELETE'
-            });
-            
-            Utils.showNotification('✅ Clase eliminada exitosamente', 'success');
-            this.loadClasses();
-            this.updateStats();
-            
-        } catch (error) {
-            Utils.showNotification('Error al eliminar clase: ' + error.message, 'error');
-        }
-    },
-
-    confirmDeleteClass(id) {
-        const clase = this.data.classes.find(c => c.id === id);
-        if (!clase) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Clase?',
-            message: `¿Estás seguro de que deseas eliminar la clase <strong>${clase.asignatura}</strong>? Esta acción no se puede deshacer.`,
-            icon: 'book-x',
-            confirmText: 'Sí, Eliminar',
-            cancelText: 'Cancelar',
-            onConfirm: () => this.deleteClass(id)
-        });
-    },
-
-    reopenClass(id) {
-        Utils.showNotification('Funcionalidad de reabrir clase en desarrollo', 'info');
-    },
-
-    viewClassAttendance(id) {
-        Utils.showNotification('Vista de asistencia en desarrollo', 'info'); 
-    },
-
-    showAddClassModal() {
-        Utils.showNotification('Modal de crear clase en desarrollo', 'info');
-    },
-
-    filterClasses() {
-        if (!this._debouncedFilterClasses) {
-            this._debouncedFilterClasses = this.debounce(() => {
-                const searchTerm = document.getElementById('classSearch')?.value.toLowerCase() || '';
-                const statusFilter = document.getElementById('statusFilter')?.value || '';
-                const rows = document.querySelectorAll('#classesTable .class-row');
-                
-                rows.forEach(row => {
-                    const asignatura = row.getAttribute('data-asignatura');
-                    const status = row.getAttribute('data-status');
-                    
-                    const matchesSearch = asignatura.includes(searchTerm);
-                    const matchesStatus = !statusFilter || status === statusFilter;
-                    const matches = matchesSearch && matchesStatus;
-                    
-                    row.style.display = matches ? '' : 'none';
-                });
-            }, 300);
-        }
-        
-        this._debouncedFilterClasses();
-    },
-
-    sortClasses(field) {
-        this.data.classes.sort((a, b) => {
-            if (field === 'asignatura') return a.asignatura.localeCompare(b.asignatura);
-            if (field === 'inicioUtc') return new Date(a.inicioUtc) - new Date(b.inicioUtc);
-            return 0;
-        });
-        this.renderClassesTable();
-    },
-
-    selectAllClasses(checked) {
-        const checkboxes = document.querySelectorAll('.class-checkbox');
-        checkboxes.forEach(cb => cb.checked = checked);
-        this.updateClassBulkActions();
-    },
-
-    updateClassBulkActions() {
-        const checkboxes = document.querySelectorAll('.class-checkbox:checked');
-        const footer = document.getElementById('classesFooter');
-        const count = document.getElementById('selectedClassCount');
-        
-        if (checkboxes.length > 0) {
-            footer.style.display = 'flex';
-            count.textContent = `${checkboxes.length} clases seleccionadas`;
-        } else {
-            footer.style.display = 'none';
-        }
-    },
-
-    async bulkDeleteClasses() {
-        const checkboxes = document.querySelectorAll('.class-checkbox:checked');
-        const ids = Array.from(checkboxes).map(cb => cb.value);
-        
-        if (ids.length === 0) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Clases?',
-            message: `¿Estás seguro de que deseas eliminar ${ids.length} clases seleccionadas? Esta acción no se puede deshacer.`,
-            icon: 'book-x',
-            confirmText: `Sí, Eliminar ${ids.length}`,
-            cancelText: 'Cancelar',
-            onConfirm: async () => {
-                try {
-                    await Promise.all(ids.map(id => 
-                        Utils.request(`/api/clases/${id}`, { method: 'DELETE' })
-                    ));
-                    
-                    Utils.showNotification(`✅ ${ids.length} clases eliminadas exitosamente`, 'success');
-                    this.loadClasses();
-                    this.updateStats();
-                    
-                } catch (error) {
-                    Utils.showNotification('Error al eliminar clases: ' + error.message, 'error');
-                }
-            }
-        });
-    },
-
-    // Utility Functions
-    showConfirmDialog({ title, message, icon, confirmText, cancelText, onConfirm, onCancel }) {
-        const modalHTML = `
-            <div class="modal-overlay" id="confirmModal">
-                <div class="modal-content" style="max-width: 450px;">
-                    <div class="modal-body">
-                        <div class="confirm-dialog">
-                            <div class="confirm-icon">
-                                <i data-lucide="${icon}"></i>
-                            </div>
-                            <h3 class="confirm-title">${title}</h3>
-                            <p class="confirm-message">${message}</p>
-                            <div class="confirm-actions">
-                                <button class="quantum-btn btn-secondary" onclick="Dashboard.closeModal('confirmModal')" id="cancelBtn">
-                                    ${cancelText}
-                                </button>
-                                <button class="quantum-btn btn-danger" onclick="Dashboard.executeConfirmAction()" id="confirmBtn">
-                                    ${confirmText}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        const modal = document.getElementById('confirmModal');
-        
-        // Store the confirm action
-        this._confirmAction = onConfirm;
-        this._cancelAction = onCancel;
-        
-        setTimeout(() => modal.classList.add('show'), 10);
-        
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    },
-
-    executeConfirmAction() {
-        if (this._confirmAction) {
-            this._confirmAction();
-        }
-        this.closeModal('confirmModal');
-    },
-
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('show');
-            setTimeout(() => {
-                if (modal.parentNode) {
-                    modal.remove();
-                }
-                this._confirmAction = null;
-                this._cancelAction = null;
-            }, 300);
-        }
-    },
-    
-    // Utility function for debouncing
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func.apply(this, args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-    
-    // Course and Subject action handlers (stub implementations)
-    editCourse(id) {
-        Utils.showNotification('Funcionalidad de edición de cursos en desarrollo', 'info');
-    },
-    
-    viewCourseStudents(id) {
-        Utils.showNotification('Vista de estudiantes del curso en desarrollo', 'info');
-    },
-    
-    confirmDeleteCourse(id) {
-        const course = this.data.courses.find(c => c.id === id);
-        if (!course) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Curso?',
-            message: `¿Estás seguro de que deseas eliminar el curso <strong>${course.nombre}</strong>? Esta acción no se puede deshacer.`,
-            icon: 'folder-x',
-            confirmText: 'Sí, Eliminar',
-            cancelText: 'Cancelar',
-            onConfirm: () => this.deleteCourse(id)
-        });
-    },
-    
-    async deleteCourse(id) {
-        try {
-            await Utils.request(`/api/cursos/${id}`, {
-                method: 'DELETE'
-            });
-            
-            Utils.showNotification('✅ Curso eliminado exitosamente', 'success');
-            this.loadCourses();
-            this.updateStats();
-            
-        } catch (error) {
-            Utils.showNotification('Error al eliminar curso: ' + error.message, 'error');
-        }
-    },
-    
-    editSubject(id) {
-        Utils.showNotification('Funcionalidad de edición de ramos en desarrollo', 'info');
-    },
-    
-    viewSubjectClasses(id) {
-        Utils.showNotification('Vista de clases del ramo en desarrollo', 'info');
-    },
-    
-    confirmDeleteSubject(id) {
-        const subject = this.data.subjects.find(s => s.id === id);
-        if (!subject) return;
-        
-        this.showConfirmDialog({
-            title: '¿Eliminar Ramo?',
-            message: `¿Estás seguro de que deseas eliminar el ramo <strong>${subject.nombre}</strong>? Esta acción no se puede deshacer.`,
-            icon: 'book-x',
-            confirmText: 'Sí, Eliminar',
-            cancelText: 'Cancelar',
-            onConfirm: () => this.deleteSubject(id)
-        });
-    },
-    
-    async deleteSubject(id) {
-        try {
-            await Utils.request(`/api/ramos/${id}`, {
-                method: 'DELETE'
-            });
-            
-            Utils.showNotification('✅ Ramo eliminado exitosamente', 'success');
-            this.loadSubjects();
-            this.updateStats();
-            
-        } catch (error) {
-            Utils.showNotification('Error al eliminar ramo: ' + error.message, 'error');
-        }
-    }
-};
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    Dashboard.init();
-    
-    // Setup checkbox listeners with event delegation for better performance
-    document.addEventListener('change', (e) => {
-        if (e.target.classList.contains('student-checkbox')) {
-            Dashboard.updateBulkActions();
-        } else if (e.target.classList.contains('class-checkbox')) {
-            Dashboard.updateClassBulkActions();
-        }
-    });
-    
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-        Dashboard.clearTimers();
-    });
-    
-    // Pause updates when page is hidden
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            Dashboard.clearTimers();
-        } else {
-            Dashboard.startRealTimeUpdates();
-        }
-    });
-});
-
-// All styles have been moved to the main CSS file
-</script>
+    </script>
 }

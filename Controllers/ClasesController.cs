@@ -155,12 +155,12 @@ public class ClasesController : ControllerBase
             var clase = await _dataService.GetClaseAsync(id);
             if (clase == null)
             {
-                return BadRequest($"La clase {id} no existe");
+                return BadRequest(new { message = $"La clase {id} no existe" });
             }
-            
+
             if (!clase.Activa)
             {
-                return BadRequest($"La clase {id} ({clase.Asignatura}) no está activa. Fue cerrada el {clase.FinUtc}.");
+                return BadRequest(new { message = $"La clase {id} ({clase.Asignatura}) no está activa. Fue cerrada el {clase.FinUtc}." });
             }
 
             var nonce = await _dataService.GenerarTokenClaseAsync(id);
@@ -190,7 +190,7 @@ public class ClasesController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest($"Error generando QR: {ex.Message}");
+            return BadRequest(new { message = $"Error generando QR: {ex.Message}" });
         }
     }
 
@@ -202,7 +202,7 @@ public class ClasesController : ControllerBase
             return NotFound();
         
         if (!clase.Activa)
-            return BadRequest("Clase no activa.");
+            return BadRequest(new { message = "Clase no activa." });
 
         var nonce = await _dataService.GenerarTokenClaseAsync(id);
         var publicBaseUrl = _configuration["PublicBaseUrl"];

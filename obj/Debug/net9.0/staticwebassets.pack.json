@@ -5,6 +5,10 @@
       "PackagePath": "staticwebassets\\css\\clases.css"
     },
     {
+      "Id": "E:\\csharp\\registro_clonado\\wwwroot\\css\\modern-ui.css",
+      "PackagePath": "staticwebassets\\css\\modern-ui.css"
+    },
+    {
       "Id": "E:\\csharp\\registro_clonado\\wwwroot\\css\\styles.css",
       "PackagePath": "staticwebassets\\css\\styles.css"
     },

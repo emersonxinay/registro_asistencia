@@ -12,6 +12,18 @@
       <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo="}]]]></EndpointProperties>
       <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"13822"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022DxU2pAZuopd7LWmvEMEDSOEf3kV9kTN2JwpTJYbGZuo=\u0022"},{"Name":"Last-Modified","Value":"Fri, 12 Sep 2025 01:37:20 GMT"}]]]></ResponseHeaders>
     </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/modern-ui.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\modern-ui.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"25354"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\u0022"},{"Name":"Last-Modified","Value":"Sun, 28 Sep 2025 20:17:45 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/modern-ui.jd72qo54sn.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\modern-ui.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"jd72qo54sn"},{"Name":"integrity","Value":"sha256-KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs="},{"Name":"label","Value":"_content/registroAsistencia/css/modern-ui.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"25354"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022KWRY0Yd6b6LcdhERMau6zycmNkU7YLgxmH3X1Wokgfs=\u0022"},{"Name":"Last-Modified","Value":"Sun, 28 Sep 2025 20:17:45 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
     <StaticWebAssetEndpoint Include="_content/registroAsistencia/css/styles.css">
       <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
       <Selectors><![CDATA[[]]]></Selectors>

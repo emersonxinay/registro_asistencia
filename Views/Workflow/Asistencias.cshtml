@@ -1,0 +1,441 @@
+@model List<registroAsistencia.Models.Asistencia>
+@{
+    ViewData["Title"] = "Asistencias de la Clase";
+    var clase = ViewBag.Clase as registroAsistencia.Models.Clase;
+}
+
+@section Styles {
+    <style>
+        .asistencias-container {
+            padding: var(--space-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .asistencias-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .clase-info {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: var(--space-4);
+            align-items: center;
+        }
+
+        .clase-details h1 {
+            margin: 0 0 var(--space-2) 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .clase-meta {
+            display: flex;
+            gap: var(--space-4);
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .clase-stats {
+            text-align: right;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .asistencias-grid {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .grid-header {
+            background: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            padding: var(--space-4);
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: var(--space-4);
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+
+        .asistencia-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: var(--space-4);
+            padding: var(--space-4);
+            border-bottom: 1px solid var(--gray-100);
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .asistencia-row:hover {
+            background: var(--gray-50);
+        }
+
+        .asistencia-row:last-child {
+            border-bottom: none;
+        }
+
+        .estudiante-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .estudiante-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .estudiante-datos h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .estudiante-codigo {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .hora-asistencia {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            font-family: monospace;
+        }
+
+        .estado-badge {
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-lg);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .estado-presente {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+
+        .estado-tarde {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .estado-ausente {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+
+        .estado-excusado {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .estado-pendiente {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .tipo-badge {
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tipo-qr {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .tipo-manual {
+            background: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-16);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: var(--space-4);
+            color: var(--gray-300);
+        }
+
+        .actions-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+            gap: var(--space-4);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: var(--space-3) var(--space-3) var(--space-3) var(--space-10);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: var(--space-3);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-4);
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .export-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: var(--space-4);
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary-dark);
+        }
+
+        @@media (max-width: 768px) {
+            .clase-info {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .grid-header,
+            .asistencia-row {
+                grid-template-columns: 1fr;
+                gap: var(--space-2);
+            }
+
+            .actions-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+        }
+    </style>
+}
+
+<div class="asistencias-container">
+    <a href="/workflow/misclases" class="back-link">
+        <i data-lucide="arrow-left"></i>
+        Volver a Mis Clases
+    </a>
+
+    @if (clase != null)
+    {
+        <div class="asistencias-header">
+            <div class="clase-info">
+                <div class="clase-details">
+                    <h1>@clase.NombreCompleto</h1>
+                    <div class="clase-meta">
+                        <div class="meta-item">
+                            <i data-lucide="calendar"></i>
+                            <span>@clase.InicioUtc.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div class="meta-item">
+                            <i data-lucide="clock"></i>
+                            <span>@clase.InicioUtc.ToString("HH:mm")</span>
+                        </div>
+                        @if (clase.Ramo?.Curso != null)
+                        {
+                            <div class="meta-item">
+                                <i data-lucide="book"></i>
+                                <span>@clase.Ramo.Curso.Nombre</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="clase-stats">
+                    <div class="stat-number">@Model.Count</div>
+                    <div class="stat-label">Asistencias Registradas</div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="actions-toolbar">
+        <div class="search-box">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" class="search-input" placeholder="Buscar estudiante..." id="searchInput">
+        </div>
+        <a href="/api/clases/@ViewBag.ClaseId/asistencias.csv" class="export-btn">
+            <i data-lucide="download"></i>
+            Exportar CSV
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="asistencias-grid">
+            <div class="grid-header">
+                <div>Estudiante</div>
+                <div>Hora</div>
+                <div>Tipo</div>
+                <div>Estado</div>
+            </div>
+
+            @foreach (var asistencia in Model.OrderBy(a => a.Alumno.Nombre))
+            {
+                <div class="asistencia-row" data-estudiante="@asistencia.Alumno.Nombre.ToLower()">
+                    <div class="estudiante-info">
+                        <div class="estudiante-avatar">
+                            @asistencia.Alumno.Nombre.Split(' ').Take(2).Select(n => n.FirstOrDefault()).ToArray()
+                        </div>
+                        <div class="estudiante-datos">
+                            <h3>@asistencia.Alumno.Nombre</h3>
+                            <p class="estudiante-codigo">@asistencia.Alumno.Codigo</p>
+                        </div>
+                    </div>
+                    <div class="hora-asistencia">
+                        @asistencia.MarcadaUtc.ToString("HH:mm:ss")
+                    </div>
+                    <div>
+                        <span class="tipo-badge @(asistencia.Metodo == registroAsistencia.Models.MetodoRegistro.QrEstudiante || asistencia.Metodo == registroAsistencia.Models.MetodoRegistro.QrDocente ? "tipo-qr" : "tipo-manual")">
+                            @(asistencia.Metodo == registroAsistencia.Models.MetodoRegistro.QrEstudiante || asistencia.Metodo == registroAsistencia.Models.MetodoRegistro.QrDocente ? "QR" : "Manual")
+                        </span>
+                    </div>
+                    <div>
+                        <span class="estado-badge @(GetEstadoClass(asistencia.Estado))">
+                            @GetEstadoText(asistencia.Estado)
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i data-lucide="users-x"></i>
+            <h3>Sin asistencias registradas</h3>
+            <p>Aún no hay estudiantes que hayan registrado su asistencia a esta clase.</p>
+        </div>
+    }
+</div>
+
+@functions {
+    private string GetEstadoClass(registroAsistencia.Models.EstadoAsistencia estado)
+    {
+        return estado switch
+        {
+            registroAsistencia.Models.EstadoAsistencia.Presente => "estado-presente",
+            registroAsistencia.Models.EstadoAsistencia.Tardanza => "estado-tarde",
+            registroAsistencia.Models.EstadoAsistencia.Ausente => "estado-ausente",
+            registroAsistencia.Models.EstadoAsistencia.Excusado => "estado-excusado",
+            registroAsistencia.Models.EstadoAsistencia.Pendiente => "estado-pendiente",
+            _ => "estado-ausente"
+        };
+    }
+
+    private string GetEstadoText(registroAsistencia.Models.EstadoAsistencia estado)
+    {
+        return estado switch
+        {
+            registroAsistencia.Models.EstadoAsistencia.Presente => "Presente",
+            registroAsistencia.Models.EstadoAsistencia.Tardanza => "Tarde",
+            registroAsistencia.Models.EstadoAsistencia.Ausente => "Ausente",
+            registroAsistencia.Models.EstadoAsistencia.Excusado => "Excusado",
+            registroAsistencia.Models.EstadoAsistencia.Pendiente => "Pendiente",
+            _ => "Ausente"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            const rows = document.querySelectorAll('.asistencia-row');
+
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const estudianteText = row.dataset.estudiante;
+                    if (estudianteText.includes(searchTerm)) {
+                        row.style.display = 'grid';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+}

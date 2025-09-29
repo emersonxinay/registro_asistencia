@@ -103,7 +103,7 @@ public class AttendanceController : ControllerBase
 
             if (clase.FinUtc != null)
             {
-                return BadRequest("La clase ya está cerrada");
+                return BadRequest(new { message = "La clase ya está cerrada" });
             }
 
             var success = await _attendanceService.CerrarClaseYMarcarAusentesAsync(claseId);
@@ -128,7 +128,7 @@ public class AttendanceController : ControllerBase
                 });
             }
 
-            return BadRequest("No se pudo cerrar la clase");
+            return BadRequest(new { message = "No se pudo cerrar la clase" });
         }
         catch (Exception ex)
         {
@@ -154,7 +154,7 @@ public class AttendanceController : ControllerBase
 
             if (clase.FinUtc == null)
             {
-                return BadRequest("La clase ya está abierta");
+                return BadRequest(new { message = "La clase ya está abierta" });
             }
 
             clase.FinUtc = null;
@@ -202,7 +202,7 @@ public class AttendanceController : ControllerBase
                 return Ok(new { success = true, message = "Asistencia modificada exitosamente" });
             }
 
-            return BadRequest("No se pudo modificar la asistencia");
+            return BadRequest(new { message = "No se pudo modificar la asistencia" });
         }
         catch (Exception ex)
         {
@@ -231,7 +231,7 @@ public class AttendanceController : ControllerBase
             var config = await _attendanceService.GetConfiguracionAsync(request.ClaseId);
             if (!config.PermiteRegistroManual)
             {
-                return BadRequest("El registro manual no está habilitado para esta clase");
+                return BadRequest(new { message = "El registro manual no está habilitado para esta clase" });
             }
 
             var asistencia = await _attendanceService.RegistrarAsistenciaAsync(
@@ -374,6 +374,225 @@ public class AttendanceController : ControllerBase
         }
     }
 
+    // PRIORIDAD: Endpoint para scanner de docente que escanea QR de estudiantes
+    [HttpPost("scan-student-qr")]
+    public async Task<IActionResult> ScanStudentQr([FromBody] ScanStudentQrRequest request)
+    {
+        try
+        {
+            var docenteId = GetCurrentUserId();
+
+            // Verificar acceso a la clase
+            var clase = await _context.Clases
+                .FirstOrDefaultAsync(c => c.Id == request.ClaseId && c.DocenteId == docenteId);
+
+            if (clase == null)
+            {
+                return Forbid("No tienes acceso a esta clase");
+            }
+
+            if (!clase.Activa)
+            {
+                return BadRequest(new { message = "La clase no está activa" });
+            }
+
+            // Parsear el QR del estudiante - soportar múltiples formatos
+            QrStudentPayload? qrData = null;
+
+            // Intentar deserializar como JSON
+            try
+            {
+                qrData = System.Text.Json.JsonSerializer.Deserialize<QrStudentPayload>(request.QrData);
+            }
+            catch
+            {
+                // Si falla el JSON, intentar como formato simple "STUDENT:ID:CODIGO"
+                try
+                {
+                    var parts = request.QrData.Split(':');
+                    if (parts.Length >= 3 && parts[0] == "STUDENT")
+                    {
+                        qrData = new QrStudentPayload
+                        {
+                            type = "student",
+                            studentId = int.Parse(parts[1]),
+                            studentCode = parts[2],
+                            timestamp = DateTime.UtcNow.ToString("O"),
+                            version = "1.0"
+                        };
+                    }
+                }
+                catch
+                {
+                    return BadRequest(new { message = "QR de estudiante inválido - formato no reconocido" });
+                }
+            }
+
+            if (qrData == null || qrData.type != "student")
+            {
+                return BadRequest(new { message = "QR no es de un estudiante válido" });
+            }
+
+            // Verificar que el estudiante existe
+            var alumno = await _context.Alumnos
+                .FirstOrDefaultAsync(a => a.Id == qrData.studentId && a.Codigo == qrData.studentCode);
+
+            if (alumno == null)
+            {
+                return BadRequest(new { message = $"Estudiante no encontrado: {qrData.studentCode}" });
+            }
+
+            // Verificar que no haya asistencia previa
+            var asistenciaExistente = await _context.Asistencias
+                .FirstOrDefaultAsync(a => a.ClaseId == request.ClaseId && a.AlumnoId == alumno.Id);
+
+            if (asistenciaExistente != null)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = $"El estudiante {alumno.Nombre} ya tiene asistencia registrada",
+                    asistencia = new
+                    {
+                        id = asistenciaExistente.Id,
+                        alumnoId = alumno.Id,
+                        alumnoCodigo = alumno.Codigo,
+                        alumnoNombre = alumno.Nombre,
+                        estado = asistenciaExistente.Estado.ToString(),
+                        marcadaUtc = asistenciaExistente.MarcadaUtc,
+                        minutosRetraso = asistenciaExistente.MinutosRetraso,
+                        metodo = "YA_REGISTRADO"
+                    }
+                });
+            }
+
+            // Registrar asistencia con método QrDocente
+            var asistencia = await _attendanceService.RegistrarAsistenciaAsync(
+                alumno.Id,
+                request.ClaseId,
+                MetodoRegistro.QrDocente,
+                docenteId,
+                $"Escaneado por docente desde código QR físico del estudiante {alumno.Codigo}"
+            );
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Asistencia registrada exitosamente para {alumno.Nombre}",
+                asistencia = new
+                {
+                    id = asistencia.Id,
+                    alumnoId = alumno.Id,
+                    alumnoCodigo = alumno.Codigo,
+                    alumnoNombre = alumno.Nombre,
+                    estado = asistencia.Estado.ToString(),
+                    marcadaUtc = asistencia.MarcadaUtc,
+                    minutosRetraso = asistencia.MinutosRetraso,
+                    metodo = "QR_DOCENTE_ESCANEA_ESTUDIANTE"
+                }
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno: " + ex.Message });
+        }
+    }
+
+    // Generar QRs físicos para estudiantes de una clase
+    [HttpGet("class/{claseId:int}/student-qrs")]
+    public async Task<IActionResult> GenerateStudentQrs(int claseId)
+    {
+        try
+        {
+            var docenteId = GetCurrentUserId();
+
+            // Verificar acceso a la clase
+            var clase = await _context.Clases
+                .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+                .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+
+            if (clase == null)
+            {
+                return NotFound("Clase no encontrada o sin acceso");
+            }
+
+            // Obtener estudiantes del curso
+            var alumnosCurso = await _context.AlumnoCursos
+                .Where(ac => ac.CursoId == clase.Ramo!.Curso.Id && ac.Activo)
+                .Include(ac => ac.Alumno)
+                .Select(ac => new { ac.Alumno.Id, ac.Alumno.Codigo, ac.Alumno.Nombre })
+                .OrderBy(a => a.Codigo)
+                .ToListAsync();
+
+            var currentTimestamp = DateTime.UtcNow.ToString("O");
+            var estudiantes = alumnosCurso.Select(a => new StudentQrData
+            {
+                Id = a.Id,
+                Codigo = a.Codigo,
+                Nombre = a.Nombre,
+                QrDataJson = System.Text.Json.JsonSerializer.Serialize(new QrStudentPayload
+                {
+                    type = "student",
+                    studentId = a.Id,
+                    studentCode = a.Codigo,
+                    timestamp = currentTimestamp,
+                    version = "1.0"
+                }),
+                QrDataSimple = $"STUDENT:{a.Id}:{a.Codigo}"
+            }).ToList();
+
+            return Ok(new
+            {
+                claseId = claseId,
+                claseNombre = clase.Asignatura,
+                cursoNombre = clase.Ramo.Curso.Nombre,
+                totalEstudiantes = estudiantes.Count,
+                estudiantes = estudiantes
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    // API para obtener clases activas (para la vista de QR Students)
+    [HttpGet("/api/clases/activas")]
+    public async Task<IActionResult> GetClasesActivas()
+    {
+        try
+        {
+            var docenteId = GetCurrentUserId();
+
+            var clasesActivas = await _context.Clases
+                .Where(c => c.DocenteId == docenteId && c.Activa)
+                .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    nombre = c.Asignatura,
+                    ramoNombre = c.Ramo!.Nombre,
+                    cursoNombre = c.Ramo.Curso.Nombre,
+                    inicioUtc = c.InicioUtc,
+                    minutosTranscurridos = (int)(DateTime.UtcNow - c.InicioUtc).TotalMinutes
+                })
+                .OrderByDescending(c => c.inicioUtc)
+                .ToListAsync();
+
+            return Ok(clasesActivas);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     // Métodos auxiliares
     private int GetCurrentUserId()
     {
@@ -433,4 +652,29 @@ public class EstadisticasAsistencia
     public int Excusados { get; set; }
     public int Pendientes { get; set; }
     public double PorcentajeAsistencia { get; set; }
+}
+
+// PRIORIDAD: DTOs para scanner de docente
+public class ScanStudentQrRequest
+{
+    public int ClaseId { get; set; }
+    public string QrData { get; set; } = "";
+}
+
+public class QrStudentPayload
+{
+    public string type { get; set; } = "";
+    public int studentId { get; set; }
+    public string studentCode { get; set; } = "";
+    public string timestamp { get; set; } = "";
+    public string version { get; set; } = "";
+}
+
+public class StudentQrData
+{
+    public int Id { get; set; }
+    public string Codigo { get; set; } = "";
+    public string Nombre { get; set; } = "";
+    public string QrDataJson { get; set; } = "";
+    public string QrDataSimple { get; set; } = "";
 }

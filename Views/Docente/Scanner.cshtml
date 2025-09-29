@@ -731,15 +731,22 @@ function startQRDetection() {
         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         
         try {
-            // Aquí usarías una librería como jsQR o similar
-            // const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
-            // if (qrCode) {
-            //     processQRCode(qrCode.data);
-            // }
-            
-            // Simulación para pruebas - remover en producción
-            // processQRCode('STUDENT_123');
-            
+            // Intentar detectar QR usando jsQR (requiere incluir la librería)
+            if (typeof jsQR !== 'undefined') {
+                const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
+                if (qrCode) {
+                    console.log('🎯 QR Detectado:', qrCode.data);
+                    processQRCode(qrCode.data);
+                    return; // Parar el escaneo momentáneamente después de detectar
+                }
+            } else {
+                console.log('📷 jsQR no disponible - modo de escaneo manual activo');
+            }
+
+            // Para testing: Simular QR de estudiante (solo para desarrollo)
+            // Descomenta la línea siguiente para probar con datos de ejemplo:
+            // processQRCode('{"type":"student","studentId":1,"studentCode":"EST001","timestamp":"2024-01-01T10:00:00Z","version":"1.0"}');
+
         } catch (error) {
             console.error('Error detectando QR:', error);
         }
@@ -755,34 +762,74 @@ function startQRDetection() {
 }
 
 async function processQRCode(qrData) {
-    if (!selectedClassId) return;
-    
+    if (!selectedClassId) {
+        showError('❌ Selecciona una clase primero');
+        return;
+    }
+
+    console.log('📱 QR Escaneado:', qrData);
+
     try {
-        const response = await fetch('/api/attendance/scan-student', {
+        // PRIORIDAD: Usar el nuevo endpoint para scanner de docente
+        const response = await fetch('/api/attendance/scan-student-qr', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 claseId: selectedClassId,
-                qrData: qrData,
-                metodo: 'QrDocente'
+                qrData: qrData
             })
         });
-        
+
         const result = await response.json();
-        addScanResult(result);
-        
-        // Feedback visual/sonoro
-        if (result.success) {
-            showSuccess(`✅ ${result.studentName} registrado correctamente`);
+
+        // Procesar resultado y agregarlo a la lista
+        if (result.success && result.asistencia) {
+            const scanResult = {
+                success: true,
+                studentName: result.asistencia.alumnoNombre,
+                studentCode: result.asistencia.alumnoCodigo,
+                estado: result.asistencia.estado,
+                metodo: result.asistencia.metodo,
+                message: result.message,
+                timestamp: result.asistencia.marcadaUtc
+            };
+
+            addScanResult(scanResult);
+            showSuccess(`✅ ${result.asistencia.alumnoNombre} (${result.asistencia.alumnoCodigo}) registrado correctamente`);
+
+            // Sonido de éxito (opcional)
+            playSuccessSound();
+
         } else {
-            showError(`❌ ${result.message}`);
+            const errorResult = {
+                success: false,
+                studentName: 'Error en QR',
+                estado: 'Error',
+                message: result.message || 'QR inválido'
+            };
+
+            addScanResult(errorResult);
+            showError(`❌ ${result.message || 'Error procesando QR'}`);
+
+            // Sonido de error (opcional)
+            playErrorSound();
         }
-        
+
     } catch (error) {
         console.error('Error procesando QR:', error);
-        showError('Error al procesar el código QR');
+
+        const errorResult = {
+            success: false,
+            studentName: 'Error de conexión',
+            estado: 'Error',
+            message: 'Error de red o servidor'
+        };
+
+        addScanResult(errorResult);
+        showError('❌ Error de conexión al procesar QR');
+        playErrorSound();
     }
 }
 
@@ -837,7 +884,7 @@ async function registerManual() {
     }
     
     try {
-        const response = await fetch('/api/attendance/manual-register', {
+        const response = await fetch('/api/attendance/manual', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -889,13 +936,107 @@ async function loadExistingAttendance() {
 }
 
 function showSuccess(message) {
-    // Implementar notificación de éxito
     console.log('✅', message);
+    showNotification(message, 'success');
 }
 
 function showError(message) {
-    // Implementar notificación de error
     console.log('❌', message);
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type) {
+    // Crear notificación toast
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${type === 'success' ? '✅' : '❌'}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+
+    // Estilos inline para la notificación
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : '#ef4444'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        max-width: 400px;
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animar entrada
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+
+    // Auto-remove después de 4 segundos
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
+
+function playSuccessSound() {
+    try {
+        // Crear sonido de éxito usando Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1);
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+    } catch (error) {
+        console.log('No se pudo reproducir sonido de éxito');
+    }
+}
+
+function playErrorSound() {
+    try {
+        // Crear sonido de error usando Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    } catch (error) {
+        console.log('No se pudo reproducir sonido de error');
+    }
 }
 
 // Limpiar recursos al salir

@@ -152,12 +152,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/csharp/registro_clonado/Views/Workflow/Asistencias.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcQXNpc3RlbmNpYXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/csharp/registro_clonado/Views/Workflow/ClaseCreada.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcQ2xhc2VDcmVhZGEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/csharp/registro_clonado/Views/Workflow/CrearClase.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcQ3JlYXJDbGFzZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/csharp/registro_clonado/Views/Workflow/GestionarClase.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcR2VzdGlvbmFyQ2xhc2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/csharp/registro_clonado/Views/Workflow/MisClases.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcTWlzQ2xhc2VzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/csharp/registro_clonado/Views/Workflow/QRStudents.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcV29ya2Zsb3dcUVJTdHVkZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/csharp/registro_clonado/Views/Workflow/SeleccionarCurso.cshtml]

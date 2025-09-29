@@ -159,6 +159,16 @@ public class WorkflowController : Controller
         return View(viewModel);
     }
 
+    // Vista para generar QRs físicos de estudiantes
+    [Route("workflow/qr-students")]
+    [Route("workflow/codigos-qr")]
+    public IActionResult QRStudents()
+    {
+        ViewData["Title"] = "Códigos QR de Estudiantes";
+        ViewData["Subtitle"] = "Genera códigos QR físicos para estudiantes sin internet";
+        return View();
+    }
+
     [HttpPost]
     [Route("workflow/crear-clase")]
     [Route("workflow/procesar-clase")]
@@ -380,19 +390,27 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
+        // Primero obtener la clase básica
         var clase = await _context.Clases
             .Include(c => c.Ramo)
                 .ThenInclude(r => r!.Curso)
-            .Include(c => c.Asistencias)
-                .ThenInclude(a => a.Alumno)
-            .Include(c => c.Docente)
             .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
 
         if (clase == null)
             return NotFound();
 
-        ViewData["Title"] = $"Asistencias - {clase.Asignatura}";
-        return View("AsistenciasClase", clase);
+        // Obtener las asistencias por separado para evitar problemas de SQL
+        var asistencias = await _context.Asistencias
+            .Include(a => a.Alumno)
+            .Where(a => a.ClaseId == claseId)
+            .OrderBy(a => a.Alumno.Nombre)
+            .ToListAsync();
+
+        ViewData["Title"] = $"Asistencias - {clase.NombreCompleto}";
+        ViewBag.Clase = clase;
+        ViewBag.ClaseId = claseId;
+
+        return View("Asistencias", asistencias);
     }
 
     // Gestionar clase específica (editar, finalizar, etc.)
@@ -452,6 +470,7 @@ public class WorkflowController : Controller
 
     // Lista de clases del docente
     [Route("workflow/mis-clases")]
+    [Route("workflow/misclases")]
     public async Task<IActionResult> MisClases()
     {
         var docenteId = GetCurrentUserId();

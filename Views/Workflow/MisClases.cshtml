@@ -1,0 +1,453 @@
+@model List<registroAsistencia.Models.Clase>
+@{
+    ViewData["Title"] = "Mis Clases";
+}
+
+@section Styles {
+    <style>
+        .classes-container {
+            padding: var(--space-6);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .classes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-8);
+            padding-bottom: var(--space-4);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .classes-title {
+            margin: 0;
+            color: var(--gray-800);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .classes-stats {
+            display: flex;
+            gap: var(--space-4);
+            align-items: center;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .class-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .class-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .class-header {
+            padding: var(--space-5);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            position: relative;
+        }
+
+        .class-status {
+            position: absolute;
+            top: var(--space-3);
+            right: var(--space-3);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-lg);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .class-status.active {
+            background: var(--success-color);
+        }
+
+        .class-status.closed {
+            background: var(--gray-400);
+        }
+
+        .class-title {
+            margin: 0 0 var(--space-2) 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .class-course {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .class-body {
+            padding: var(--space-5);
+        }
+
+        .class-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+            margin-bottom: var(--space-5);
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .info-item i {
+            color: var(--primary-color);
+            width: 16px;
+        }
+
+        .class-actions {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-3);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition);
+            color: var(--gray-700);
+        }
+
+        .btn-action:hover {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .btn-qr {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .btn-qr:hover {
+            background: var(--success-color);
+            opacity: 0.9;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-20);
+            color: var(--gray-500);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: var(--space-4);
+            color: var(--gray-300);
+        }
+
+        .filters {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: var(--space-2) var(--space-4);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            background: white;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        @@media (max-width: 768px) {
+            .classes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .classes-header {
+                flex-direction: column;
+                gap: var(--space-4);
+                align-items: stretch;
+            }
+
+            .filters {
+                flex-wrap: wrap;
+            }
+
+            .class-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+}
+
+<div class="classes-container">
+    <div class="classes-header">
+        <h1 class="classes-title">Mis Clases</h1>
+        <div class="classes-stats">
+            <div class="stat-item">
+                <i data-lucide="calendar"></i>
+                <span>Total: @Model.Count</span>
+            </div>
+            <div class="stat-item">
+                <i data-lucide="play-circle"></i>
+                <span>Activas: @Model.Count(c => c.Activa)</span>
+            </div>
+            <div class="stat-item">
+                <i data-lucide="pause-circle"></i>
+                <span>Finalizadas: @Model.Count(c => !c.Activa)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" onclick="filterClasses('all')">
+            <i data-lucide="list"></i>
+            Todas
+        </button>
+        <button class="filter-btn" onclick="filterClasses('active')">
+            <i data-lucide="play-circle"></i>
+            Activas
+        </button>
+        <button class="filter-btn" onclick="filterClasses('closed')">
+            <i data-lucide="pause-circle"></i>
+            Finalizadas
+        </button>
+        <button class="filter-btn" onclick="filterClasses('today')">
+            <i data-lucide="calendar-days"></i>
+            Hoy
+        </button>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="classes-grid">
+            @foreach (var clase in Model)
+            {
+                <div class="class-card" data-status="@(clase.Activa ? "active" : "closed")" data-date="@clase.InicioUtc.ToString("yyyy-MM-dd")">
+                    <div class="class-header">
+                        <span class="class-status @(clase.Activa ? "active" : "closed")">
+                            @(clase.Activa ? "Activa" : "Finalizada")
+                        </span>
+                        <h3 class="class-title">@clase.NombreCompleto</h3>
+                        <p class="class-course">
+                            @if (clase.Ramo?.Curso != null)
+                            {
+                                <span>@clase.Ramo.Curso.Nombre</span>
+                            }
+                            else
+                            {
+                                <span>Clase independiente</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="class-body">
+                        <div class="class-info">
+                            <div class="info-item">
+                                <i data-lucide="calendar"></i>
+                                <span>@clase.InicioUtc.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="info-item">
+                                <i data-lucide="clock"></i>
+                                <span>@clase.InicioUtc.ToString("HH:mm")</span>
+                            </div>
+                            <div class="info-item">
+                                <i data-lucide="users"></i>
+                                <span>@clase.Asistencias.Count estudiantes</span>
+                            </div>
+                            <div class="info-item">
+                                <i data-lucide="activity"></i>
+                                <span>
+                                    @if (clase.Activa)
+                                    {
+                                        var duration = DateTime.UtcNow - clase.InicioUtc;
+                                        <span>@((int)duration.TotalMinutes) min activa</span>
+                                    }
+                                    else if (clase.FinUtc.HasValue)
+                                    {
+                                        var duration = clase.FinUtc.Value - clase.InicioUtc;
+                                        <span>@((int)duration.TotalMinutes) min total</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(clase.Descripcion))
+                        {
+                            <div class="class-description">
+                                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0;">@clase.Descripcion</p>
+                            </div>
+                        }
+
+                        <div class="class-actions">
+                            @if (clase.Activa)
+                            {
+                                <a href="/clases/@clase.Id/qr" class="btn-action btn-qr" target="_blank">
+                                    <i data-lucide="qr-code"></i>
+                                    QR Rápido
+                                </a>
+                                <a href="/workflow/clase/@clase.Id/gestionar" class="btn-action btn-primary">
+                                    <i data-lucide="settings"></i>
+                                    Gestionar
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="/workflow/clase/@clase.Id/asistencias" class="btn-action">
+                                    <i data-lucide="users-check"></i>
+                                    Ver Asistencias
+                                </a>
+                                <a href="/api/clases/@clase.Id/reabrir" class="btn-action" onclick="return confirm('¿Reabrir esta clase?')">
+                                    <i data-lucide="play-circle"></i>
+                                    Reabrir
+                                </a>
+                            }
+                            <button class="btn-action" onclick="duplicarClase(@clase.Id)">
+                                <i data-lucide="copy"></i>
+                                Duplicar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i data-lucide="calendar-x"></i>
+            <h3>No tienes clases creadas</h3>
+            <p>Comienza creando tu primera clase para gestionar la asistencia</p>
+            <a href="/workflow/cursos" class="btn-action btn-primary" style="display: inline-flex; margin-top: var(--space-4);">
+                <i data-lucide="plus"></i>
+                Crear Primera Clase
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterClasses(filter) {
+            const cards = document.querySelectorAll('.class-card');
+            const buttons = document.querySelectorAll('.filter-btn');
+            const today = new Date().toISOString().split('T')[0];
+
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            cards.forEach(card => {
+                const status = card.dataset.status;
+                const date = card.dataset.date;
+                let show = false;
+
+                switch(filter) {
+                    case 'all':
+                        show = true;
+                        break;
+                    case 'active':
+                        show = status === 'active';
+                        break;
+                    case 'closed':
+                        show = status === 'closed';
+                        break;
+                    case 'today':
+                        show = date === today;
+                        break;
+                }
+
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+
+        // Initialize Lucide icons when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
+
+        // Duplicar clase function
+        async function duplicarClase(claseId) {
+            if (!confirm('¿Duplicar esta clase?')) return;
+
+            try {
+                const response = await fetch(`/api/clases/${claseId}/duplicar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al duplicar clase');
+                }
+
+                const claseNueva = await response.json();
+                alert(`Clase duplicada exitosamente. ID: ${claseNueva.id}`);
+                location.reload(); // Refresh page to show new class
+            } catch (error) {
+                console.error('Error duplicando clase:', error);
+                alert('Error al duplicar la clase: ' + error.message);
+            }
+        }
+    </script>
+}

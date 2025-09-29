@@ -90,7 +90,78 @@ public class AlumnosController : ControllerBase
         var deleted = await _dataService.DeleteAlumnoAsync(id);
         if (!deleted)
             return NotFound();
-        
+
         return NoContent();
+    }
+
+    // Generar QR del estudiante para que docente escanee
+    [HttpGet("{id}/qr")]
+    public async Task<IActionResult> GetStudentQr(int id)
+    {
+        try
+        {
+            var alumno = await _dataService.GetAlumnoAsync(id);
+            if (alumno == null)
+                return NotFound(new { message = "Estudiante no encontrado" });
+
+            // Crear payload para QR de estudiante
+            var qrPayload = new
+            {
+                type = "student",
+                studentId = alumno.Id,
+                studentCode = alumno.Codigo,
+                timestamp = DateTime.UtcNow.ToString("O"),
+                version = "1.0"
+            };
+
+            var qrData = System.Text.Json.JsonSerializer.Serialize(qrPayload);
+            var base64Qr = _qrService.GenerateBase64Qr(qrData);
+
+            return Ok(new
+            {
+                qrCode = base64Qr,
+                studentInfo = new
+                {
+                    id = alumno.Id,
+                    codigo = alumno.Codigo,
+                    nombre = alumno.Nombre
+                },
+                payload = qrData
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Error generando QR: " + ex.Message });
+        }
+    }
+
+    // Generar QR PNG para imprimir
+    [HttpGet("{id}/qr.png")]
+    public async Task<IActionResult> GetStudentQrPng(int id)
+    {
+        try
+        {
+            var alumno = await _dataService.GetAlumnoAsync(id);
+            if (alumno == null)
+                return NotFound();
+
+            var qrPayload = new
+            {
+                type = "student",
+                studentId = alumno.Id,
+                studentCode = alumno.Codigo,
+                timestamp = DateTime.UtcNow.ToString("O"),
+                version = "1.0"
+            };
+
+            var qrData = System.Text.Json.JsonSerializer.Serialize(qrPayload);
+            var pngBytes = _qrService.GeneratePngBytes(qrData);
+
+            return File(pngBytes, "image/png", $"qr-estudiante-{alumno.Codigo}.png");
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Error generando QR PNG: " + ex.Message });
+        }
     }
 }

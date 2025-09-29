@@ -1,0 +1,720 @@
+@{
+    ViewData["Title"] = "QR Códigos de Estudiantes";
+    ViewData["Subtitle"] = "Genera e imprime códigos QR para estudiantes sin internet";
+}
+
+<div class="qr-generation-container">
+    <div class="header-section">
+        <div class="header-content">
+            <h1>📱 Códigos QR de Estudiantes</h1>
+            <p>Genera códigos QR físicos para estudiantes que no tienen acceso a internet</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-secondary" onclick="window.history.back()">
+                <i data-lucide="arrow-left"></i>
+                Volver
+            </button>
+        </div>
+    </div>
+
+    <!-- Selección de Clase -->
+    <div class="class-selection-card">
+        <h2>📖 Selecciona la Clase</h2>
+        <div class="form-group">
+            <label for="claseSelect">Clase Activa:</label>
+            <select id="claseSelect" class="form-input" onchange="loadStudentQRs()">
+                <option value="">Selecciona una clase...</option>
+                <!-- Se llenará dinámicamente -->
+            </select>
+        </div>
+        <div id="loadingIndicator" class="loading-state" style="display: none;">
+            <div class="spinner"></div>
+            <p>Cargando códigos QR...</p>
+        </div>
+    </div>
+
+    <!-- Información de la Clase -->
+    <div id="classInfo" class="class-info-card" style="display: none;">
+        <!-- Se llenará dinámicamente -->
+    </div>
+
+    <!-- Grid de QR Codes -->
+    <div id="qrGrid" class="qr-grid" style="display: none;">
+        <!-- Se llenará dinámicamente -->
+    </div>
+
+    <!-- Controles de Impresión -->
+    <div id="printControls" class="print-controls" style="display: none;">
+        <div class="print-options">
+            <h3>🖨️ Opciones de Impresión</h3>
+            <div class="options-grid">
+                <div class="option-group">
+                    <label for="printSize">Tamaño de QR:</label>
+                    <select id="printSize" class="form-input" onchange="updateQRSize()">
+                        <option value="small">Pequeño (4x4 cm)</option>
+                        <option value="medium" selected>Mediano (6x6 cm)</option>
+                        <option value="large">Grande (8x8 cm)</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="printLayout">Diseño:</label>
+                    <select id="printLayout" class="form-input" onchange="updateLayout()">
+                        <option value="grid" selected>Cuadrícula (6 por página)</option>
+                        <option value="list">Lista (3 por página)</option>
+                        <option value="cards">Tarjetas individuales</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label for="includeInstructions">Incluir instrucciones:</label>
+                    <input type="checkbox" id="includeInstructions" checked onchange="updateInstructions()">
+                </div>
+            </div>
+        </div>
+
+        <div class="print-actions">
+            <button class="btn-primary" onclick="printQRCodes()">
+                <i data-lucide="printer"></i>
+                Imprimir Todo
+            </button>
+            <button class="btn-secondary" onclick="downloadQRCodes()">
+                <i data-lucide="download"></i>
+                Descargar PDF
+            </button>
+            <button class="btn-outline" onclick="copyQRData()">
+                <i data-lucide="copy"></i>
+                Copiar Datos
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.qr-generation-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.header-content h1 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 2.2em;
+}
+
+.header-content p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.class-selection-card, .class-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #e1e8ed;
+}
+
+.class-selection-card h2 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+}
+
+.class-info-card {
+    background: #f8f9fa;
+    border-left: 4px solid #3498db;
+}
+
+.loading-state {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    color: #7f8c8d;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e1e8ed;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.qr-card {
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.qr-card:hover {
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+}
+
+.qr-code-container {
+    margin-bottom: 15px;
+}
+
+.qr-code-container canvas {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+}
+
+.student-info {
+    margin-bottom: 15px;
+}
+
+.student-info h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1.2em;
+}
+
+.student-info p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.qr-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.print-controls {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid #e1e8ed;
+}
+
+.print-controls h3 {
+    margin: 0 0 20px 0;
+    color: #2c3e50;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option-group label {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.print-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn-primary, .btn-secondary, .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.8em;
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Print styles */
+@@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .qr-grid, .qr-grid * {
+        visibility: visible;
+    }
+
+    .qr-grid {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        padding: 20px;
+    }
+
+    .qr-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+
+    .qr-actions {
+        display: none;
+    }
+}
+
+/* Responsive */
+@@media (max-width: 768px) {
+    .header-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .qr-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .print-actions {
+        flex-direction: column;
+    }
+}
+
+@@media (max-width: 480px) {
+    .qr-generation-container {
+        padding: 15px;
+    }
+
+    .qr-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+let currentClassData = null;
+let qrSize = 150; // Default size in pixels
+
+// Cargar clases activas al inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    loadActiveClasses();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+
+async function loadActiveClasses() {
+    try {
+        const response = await fetch('/api/clases/activas');
+        const clases = await response.json();
+
+        const select = document.getElementById('claseSelect');
+        select.innerHTML = '<option value="">Selecciona una clase...</option>';
+
+        clases.forEach(clase => {
+            const option = document.createElement('option');
+            option.value = clase.id;
+            option.textContent = `${clase.nombre} - ${clase.ramoNombre} (${clase.cursoNombre})`;
+            select.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error('Error cargando clases:', error);
+        showNotification('Error al cargar las clases', 'error');
+    }
+}
+
+async function loadStudentQRs() {
+    const claseId = document.getElementById('claseSelect').value;
+    if (!claseId) {
+        document.getElementById('classInfo').style.display = 'none';
+        document.getElementById('qrGrid').style.display = 'none';
+        document.getElementById('printControls').style.display = 'none';
+        return;
+    }
+
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    loadingIndicator.style.display = 'flex';
+
+    try {
+        const response = await fetch(`/api/attendance/class/${claseId}/student-qrs`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al cargar códigos QR');
+        }
+
+        currentClassData = data;
+        displayClassInfo(data);
+        await generateQRGrid(data.estudiantes);
+
+        document.getElementById('classInfo').style.display = 'block';
+        document.getElementById('qrGrid').style.display = 'grid';
+        document.getElementById('printControls').style.display = 'block';
+
+    } catch (error) {
+        console.error('Error cargando QRs:', error);
+        showNotification(`Error: ${error.message}`, 'error');
+    } finally {
+        loadingIndicator.style.display = 'none';
+    }
+}
+
+function displayClassInfo(data) {
+    const classInfoDiv = document.getElementById('classInfo');
+    classInfoDiv.innerHTML = `
+        <div class="class-details">
+            <h3>📖 ${data.claseNombre}</h3>
+            <p><strong>Curso:</strong> ${data.cursoNombre}</p>
+            <p><strong>Total de estudiantes:</strong> ${data.totalEstudiantes}</p>
+            <p class="info-note">
+                <i data-lucide="info"></i>
+                Los estudiantes pueden usar estos códigos QR cuando no tengan acceso a internet.
+                El docente debe escanear estos códigos con su dispositivo móvil.
+            </p>
+        </div>
+    `;
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+async function generateQRGrid(estudiantes) {
+    const qrGrid = document.getElementById('qrGrid');
+    qrGrid.innerHTML = '';
+
+    for (const estudiante of estudiantes) {
+        const qrCard = document.createElement('div');
+        qrCard.className = 'qr-card';
+        qrCard.innerHTML = `
+            <div class="qr-code-container">
+                <canvas id="qr-${estudiante.id}" width="${qrSize}" height="${qrSize}"></canvas>
+            </div>
+            <div class="student-info">
+                <h4>${estudiante.nombre}</h4>
+                <p>Código: <strong>${estudiante.codigo}</strong></p>
+                <p class="qr-data">ID: ${estudiante.id}</p>
+            </div>
+            <div class="qr-actions">
+                <button class="btn-outline btn-small" onclick="downloadSingleQR(${estudiante.id}, '${estudiante.nombre}', '${estudiante.codigo}')">
+                    <i data-lucide="download"></i>
+                    Descargar
+                </button>
+            </div>
+        `;
+
+        qrGrid.appendChild(qrCard);
+
+        // Generar QR code
+        try {
+            const canvas = document.getElementById(`qr-${estudiante.id}`);
+            await QRCode.toCanvas(canvas, estudiante.qrDataSimple, {
+                width: qrSize,
+                margin: 2,
+                color: {
+                    dark: '#2c3e50',
+                    light: '#ffffff'
+                }
+            });
+        } catch (error) {
+            console.error(`Error generando QR para ${estudiante.nombre}:`, error);
+        }
+    }
+
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function updateQRSize() {
+    const sizeSelect = document.getElementById('printSize');
+    const sizeMap = {
+        'small': 120,
+        'medium': 150,
+        'large': 200
+    };
+
+    qrSize = sizeMap[sizeSelect.value] || 150;
+
+    if (currentClassData) {
+        generateQRGrid(currentClassData.estudiantes);
+    }
+}
+
+function updateLayout() {
+    const layout = document.getElementById('printLayout').value;
+    const qrGrid = document.getElementById('qrGrid');
+
+    // Reset classes
+    qrGrid.className = 'qr-grid';
+
+    // Apply layout-specific classes
+    if (layout === 'list') {
+        qrGrid.classList.add('layout-list');
+        qrGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(400px, 1fr))';
+    } else if (layout === 'cards') {
+        qrGrid.classList.add('layout-cards');
+        qrGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(350px, 1fr))';
+    } else {
+        qrGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+    }
+}
+
+function updateInstructions() {
+    const includeInstructions = document.getElementById('includeInstructions').checked;
+    const cards = document.querySelectorAll('.qr-card');
+
+    cards.forEach(card => {
+        let instructionsDiv = card.querySelector('.qr-instructions');
+
+        if (includeInstructions && !instructionsDiv) {
+            instructionsDiv = document.createElement('div');
+            instructionsDiv.className = 'qr-instructions';
+            instructionsDiv.innerHTML = `
+                <p class="instructions-text">
+                    <strong>Instrucciones:</strong><br>
+                    1. Muestra este código al docente<br>
+                    2. El docente lo escaneará con su dispositivo<br>
+                    3. Tu asistencia será registrada automáticamente
+                </p>
+            `;
+            card.appendChild(instructionsDiv);
+        } else if (!includeInstructions && instructionsDiv) {
+            instructionsDiv.remove();
+        }
+    });
+}
+
+function printQRCodes() {
+    // Preparar para impresión
+    const originalTitle = document.title;
+    document.title = `QR Códigos - ${currentClassData?.claseNombre || 'Clase'}`;
+
+    // Ocultar elementos no necesarios para impresión
+    const elementsToHide = document.querySelectorAll('.header-section, .class-selection-card, .class-info-card, .print-controls');
+    elementsToHide.forEach(el => el.style.display = 'none');
+
+    // Mostrar solo el grid de QR
+    const qrGrid = document.getElementById('qrGrid');
+    const originalDisplay = qrGrid.style.display;
+    qrGrid.style.display = 'grid';
+
+    // Imprimir
+    window.print();
+
+    // Restaurar elementos
+    setTimeout(() => {
+        elementsToHide.forEach(el => el.style.display = '');
+        qrGrid.style.display = originalDisplay;
+        document.title = originalTitle;
+    }, 100);
+}
+
+async function downloadQRCodes() {
+    try {
+        showNotification('Generando PDF...', 'info');
+
+        // Aquí podrías implementar la generación de PDF
+        // Por ahora, simplemente descargar como imágenes individuales
+
+        if (currentClassData) {
+            for (const estudiante of currentClassData.estudiantes) {
+                await downloadSingleQR(estudiante.id, estudiante.nombre, estudiante.codigo);
+                await new Promise(resolve => setTimeout(resolve, 100)); // Pequeña pausa entre descargas
+            }
+        }
+
+        showNotification('QR códigos descargados exitosamente', 'success');
+
+    } catch (error) {
+        console.error('Error descargando QRs:', error);
+        showNotification('Error al descargar QR códigos', 'error');
+    }
+}
+
+async function downloadSingleQR(studentId, studentName, studentCode) {
+    try {
+        const canvas = document.getElementById(`qr-${studentId}`);
+        if (!canvas) return;
+
+        // Convertir canvas a blob
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `QR_${studentCode}_${studentName.replace(/\s+/g, '_')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+    } catch (error) {
+        console.error(`Error descargando QR para ${studentName}:`, error);
+    }
+}
+
+function copyQRData() {
+    if (!currentClassData) return;
+
+    const qrData = currentClassData.estudiantes.map(estudiante =>
+        `${estudiante.nombre} (${estudiante.codigo}): ${estudiante.qrDataSimple}`
+    ).join('\n');
+
+    navigator.clipboard.writeText(qrData).then(() => {
+        showNotification('Datos de QR copiados al portapapeles', 'success');
+    }).catch(err => {
+        console.error('Error copiando datos:', err);
+        showNotification('Error al copiar datos', 'error');
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        max-width: 400px;
+    `;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 4000);
+}
+</script>
