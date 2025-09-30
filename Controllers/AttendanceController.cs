@@ -30,11 +30,11 @@ public class AttendanceController : ControllerBase
         try
         {
             var docenteId = GetCurrentUserId();
-            
+
             // Verificar acceso
             var tieneAcceso = await _context.Clases
                 .AnyAsync(c => c.Id == claseId && c.DocenteId == docenteId);
-            
+
             if (!tieneAcceso)
             {
                 return Forbid();
@@ -47,10 +47,18 @@ public class AttendanceController : ControllerBase
                 .FirstOrDefaultAsync(c => c.Id == claseId);
 
             var totalEstudiantes = 0;
-            if (clase?.Ramo?.Curso != null)
+            var esClaseLibre = clase?.RamoId == null;
+
+            if (!esClaseLibre && clase?.Ramo?.Curso != null)
             {
+                // Clase con curso asignado
                 totalEstudiantes = await _context.AlumnoCursos
                     .CountAsync(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo);
+            }
+            else
+            {
+                // Clase libre - usar el número de estudiantes que han registrado asistencia
+                totalEstudiantes = asistencias.Count();
             }
 
             var estadisticas = CalcularEstadisticas(asistencias, totalEstudiantes);
@@ -60,6 +68,9 @@ public class AttendanceController : ControllerBase
                 ClaseId = claseId,
                 ClaseNombre = clase?.Asignatura,
                 ClaseActiva = clase?.Activa ?? false,
+                EsClaseLibre = esClaseLibre,
+                CursoNombre = clase?.Ramo?.Curso?.Nombre,
+                RamoNombre = clase?.Ramo?.Nombre,
                 TotalEstudiantes = totalEstudiantes,
                 Estadisticas = estadisticas,
                 Asistencias = asistencias.Select(a => new
@@ -324,32 +335,46 @@ public class AttendanceController : ControllerBase
         try
         {
             var docenteId = GetCurrentUserId();
-            
+
             var clase = await _context.Clases
                 .Include(c => c.Ramo)
                 .ThenInclude(r => r!.Curso)
                 .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
-            
+
             if (clase == null)
             {
                 return NotFound();
             }
 
             var asistencias = await _attendanceService.GetAsistenciasResumenAsync(claseId);
-            var totalEstudiantes = await _context.AlumnoCursos
-                .CountAsync(ac => ac.CursoId == clase.Ramo!.Curso.Id && ac.Activo);
+            var esClaseLibre = clase.RamoId == null;
+            var totalEstudiantes = 0;
+            var estudiantesPendientes = new List<object>();
+
+            if (!esClaseLibre && clase.Ramo?.Curso != null)
+            {
+                // Clase con curso asignado
+                totalEstudiantes = await _context.AlumnoCursos
+                    .CountAsync(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo);
+
+                // Obtener estudiantes pendientes (sin registrar)
+                var alumnosConAsistencia = asistencias.Select(a => a.AlumnoId).ToHashSet();
+                estudiantesPendientes = await _context.AlumnoCursos
+                    .Where(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo)
+                    .Include(ac => ac.Alumno)
+                    .Where(ac => !alumnosConAsistencia.Contains(ac.AlumnoId))
+                    .Select(ac => new { ac.Alumno.Id, ac.Alumno.Codigo, ac.Alumno.Nombre })
+                    .ToListAsync<object>();
+            }
+            else
+            {
+                // Clase libre - solo mostrar los que han registrado asistencia
+                totalEstudiantes = asistencias.Count();
+                estudiantesPendientes = new List<object>(); // No hay pendientes en clases libres
+            }
 
             var estadisticas = CalcularEstadisticas(asistencias, totalEstudiantes);
             var minutosTranscurridos = (int)(DateTime.UtcNow - clase.InicioUtc).TotalMinutes;
-
-            // Obtener estudiantes pendientes (sin registrar)
-            var alumnosConAsistencia = asistencias.Select(a => a.AlumnoId).ToHashSet();
-            var estudiantesPendientes = await _context.AlumnoCursos
-                .Where(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo)
-                .Include(ac => ac.Alumno)
-                .Where(ac => !alumnosConAsistencia.Contains(ac.AlumnoId))
-                .Select(ac => new { ac.Alumno.Id, ac.Alumno.Codigo, ac.Alumno.Nombre })
-                .ToListAsync();
 
             return Ok(new
             {
@@ -357,8 +382,9 @@ public class AttendanceController : ControllerBase
                 {
                     Id = clase.Id,
                     Nombre = clase.Asignatura,
-                    CursoNombre = clase.Ramo.Curso.Nombre,
-                    RamoNombre = clase.Ramo.Nombre,
+                    CursoNombre = clase.Ramo?.Curso?.Nombre,
+                    RamoNombre = clase.Ramo?.Nombre,
+                    EsClaseLibre = esClaseLibre,
                     InicioUtc = clase.InicioUtc,
                     MinutosTranscurridos = minutosTranscurridos,
                     Activa = clase.Activa
@@ -521,16 +547,30 @@ public class AttendanceController : ControllerBase
                 return NotFound("Clase no encontrada o sin acceso");
             }
 
-            // Obtener estudiantes del curso
-            var alumnosCurso = await _context.AlumnoCursos
-                .Where(ac => ac.CursoId == clase.Ramo!.Curso.Id && ac.Activo)
-                .Include(ac => ac.Alumno)
-                .Select(ac => new { ac.Alumno.Id, ac.Alumno.Codigo, ac.Alumno.Nombre })
-                .OrderBy(a => a.Codigo)
-                .ToListAsync();
+            var esClaseLibre = clase.RamoId == null;
+            var alumnosData = new List<dynamic>();
+
+            if (!esClaseLibre && clase.Ramo?.Curso != null)
+            {
+                // Clase con curso asignado - obtener estudiantes del curso
+                alumnosData = await _context.AlumnoCursos
+                    .Where(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo)
+                    .Include(ac => ac.Alumno)
+                    .Select(ac => new { ac.Alumno.Id, ac.Alumno.Codigo, ac.Alumno.Nombre })
+                    .OrderBy(a => a.Codigo)
+                    .ToListAsync<dynamic>();
+            }
+            else
+            {
+                // Clase libre - obtener todos los alumnos del sistema para poder escanear cualquiera
+                alumnosData = await _context.Alumnos
+                    .Select(a => new { a.Id, Codigo = a.Codigo, Nombre = a.Nombre })
+                    .OrderBy(a => a.Codigo)
+                    .ToListAsync<dynamic>();
+            }
 
             var currentTimestamp = DateTime.UtcNow.ToString("O");
-            var estudiantes = alumnosCurso.Select(a => new StudentQrData
+            var estudiantes = alumnosData.Select(a => new StudentQrData
             {
                 Id = a.Id,
                 Codigo = a.Codigo,
@@ -550,7 +590,9 @@ public class AttendanceController : ControllerBase
             {
                 claseId = claseId,
                 claseNombre = clase.Asignatura,
-                cursoNombre = clase.Ramo.Curso.Nombre,
+                cursoNombre = clase.Ramo?.Curso?.Nombre,
+                ramoNombre = clase.Ramo?.Nombre,
+                esClaseLibre = esClaseLibre,
                 totalEstudiantes = estudiantes.Count,
                 estudiantes = estudiantes
             });
@@ -577,8 +619,10 @@ public class AttendanceController : ControllerBase
                 {
                     id = c.Id,
                     nombre = c.Asignatura,
-                    ramoNombre = c.Ramo!.Nombre,
-                    cursoNombre = c.Ramo.Curso.Nombre,
+                    ramoNombre = c.Ramo != null ? c.Ramo.Nombre : null,
+                    cursoNombre = c.Ramo != null && c.Ramo.Curso != null ? c.Ramo.Curso.Nombre : null,
+                    esClaseLibre = c.RamoId == null,
+                    tipoClase = c.RamoId == null ? "Clase Libre" : "Clase con Curso",
                     inicioUtc = c.InicioUtc,
                     minutosTranscurridos = (int)(DateTime.UtcNow - c.InicioUtc).TotalMinutes
                 })

@@ -2,339 +2,1045 @@
 <html lang="es">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
     <title>Registro de Asistencia - QuantumAttend</title>
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --success-dark: #059669;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-accent: #f3f4f6;
+            --border-color: #e5e7eb;
+            --border-focus: #667eea;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
-            padding: 20px; 
-            line-height: 1.6; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            line-height: 1.6;
+            color: var(--text-primary);
+            position: relative;
+            overflow-x: hidden;
         }
-        .container { 
-            max-width: 450px; 
+
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.05) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+        }
+
+        .container {
+            flex: 1;
+            max-width: 420px;
             width: 100%;
-            background: white; 
-            padding: 40px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            overflow: hidden;
+        }
+        /* Header Styles */
+        .header {
             text-align: center;
+            padding: 1.5rem 1.5rem 1rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            position: relative;
+            margin-bottom: 0;
         }
-        .header { 
-            margin-bottom: 30px; 
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
         }
+
         .brand {
-            color: #667eea;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 800;
-            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
         }
-        .success-icon { 
-            font-size: 60px; 
-            color: #27ae60; 
-            margin-bottom: 15px; 
+
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
             display: block;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 4px 6px rgba(102, 126, 234, 0.2));
         }
-        .header h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
+
+        .header h1 {
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
-        .class-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            border-left: 4px solid #667eea;
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0;
         }
-        .class-info h3 {
-            color: #495057;
-            margin-bottom: 5px;
-            font-size: 1.1rem;
+
+        /* Status Card */
+        .status-card {
+            margin: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-        .class-info p {
-            color: #6c757d;
-            font-size: 0.9rem;
+
+        .status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
-        .steps-section {
-            margin-bottom: 30px;
-            text-align: left;
-        }
-        .steps-title {
-            text-align: center;
-            color: #495057;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-        .step {
+
+        .status-header {
             display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
         }
-        .step-number {
-            background: #667eea;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
+
+        .status-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
+            font-size: 1.25rem;
             flex-shrink: 0;
         }
-        .step-text {
-            color: #495057;
-            font-size: 0.95rem;
-        }
-        .scanner-section {
-            background: #e8f4fd;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .scanner-icon {
-            font-size: 48px;
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-        .scanner-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1.1rem;
+
+        .status-title {
+            font-size: 1rem;
             font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--text-primary);
+            margin: 0;
         }
-        .scanner-btn:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
+
+        .status-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
         }
-        .scanner-btn:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .camera-container {
-            margin: 20px 0;
-            display: none;
-        }
-        .camera-view {
-            width: 100%;
-            max-width: 300px;
-            height: 200px;
-            border-radius: 12px;
-            background: #000;
-            margin: 0 auto;
-        }
-        .manual-input {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-        }
-        .form-group { 
-            margin-bottom: 20px; 
-            text-align: left;
-        }
-        .form-label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            color: #495057; 
-        }
-        .form-input { 
-            width: 100%; 
-            padding: 15px; 
-            border: 2px solid #e9ecef; 
-            border-radius: 12px; 
-            font-size: 16px; 
-            transition: border-color 0.3s ease;
-        }
-        .form-input:focus { 
-            border-color: #667eea; 
-            outline: none; 
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        .btn { 
-            width: 100%; 
-            padding: 15px; 
-            background: #27ae60; 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-        }
-        .btn:hover { 
-            background: #229954; 
-            transform: translateY(-2px);
-        }
-        .btn:disabled { 
-            background: #95a5a6; 
-            cursor: not-allowed; 
-            transform: none;
-        }
-        .message { 
-            margin-top: 20px; 
-            padding: 15px; 
-            border-radius: 12px; 
-            font-weight: 600; 
-        }
-        .message.success { 
-            background: #d4edda; 
-            color: #155724; 
-            border: 1px solid #c3e6cb; 
-        }
-        .message.error { 
-            background: #f8d7da; 
-            color: #721c24; 
-            border: 1px solid #f5c6cb; 
-        }
-        .help { 
-            margin-top: 25px; 
-            padding: 20px; 
-            background: #f8f9fa; 
-            border-radius: 12px; 
-            font-size: 0.9rem; 
-            text-align: left;
-        }
-        .help h4 { 
-            margin-bottom: 15px; 
-            color: #495057; 
+
+        .status-item {
             text-align: center;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
         }
-        .help-item {
+
+        .status-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+
+        .status-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        /* Steps Section */
+        .steps-section {
+            margin: 1.5rem;
+            position: relative;
+        }
+
+        .steps-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .steps-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .steps-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .steps-container {
+            position: relative;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .step:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
         }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .step-description {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        /* Scanner Section */
+        .scanner-section {
+            margin: 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .scanner-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .scanner-icon {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+            display: block;
+            opacity: 0.8;
+        }
+
+        .scanner-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .scanner-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .scanner-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1rem;
+        }
+
+        .scanner-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .scanner-btn:active {
+            transform: translateY(0);
+        }
+
+        .scanner-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .camera-container {
+            margin: 1rem 0;
+            display: none;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+        }
+
+        .camera-view {
+            width: 100%;
+            height: 280px;
+            background: #000;
+            object-fit: cover;
+            display: block;
+        }
+
+        .camera-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .camera-overlay {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+        }
+
+        .camera-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 220px;
+            height: 220px;
+            border: 3px solid var(--success-color);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .camera-frame.scanning {
+            border-color: var(--warning-color);
+            box-shadow:
+                0 0 0 1000px rgba(0, 0, 0, 0.6),
+                0 0 20px rgba(245, 158, 11, 0.5),
+                inset 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .camera-frame.found {
+            border-color: var(--success-color);
+            box-shadow:
+                0 0 0 1000px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(16, 185, 129, 0.8),
+                inset 0 0 30px rgba(16, 185, 129, 0.3);
+            animation: pulse-green 0.6s ease-in-out;
+        }
+
+        @@keyframes pulse-green {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--warning-color), transparent);
+            animation: scan-sweep 2s linear infinite;
+            opacity: 0.8;
+        }
+
+        @@keyframes scan-sweep {
+            0% { transform: translate(-50%, -50%) translateY(-100px); }
+            100% { transform: translate(-50%, -50%) translateY(100px); }
+        }
+
+        .scan-status {
+            padding: 1rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .scan-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .scan-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--warning-color);
+            border-radius: 50%;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        .scan-dot.success {
+            background: var(--success-color);
+            animation: none;
+        }
+
+        .scan-dot.error {
+            background: var(--error-color);
+            animation: none;
+        }
+
+        @@keyframes pulse-dot {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .camera-hint {
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        /* Form Section */
+        .form-section {
+            margin: 1.5rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .form-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 1.5rem;
+            right: 1.5rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        .form-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 500;
+            background: var(--bg-primary);
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--border-focus);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.125rem;
+            pointer-events: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--success-color), var(--success-dark));
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+        /* Message Styles */
+        .message-container {
+            margin: 1.5rem;
+            position: relative;
+        }
+
+        .message {
+            padding: 1rem 1rem 1rem 3rem;
+            border-radius: var(--radius-lg);
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            position: relative;
+            border: 1px solid;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .message::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background-size: 0.75rem;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .message.success::before {
+            background-color: var(--success-color);
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 9.586l6.646-6.647a.5.5 0 0 1 .708.707z'/%3e%3c/svg%3e");
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .message.error::before {
+            background-color: var(--error-color);
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/%3e%3cpath d='M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z'/%3e%3c/svg%3e");
+        }
+
+        .message.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #92400e;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .message.warning::before {
+            background-color: var(--warning-color);
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z'/%3e%3c/svg%3e");
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Help Section */
+        .help-section {
+            margin: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+        }
+
+        .help-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .help-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .help-subtitle {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .help-list {
+            space-y: 0.75rem;
+        }
+
+        .help-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .help-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+
         .help-icon {
-            color: #667eea;
-            margin-right: 10px;
-            font-size: 1.2rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
         }
+
+        .help-text {
+            flex: 1;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        /* Loading & Utility Styles */
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #ffffff;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s ease-in-out infinite;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
         }
+
         @@keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .hidden { display: none !important; }
-        
-        @@media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-                margin: 10px;
+
+        .hidden {
+            display: none !important;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% {
+                opacity: 1;
             }
-            .header h2 {
-                font-size: 1.5rem;
+            50% {
+                opacity: 0.5;
+            }
+        }
+        /* Responsive Design */
+        @@media (max-width: 640px) {
+            .app-container {
+                padding: 0;
+            }
+
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+                min-height: 100dvh;
+            }
+
+            .header {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .status-details {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .status-item {
+                padding: 1rem;
+            }
+
+            .scanner-section,
+            .form-section,
+            .help-section,
+            .message-container {
+                margin: 1rem;
+            }
+
+            .camera-view {
+                height: 200px;
+            }
+
+            .help-item {
+                padding: 1rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .header {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .brand {
+                font-size: 1.125rem;
+            }
+
+            .header h1 {
+                font-size: 1.375rem;
+            }
+
+            .scanner-section,
+            .form-section,
+            .help-section,
+            .message-container {
+                margin: 0.75rem;
+            }
+
+            .step {
+                padding: 0.75rem;
+            }
+
+            .step-number {
+                width: 1.75rem;
+                height: 1.75rem;
+                font-size: 0.75rem;
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Dark mode support */
+        @@media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-light: #9ca3af;
+                --bg-primary: #1f2937;
+                --bg-secondary: #374151;
+                --bg-accent: #4b5563;
+                --border-color: #4b5563;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="brand">QuantumAttend</div>
-            <div class="success-icon">📱</div>
-            <h2>Registro de Asistencia</h2>
-        </div>
+    <div class="app-container">
+        <div class="container">
+            <header class="header">
+                <div class="brand">QuantumAttend</div>
+                <div class="app-icon">📱</div>
+                <h1>Registro de Asistencia</h1>
+                <p>Escanea tu QR o ingresa tu ID manualmente</p>
+            </header>
 
-        <div class="class-info">
-            <h3>Clase Activa</h3>
-            <p>ID de Clase: <strong>@ViewBag.ClaseId</strong></p>
-            <p>Código de Sesión: <strong>@ViewBag.Nonce</strong></p>
-        </div>
-
-        <div class="steps-section">
-            <h3 class="steps-title">¿Cómo registrar tu asistencia?</h3>
-            <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-text">Haz clic en "Abrir Escáner" para activar la cámara</div>
-            </div>
-            <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-text">Apunta la cámara hacia tu código QR personal</div>
-            </div>
-            <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-text">Espera la confirmación de registro exitoso</div>
-            </div>
-        </div>
-
-        <div class="scanner-section">
-            <div class="scanner-icon">📸</div>
-            <h3 style="margin-bottom: 15px; color: #495057;">Escáner QR</h3>
-            <button type="button" class="scanner-btn" id="startScanBtn">
-                <span>📱</span> Abrir Escáner
-            </button>
-            <div class="camera-container" id="cameraContainer">
-                <video class="camera-view" id="cameraView" autoplay playsinline></video>
-            </div>
-            <p style="color: #6c757d; font-size: 0.9rem; margin-top: 10px;">
-                Necesitarás permitir el acceso a la cámara cuando te lo solicite el navegador
-            </p>
-        </div>
-
-        <div class="manual-input">
-            <h4 style="margin-bottom: 15px; color: #495057; text-align: center;">
-                ¿No tienes tu QR? Ingresa tu ID manualmente
-            </h4>
-            <form id="scanForm">
-                <div class="form-group">
-                    <label class="form-label">Tu ID de Estudiante:</label>
-                    <input type="number" id="alumnoId" class="form-input" min="1" required 
-                           placeholder="Ingresa tu ID de estudiante">
+            <div class="status-card">
+                <div class="status-header">
+                    <div class="status-icon">🎯</div>
+                    <h2 class="status-title">Clase Activa</h2>
                 </div>
-                <button type="submit" class="btn" id="submitBtn">
-                    Registrar Asistencia
-                </button>
-                <button type="button" class="btn hidden" id="loadingBtn" disabled>
-                    <span class="loading-spinner"></span> Registrando...
-                </button>
-            </form>
-        </div>
+                <div class="status-details">
+                    <div class="status-item">
+                        <div class="status-label">ID de Clase</div>
+                        <div class="status-value">#@ViewBag.ClaseId</div>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-label">Sesión</div>
+                        <div class="status-value">@ViewBag.Nonce.ToString().Substring(0, 8).ToUpper()</div>
+                    </div>
+                </div>
+            </div>
 
-        <div id="mensaje"></div>
+            <section class="steps-section">
+                <div class="steps-header">
+                    <h2 class="steps-title">¿Cómo registrar tu asistencia?</h2>
+                    <p class="steps-subtitle">Sigue estos sencillos pasos</p>
+                </div>
+                <div class="steps-container">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Activa el escáner</div>
+                            <div class="step-description">Toca "Abrir Escáner" para acceder a tu cámara</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Escanea tu QR</div>
+                            <div class="step-description">Apunta hacia tu código QR personal de estudiante</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-title">Confirma registro</div>
+                            <div class="step-description">Espera la confirmación de asistencia registrada</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="help">
-            <h4>🆘 ¿Necesitas ayuda?</h4>
-            <div class="help-item">
-                <span class="help-icon">❓</span>
-                <span>Si no tienes tu QR personal, contacta a tu profesor</span>
-            </div>
-            <div class="help-item">
-                <span class="help-icon">🔄</span>
-                <span>Si el escáner no funciona, usa el registro manual</span>
-            </div>
-            <div class="help-item">
-                <span class="help-icon">⚠️</span>
-                <span>Asegúrate de estar en la clase correcta antes de registrar</span>
-            </div>
+            <section class="scanner-section">
+                <div class="scanner-header">
+                    <div class="scanner-icon">📸</div>
+                    <h2 class="scanner-title">Escáner QR</h2>
+                    <p class="scanner-subtitle">Usa tu cámara para escanear tu código QR</p>
+                </div>
+
+                <button type="button" class="scanner-btn" id="startScanBtn">
+                    <span>📱</span> Abrir Escáner
+                </button>
+
+                <div class="camera-container" id="cameraContainer">
+                    <div class="camera-overlay">
+                        <video class="camera-view" id="cameraView" autoplay playsinline muted></video>
+                        <canvas class="camera-canvas" id="cameraCanvas"></canvas>
+                        <div class="camera-frame" id="cameraFrame"></div>
+                        <div class="scan-line" id="scanLine"></div>
+                    </div>
+                    <div class="scan-status" id="scanStatus">
+                        <div class="scan-indicator">
+                            <div class="scan-dot"></div>
+                            <span>Buscando códigos QR...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="camera-hint">
+                    <span>🛡️</span>
+                    <span>Se requiere permiso de cámara para escanear</span>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-header">
+                    <h2 class="form-title">Registro Manual</h2>
+                    <p class="form-subtitle">¿No tienes tu QR? Ingresa tu ID de estudiante</p>
+                </div>
+
+                <form id="scanForm">
+                    <div class="form-group">
+                        <label class="form-label" for="alumnoId">ID de Estudiante</label>
+                        <div class="input-container">
+                            <span class="input-icon">👤</span>
+                            <input type="number" id="alumnoId" class="form-input" min="1" required
+                                   placeholder="Ej: 12345" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="submitBtn">
+                        <span>✅</span> Registrar Asistencia
+                    </button>
+
+                    <button type="button" class="btn hidden" id="loadingBtn" disabled>
+                        <span class="loading-spinner"></span> Registrando...
+                    </button>
+                </form>
+            </section>
+
+            <div class="message-container" id="mensaje"></div>
+
+            <section class="help-section">
+                <div class="help-header">
+                    <h2 class="help-title">🆘 ¿Necesitas ayuda?</h2>
+                    <p class="help-subtitle">Consejos útiles para registrar tu asistencia</p>
+                </div>
+
+                <div class="help-list">
+                    <div class="help-item">
+                        <div class="help-icon">❓</div>
+                        <div class="help-text">Si no tienes tu QR personal, contacta a tu profesor para obtenerlo</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-icon">🔄</div>
+                        <div class="help-text">Si el escáner no funciona, usa el registro manual con tu ID</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-icon">⚠️</div>
+                        <div class="help-text">Verifica que estés en la clase correcta antes de registrar</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-icon">📱</div>
+                        <div class="help-text">Asegúrate de permitir el acceso a la cámara en tu navegador</div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -343,6 +1049,8 @@
         let currentNonce = '@ViewBag.Nonce';
         let isSubmitting = false;
         let stream = null;
+        let isScanning = false;
+        let scanningInterval = null;
 
         const form = document.getElementById('scanForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -351,49 +1059,226 @@
         const startScanBtn = document.getElementById('startScanBtn');
         const cameraContainer = document.getElementById('cameraContainer');
         const cameraView = document.getElementById('cameraView');
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        const cameraFrame = document.getElementById('cameraFrame');
+        const scanStatus = document.getElementById('scanStatus');
+        const scanLine = document.getElementById('scanLine');
 
-        // Scanner functionality
+        // QR Scanner functionality
         startScanBtn.addEventListener('click', async function() {
+            if (isScanning) {
+                stopScanning();
+                return;
+            }
+
             try {
-                // Request camera permission
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment', // Back camera on mobile
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
-                
-                cameraView.srcObject = stream;
-                cameraContainer.style.display = 'block';
-                startScanBtn.textContent = '🔍 Escaneando...';
-                startScanBtn.disabled = true;
-                
-                showMessage('Cámara activada. Apunta hacia tu código QR personal.', 'success');
-                
-                // Note: In a real implementation, you would integrate a QR code scanning library here
-                // For now, we'll show instructions for manual input
-                setTimeout(() => {
-                    showMessage('Para esta demo, usa el registro manual con tu ID de estudiante.', 'error');
-                }, 3000);
-                
+                await startScanning();
             } catch (error) {
                 console.error('Error accessing camera:', error);
-                showMessage('No se pudo acceder a la cámara. Usa el registro manual.', 'error');
+                handleScanError('No se pudo acceder a la cámara. Verifica los permisos e intenta nuevamente.');
             }
         });
+
+        async function startScanning() {
+            // Request camera permission with optimal settings for QR scanning
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment', // Back camera on mobile
+                    width: { ideal: 1280, min: 640 },
+                    height: { ideal: 720, min: 480 },
+                    aspectRatio: { ideal: 16/9 }
+                }
+            });
+
+            cameraView.srcObject = stream;
+            cameraContainer.style.display = 'block';
+
+            // Wait for video to be ready
+            await new Promise((resolve) => {
+                cameraView.onloadedmetadata = () => {
+                    cameraView.play();
+                    resolve();
+                };
+            });
+
+            // Setup canvas for QR detection
+            const canvas = cameraCanvas;
+            const context = canvas.getContext('2d');
+            canvas.width = cameraView.videoWidth;
+            canvas.height = cameraView.videoHeight;
+
+            isScanning = true;
+            startScanBtn.innerHTML = '<span>⏹️</span> Detener Escáner';
+            cameraFrame.classList.add('scanning');
+
+            updateScanStatus('Buscando códigos QR...', 'scanning');
+            showMessage('📸 Cámara activada. Apunta hacia tu código QR de estudiante.', 'success');
+
+            // Start QR scanning loop
+            scanningInterval = setInterval(() => {
+                if (cameraView.readyState === cameraView.HAVE_ENOUGH_DATA) {
+                    scanForQRCode(context, canvas);
+                }
+            }, 100); // Scan every 100ms for responsiveness
+        }
+
+        function scanForQRCode(context, canvas) {
+            if (!isScanning) return;
+
+            try {
+                // Draw current video frame to canvas
+                context.drawImage(cameraView, 0, 0, canvas.width, canvas.height);
+
+                // Get image data for QR detection
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+                // Detect QR code using jsQR library
+                const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+                if (qrCode) {
+                    onQRCodeDetected(qrCode.data);
+                }
+            } catch (error) {
+                console.error('QR scanning error:', error);
+            }
+        }
+
+        function onQRCodeDetected(qrData) {
+            if (!isScanning) return;
+
+            console.log('QR Code detected:', qrData);
+
+            // Visual feedback for successful detection
+            cameraFrame.classList.remove('scanning');
+            cameraFrame.classList.add('found');
+            updateScanStatus('¡Código QR detectado!', 'success');
+
+            // Play success feedback (if available)
+            try {
+                navigator.vibrate && navigator.vibrate([100, 50, 100]);
+            } catch (e) { /* ignore */ }
+
+            // Extract student ID from QR data
+            const alumnoId = extractAlumnoIdFromQR(qrData);
+
+            if (alumnoId) {
+                // Stop scanning and process attendance
+                stopScanning();
+                processAttendanceWithId(alumnoId);
+            } else {
+                // QR format not recognized
+                setTimeout(() => {
+                    cameraFrame.classList.remove('found');
+                    cameraFrame.classList.add('scanning');
+                    updateScanStatus('Código QR no válido. Intenta con tu QR de estudiante.', 'error');
+
+                    setTimeout(() => {
+                        updateScanStatus('Buscando códigos QR...', 'scanning');
+                    }, 2000);
+                }, 1000);
+            }
+        }
+
+        function extractAlumnoIdFromQR(qrData) {
+            try {
+                // Try different QR formats that might contain student ID
+
+                // Format 1: Direct number (simple ID)
+                if (/^\d+$/.test(qrData)) {
+                    return parseInt(qrData);
+                }
+
+                // Format 2: JSON format like {"alumnoId": 123, ...}
+                if (qrData.startsWith('{')) {
+                    const data = JSON.parse(qrData);
+                    return data.alumnoId || data.id || data.studentId;
+                }
+
+                // Format 3: URL format like "student/123" or "alumno/123"
+                const urlMatch = qrData.match(/(?:student|alumno)\/(\d+)/i);
+                if (urlMatch) {
+                    return parseInt(urlMatch[1]);
+                }
+
+                // Format 4: Key-value format like "ID:123" or "ALUMNO:123"
+                const kvMatch = qrData.match(/(?:ID|ALUMNO|STUDENT):(\d+)/i);
+                if (kvMatch) {
+                    return parseInt(kvMatch[1]);
+                }
+
+                console.log('QR format not recognized:', qrData);
+                return null;
+            } catch (error) {
+                console.error('Error parsing QR data:', error);
+                return null;
+            }
+        }
+
+        function stopScanning() {
+            isScanning = false;
+
+            if (scanningInterval) {
+                clearInterval(scanningInterval);
+                scanningInterval = null;
+            }
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+
+            cameraContainer.style.display = 'none';
+            startScanBtn.innerHTML = '<span>📱</span> Abrir Escáner';
+            startScanBtn.disabled = false;
+
+            cameraFrame.classList.remove('scanning', 'found');
+        }
+
+        function updateScanStatus(message, type = 'scanning') {
+            const indicator = scanStatus.querySelector('.scan-indicator span');
+            const dot = scanStatus.querySelector('.scan-dot');
+
+            indicator.textContent = message;
+            dot.className = `scan-dot ${type}`;
+        }
+
+        function handleScanError(message) {
+            updateScanStatus(message, 'error');
+            showMessage('❌ ' + message, 'error');
+            stopScanning();
+        }
+
+        async function processAttendanceWithId(alumnoId) {
+            if (isSubmitting) return;
+
+            console.log('Processing attendance for student ID:', alumnoId);
+
+            // Update UI to show processing
+            document.getElementById('alumnoId').value = alumnoId;
+            showMessage(`🔍 Procesando asistencia para estudiante #${alumnoId}...`, 'success');
+
+            // Submit attendance automatically
+            await submitAttendance(alumnoId);
+        }
 
         // Form submission for manual input
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            if (isSubmitting) return;
-            
+
             const alumnoId = document.getElementById('alumnoId').value;
             if (!alumnoId) {
                 showMessage('Por favor ingresa tu ID de estudiante', 'error');
                 return;
             }
+
+            await submitAttendance(parseInt(alumnoId));
+        });
+
+        // Unified attendance submission function
+        async function submitAttendance(alumnoId) {
+            if (isSubmitting) return;
 
             isSubmitting = true;
             submitBtn.classList.add('hidden');
@@ -401,14 +1286,14 @@
 
             try {
                 console.log('Enviando registro:', { alumnoId, claseId, nonce: currentNonce });
-                
+
                 const response = await fetch('/api/asistencias/alumno-scan', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        alumnoId: parseInt(alumnoId),
+                        alumnoId: alumnoId,
                         claseId: claseId,
                         nonce: currentNonce
                     })
@@ -419,20 +1304,17 @@
                 if (response.ok) {
                     showMessage('🎉 ¡Asistencia registrada exitosamente! Tu presencia ha sido confirmada.', 'success');
                     form.reset();
-                    
-                    // Hide camera if active
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                        cameraContainer.style.display = 'none';
-                        startScanBtn.textContent = '📱 Abrir Escáner';
-                        startScanBtn.disabled = false;
+
+                    // Stop scanning if active
+                    if (isScanning) {
+                        stopScanning();
                     }
-                    
+
                     // Auto-redirect after success (optional)
                     setTimeout(() => {
                         showMessage('Puedes cerrar esta ventana. ¡Gracias por registrar tu asistencia!', 'success');
                     }, 3000);
-                    
+
                 } else {
                     throw new Error(result.mensaje || 'Error al registrar asistencia');
                 }
@@ -440,7 +1322,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 let errorMsg = error.message;
-                
+
                 // Provide helpful error messages
                 if (errorMsg.includes('alumno no encontrado')) {
                     errorMsg = 'ID de estudiante no encontrado. Verifica tu número de ID.';
@@ -448,15 +1330,17 @@
                     errorMsg = 'Esta clase ya no está activa. Contacta a tu profesor.';
                 } else if (errorMsg.includes('ya registrada')) {
                     errorMsg = 'Tu asistencia ya fue registrada para esta clase.';
+                } else if (errorMsg.includes('token no válido') || errorMsg.includes('token expirado')) {
+                    errorMsg = 'El enlace de la clase ha expirado. Solicita un nuevo código QR al profesor.';
                 }
-                
+
                 showMessage('❌ ' + errorMsg, 'error');
             } finally {
                 isSubmitting = false;
                 submitBtn.classList.remove('hidden');
                 loadingBtn.classList.add('hidden');
             }
-        });
+        }
 
         function showMessage(text, type) {
             mensajeDiv.innerHTML = '<div class="message ' + type + '">' + text + '</div>';
@@ -472,15 +1356,21 @@
             }
         });
 
-        // Auto-focus on student ID input
-        document.getElementById('alumnoId').focus();
+        // Auto-focus on student ID input on desktop only
+        if (window.innerWidth >= 768) {
+            setTimeout(() => {
+                document.getElementById('alumnoId').focus();
+            }, 500);
+        }
 
         // Log inicial
         console.log('📱 QuantumAttend - Página de registro cargada');
         console.log('Clase:', claseId, 'Sesión:', currentNonce);
         
-        // Show initial instructions
-        showMessage('👋 ¡Bienvenido! Usa el escáner QR o ingresa tu ID manualmente.', 'success');
+        // Show initial instructions with enhanced messaging
+        setTimeout(() => {
+            showMessage('👋 ¡Bienvenido! Elige tu método preferido para registrar tu asistencia.', 'success');
+        }, 1000);
     </script>
 </body>
 </html>

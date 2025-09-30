@@ -6,27 +6,50 @@
 <div class="container">
     <h1>Asistencias por Clase</h1>
     
-    <!-- Selectores de Curso y Clase -->
+    <!-- Selectores de Clase -->
     <div style="background: #f0f0f0; padding: 20px; margin-bottom: 20px;">
-        <div style="margin-bottom: 15px;">
-            <label for="selectorCurso" style="font-weight: bold;">1. Seleccionar Curso:</label>
-            <select id="selectorCurso" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarRamosPorCurso()">
-                <option value="">-- Seleccionar Curso --</option>
-            </select>
+        <!-- Tabs para elegir tipo de clase -->
+        <div style="margin-bottom: 20px;">
+            <button id="tabClasesLibres" onclick="cambiarTipoClase('libres')" style="background: #007bff; color: white; padding: 10px 20px; border: none; margin-right: 5px; cursor: pointer;">
+                📚 Clases Libres
+            </button>
+            <button id="tabClasesCurso" onclick="cambiarTipoClase('curso')" style="background: #6c757d; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+                🎓 Clases con Curso
+            </button>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label for="selectorRamo" style="font-weight: bold;">2. Seleccionar Ramo/Asignatura:</label>
-            <select id="selectorRamo" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarClasesPorRamo()" disabled>
-                <option value="">-- Primero selecciona un curso --</option>
-            </select>
+        <!-- Panel para Clases Libres -->
+        <div id="panelClasesLibres" style="display: block;">
+            <div style="margin-bottom: 15px;">
+                <label for="selectorClaseLibre" style="font-weight: bold;">Seleccionar Clase Libre:</label>
+                <select id="selectorClaseLibre" style="margin: 10px; padding: 10px; font-size: 16px; width: 400px;">
+                    <option value="">-- Cargando clases libres... --</option>
+                </select>
+            </div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label for="selectorClase" style="font-weight: bold;">3. Seleccionar Clase:</label>
-            <select id="selectorClase" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" disabled>
-                <option value="">-- Primero selecciona un ramo --</option>
-            </select>
+        <!-- Panel para Clases con Curso (existente) -->
+        <div id="panelClasesCurso" style="display: none;">
+            <div style="margin-bottom: 15px;">
+                <label for="selectorCurso" style="font-weight: bold;">1. Seleccionar Curso:</label>
+                <select id="selectorCurso" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarRamosPorCurso()">
+                    <option value="">-- Seleccionar Curso --</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="selectorRamo" style="font-weight: bold;">2. Seleccionar Ramo/Asignatura:</label>
+                <select id="selectorRamo" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarClasesPorRamo()" disabled>
+                    <option value="">-- Primero selecciona un curso --</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label for="selectorClase" style="font-weight: bold;">3. Seleccionar Clase:</label>
+                <select id="selectorClase" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" disabled>
+                    <option value="">-- Primero selecciona un ramo --</option>
+                </select>
+            </div>
         </div>
 
         <div>
@@ -66,6 +89,71 @@
 @section Scripts {
 <script>
 console.log('🔥 ASISTENCIAS POR CLASE SCRIPT LOADED');
+
+let tipoClaseActual = 'libres';
+
+// Función para cambiar entre tipos de clase
+function cambiarTipoClase(tipo) {
+    tipoClaseActual = tipo;
+
+    const tabLibres = document.getElementById('tabClasesLibres');
+    const tabCurso = document.getElementById('tabClasesCurso');
+    const panelLibres = document.getElementById('panelClasesLibres');
+    const panelCurso = document.getElementById('panelClasesCurso');
+
+    if (tipo === 'libres') {
+        tabLibres.style.background = '#007bff';
+        tabCurso.style.background = '#6c757d';
+        panelLibres.style.display = 'block';
+        panelCurso.style.display = 'none';
+        cargarClasesLibres();
+    } else {
+        tabLibres.style.background = '#6c757d';
+        tabCurso.style.background = '#007bff';
+        panelLibres.style.display = 'none';
+        panelCurso.style.display = 'block';
+        cargarCursos();
+    }
+
+    // Limpiar vista de asistencias
+    document.getElementById('asistenciasList').innerHTML = `
+        <div style="background: yellow; padding: 20px; margin: 20px 0;">
+            <h3>Selecciona una clase para ver las asistencias</h3>
+        </div>
+    `;
+    document.getElementById('resumen').style.display = 'none';
+}
+
+// Cargar clases libres (sin curso/ramo)
+async function cargarClasesLibres() {
+    const selector = document.getElementById('selectorClaseLibre');
+    selector.innerHTML = '<option value="">-- Cargando clases libres... --</option>';
+
+    try {
+        const response = await fetch('/api/clases/mis-clases');
+        const todasClases = await response.json();
+
+        // Filtrar solo clases libres (sin ramoId)
+        const clasesLibres = todasClases.filter(clase => !clase.ramoId);
+
+        selector.innerHTML = '<option value="">-- Seleccionar Clase Libre --</option>';
+
+        clasesLibres.forEach(clase => {
+            const option = document.createElement('option');
+            option.value = clase.id;
+            const fecha = new Date(clase.inicioUtc).toLocaleDateString();
+            const hora = new Date(clase.inicioUtc).toLocaleTimeString();
+            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
+            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+            selector.appendChild(option);
+        });
+
+        console.log('✅ Clases libres cargadas:', clasesLibres.length);
+    } catch (error) {
+        console.error('❌ Error cargando clases libres:', error);
+        selector.innerHTML = '<option value="">-- Error cargando clases --</option>';
+    }
+}
 
 // Cargar cursos al iniciar
 async function cargarCursos() {
@@ -167,11 +255,21 @@ async function cargarClasesPorRamo() {
 }
 
 async function cargarAsistenciasPorClase() {
-    const claseId = document.getElementById('selectorClase').value;
+    let claseId = null;
 
-    if (!claseId) {
-        alert('Por favor selecciona una clase específica');
-        return;
+    // Obtener el ID de la clase según el tipo actual
+    if (tipoClaseActual === 'libres') {
+        claseId = document.getElementById('selectorClaseLibre').value;
+        if (!claseId) {
+            alert('Por favor selecciona una clase libre específica');
+            return;
+        }
+    } else {
+        claseId = document.getElementById('selectorClase').value;
+        if (!claseId) {
+            alert('Por favor selecciona una clase específica');
+            return;
+        }
     }
     
     const container = document.getElementById('asistenciasList');
@@ -201,40 +299,51 @@ async function cargarAsistenciasPorClase() {
         const clase = await claseResponse.json();
         const asistenciasClase = await asistenciasResponse.json();
 
-        // Ahora obtener estudiantes del curso (usando el ramoId de la clase)
-        const ramoResponse = await fetch(`/api/ramos/${clase.ramoId}`);
-        const ramo = await ramoResponse.json();
-        const estudiantesResponse = await fetch(`/api/cursos/${ramo.cursoId}/alumnos`);
-        const alumnoCursoData = await estudiantesResponse.json();
+        let estudiantes = [];
+        let esClaseLibre = !clase.ramoId;
 
-        // Obtener datos completos de cada alumno
-        const estudiantesCompletos = await Promise.all(
-            alumnoCursoData.map(async (ac) => {
-                try {
-                    const alumnoResponse = await fetch(`/api/alumnos/${ac.alumnoId}`);
-                    const alumnoCompleto = await alumnoResponse.json();
-                    return {
-                        ...alumnoCompleto,
-                        id: ac.alumnoId, // Asegurar que tiene el campo id
-                        inscripcionId: ac.id,
-                        fechaInscripcion: ac.fechaInscripcion
-                    };
-                } catch (error) {
-                    console.error(`Error obteniendo datos del alumno ${ac.alumnoId}:`, error);
-                    // Fallback con datos básicos
-                    return {
-                        id: ac.alumnoId,
-                        nombre: ac.alumnoNombre,
-                        codigo: `ALU-${ac.alumnoId}`,
-                        email: 'No disponible',
-                        inscripcionId: ac.id,
-                        fechaInscripcion: ac.fechaInscripcion
-                    };
-                }
-            })
-        );
+        if (esClaseLibre) {
+            // Para clases libres, no hay estudiantes "matriculados" específicos
+            // Los estudiantes son los que han registrado asistencia
+            estudiantes = asistenciasClase.map(asistencia => ({
+                id: asistencia.alumnoId,
+                codigo: asistencia.codigo,
+                nombre: asistencia.nombre
+            }));
+        } else {
+            // Obtener estudiantes del curso (lógica existente)
+            const ramoResponse = await fetch(`/api/ramos/${clase.ramoId}`);
+            const ramo = await ramoResponse.json();
+            const estudiantesResponse = await fetch(`/api/cursos/${ramo.cursoId}/alumnos`);
+            const alumnoCursoData = await estudiantesResponse.json();
 
-        const estudiantes = estudiantesCompletos;
+            // Obtener datos completos de cada alumno
+            const estudiantesCompletos = await Promise.all(
+                alumnoCursoData.map(async (ac) => {
+                    try {
+                        const alumnoResponse = await fetch(`/api/alumnos/${ac.alumnoId}`);
+                        const alumnoCompleto = await alumnoResponse.json();
+                        return {
+                            ...alumnoCompleto,
+                            id: ac.alumnoId,
+                            inscripcionId: ac.id,
+                            fechaInscripcion: ac.fechaInscripcion
+                        };
+                    } catch (error) {
+                        console.error(`Error obteniendo datos del alumno ${ac.alumnoId}:`, error);
+                        return {
+                            id: ac.alumnoId,
+                            nombre: ac.alumnoNombre,
+                            codigo: `ALU-${ac.alumnoId}`,
+                            email: 'No disponible',
+                            inscripcionId: ac.id,
+                            fechaInscripcion: ac.fechaInscripcion
+                        };
+                    }
+                })
+            );
+            estudiantes = estudiantesCompletos;
+        }
 
         console.log('📊 Datos recibidos:', {
             clase: clase,
@@ -371,11 +480,13 @@ async function cargarAsistenciasPorClase() {
         
         // Mostrar información de la clase
         const fechaClase = new Date(clase.inicioUtc);
+        const tipoClaseTexto = esClaseLibre ? '📚 CLASE LIBRE' : '🎓 CLASE CON CURSO';
         document.getElementById('claseInfo').innerHTML = `
-            🏫 ${clase.asignatura || clase.nombreCompleto} |
+            ${tipoClaseTexto} | 🏫 ${clase.asignatura || clase.nombreCompleto} |
             📅 ${fechaClase.toLocaleDateString()} |
             🕐 ${fechaClase.toLocaleTimeString()} |
             ${clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA'}
+            ${esClaseLibre ? ' | ⚠️ Los estudiantes se registran escaneando QR' : ''}
         `;
 
         // Mostrar resumen
@@ -460,29 +571,53 @@ async function cargarAsistenciasPorClase() {
 
 // Funciones de utilidad adicionales
 function refrescarDatos() {
-    const claseId = document.getElementById('selectorClase').value;
+    let claseId = null;
+
+    if (tipoClaseActual === 'libres') {
+        claseId = document.getElementById('selectorClaseLibre').value;
+    } else {
+        claseId = document.getElementById('selectorClase').value;
+    }
+
     if (claseId) {
         cargarAsistenciasPorClase();
     }
 }
 
 function exportarCSV() {
-    const claseId = document.getElementById('selectorClase').value;
+    let claseId = null;
+
+    if (tipoClaseActual === 'libres') {
+        claseId = document.getElementById('selectorClaseLibre').value;
+    } else {
+        claseId = document.getElementById('selectorClase').value;
+    }
+
     if (!claseId) {
         alert('Por favor selecciona una clase específica primero');
         return;
     }
 
-    // Abrir CSV COMPLETO de asistencias de la clase (incluye todos los alumnos y estados)
+    // Abrir CSV COMPLETO de asistencias de la clase
     window.open(`/api/asistencias/clase/${claseId}/csv-completo`, '_blank');
 }
 
-// Cargar cursos al iniciar
-setTimeout(cargarCursos, 500);
+// Inicializar la vista
+setTimeout(() => {
+    // Por defecto, cargar clases libres primero
+    cargarClasesLibres();
+}, 500);
 
 // Auto-refrescar cada 30 segundos si hay una clase seleccionada
 setInterval(() => {
-    const claseId = document.getElementById('selectorClase').value;
+    let claseId = null;
+
+    if (tipoClaseActual === 'libres') {
+        claseId = document.getElementById('selectorClaseLibre').value;
+    } else {
+        claseId = document.getElementById('selectorClase').value;
+    }
+
     if (claseId) {
         console.log('🔄 Auto-refrescando datos...');
         refrescarDatos();

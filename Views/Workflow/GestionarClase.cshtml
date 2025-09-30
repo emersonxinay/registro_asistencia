@@ -451,7 +451,14 @@
                     <i data-lucide="clock"></i>
                     <span>@Model.Clase.InicioUtc.ToString("HH:mm")</span>
                 </div>
-                @if (Model.Clase.Ramo?.Curso != null)
+                @if (Model.EsClaseLibre)
+                {
+                    <div class="meta-item">
+                        <i data-lucide="book-x"></i>
+                        <span>📚 Clase Libre</span>
+                    </div>
+                }
+                else if (Model.Clase.Ramo?.Curso != null)
                 {
                     <div class="meta-item">
                         <i data-lucide="book-open"></i>
@@ -474,6 +481,20 @@
         </div>
     </div>
 
+    @if (Model.EsClaseLibre)
+    {
+        <!-- Información para Clases Libres -->
+        <div style="background: linear-gradient(135deg, #e0f2fe, #b3e5fc); border: 1px solid #0288d1; border-radius: var(--radius-xl); padding: var(--space-4); margin-bottom: var(--space-6); text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                <i data-lucide="info" style="color: #0288d1; width: 20px; height: 20px;"></i>
+                <strong style="color: #0277bd;">Clase Libre - Registro Abierto</strong>
+            </div>
+            <p style="color: #0277bd; margin: 0; font-size: 0.9rem;">
+                Los estudiantes pueden registrarse escaneando el código QR. No hay lista previa de estudiantes matriculados.
+            </p>
+        </div>
+    }
+
     <!-- Statistics -->
     <div class="stats-grid">
         <div class="stat-card">
@@ -489,7 +510,7 @@
                 <i data-lucide="users"></i>
             </div>
             <div class="stat-value">@Model.TotalEstudiantes</div>
-            <p class="stat-label">Total Estudiantes</p>
+            <p class="stat-label">@(Model.EsClaseLibre ? "Estudiantes Registrados" : "Total Estudiantes")</p>
         </div>
 
         <div class="stat-card">

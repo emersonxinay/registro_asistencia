@@ -28,7 +28,7 @@ public class AlumnosController : ControllerBase
             {
                 return BadRequest(new { message = "Código y nombre son requeridos" });
             }
-            
+
             var alumno = await _dataService.CreateAlumnoAsync(dto);
             return Ok(alumno);
         }
@@ -162,6 +162,93 @@ public class AlumnosController : ControllerBase
         catch (Exception ex)
         {
             return BadRequest(new { message = "Error generando QR PNG: " + ex.Message });
+        }
+    }
+
+    // Regenerar QR para estudiante específico
+    [HttpPost("{id}/regenerate-qr")]
+    public async Task<IActionResult> RegenerateQr(int id)
+    {
+        try
+        {
+            var alumno = await _dataService.GetAlumnoAsync(id);
+            if (alumno == null)
+                return NotFound(new { message = "Estudiante no encontrado" });
+
+            // Regenerar QR con formato mejorado
+            var qrPayload = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                type = "student",
+                alumnoId = alumno.Id,
+                codigo = alumno.Codigo,
+                nombre = alumno.Nombre,
+                generated = DateTime.UtcNow.ToString("O")
+            });
+
+            alumno.QrAlumnoBase64 = _qrService.GenerateBase64Qr(qrPayload);
+            await _dataService.UpdateAlumnoQrAsync(id, alumno.QrAlumnoBase64);
+
+            return Ok(new { message = "QR regenerado exitosamente", qrCode = alumno.QrAlumnoBase64 });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Error regenerando QR: " + ex.Message });
+        }
+    }
+
+    // Exportar lista de estudiantes con QRs
+    [HttpGet("export")]
+    public async Task<IActionResult> ExportStudents()
+    {
+        try
+        {
+            var alumnos = await _dataService.GetAlumnosAsync();
+            var export = alumnos.Select(a => new
+            {
+                id = a.Id,
+                codigo = a.Codigo,
+                nombre = a.Nombre,
+                qrCode = a.QrAlumnoBase64,
+                qrDataUrl = !string.IsNullOrEmpty(a.QrAlumnoBase64) ? $"data:image/png;base64,{a.QrAlumnoBase64}" : null,
+                created = a.FechaCreacion.ToString("yyyy-MM-dd HH:mm:ss")
+            });
+
+            return Ok(export);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error exportando estudiantes: " + ex.Message });
+        }
+    }
+
+    // Endpoint para generar PDF con QRs para impresión
+    [HttpGet("print-qrs")]
+    public async Task<IActionResult> PrintQRs([FromQuery] string? ids = null)
+    {
+        try
+        {
+            var alumnos = await _dataService.GetAlumnosAsync();
+
+            if (!string.IsNullOrEmpty(ids))
+            {
+                var selectedIds = ids.Split(',').Select(int.Parse).ToList();
+                alumnos = alumnos.Where(a => selectedIds.Contains(a.Id));
+            }
+
+            // Por ahora retornamos JSON, pero aquí se podría generar un PDF
+            var printData = alumnos.Select(a => new
+            {
+                id = a.Id,
+                codigo = a.Codigo,
+                nombre = a.Nombre,
+                qrDataUrl = !string.IsNullOrEmpty(a.QrAlumnoBase64) ? $"data:image/png;base64,{a.QrAlumnoBase64}" : null
+            });
+
+            return Ok(printData);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error preparando QRs para impresión: " + ex.Message });
         }
     }
 }

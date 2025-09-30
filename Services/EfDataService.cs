@@ -32,8 +32,16 @@ public class EfDataService : IDataService
         _context.Alumnos.Add(alumno);
         await _context.SaveChangesAsync();
         
-        // Generar QR después de guardar para tener el ID
-        alumno.QrAlumnoBase64 = _qrService.GenerateBase64Qr($"alumno:{alumno.Id}");
+        // Generar QR después de guardar para tener el ID con formato JSON para mejor compatibilidad
+        var qrPayload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            type = "student",
+            alumnoId = alumno.Id,
+            codigo = alumno.Codigo,
+            nombre = alumno.Nombre,
+            generated = DateTime.UtcNow.ToString("O")
+        });
+        alumno.QrAlumnoBase64 = _qrService.GenerateBase64Qr(qrPayload);
         await _context.SaveChangesAsync();
         
         return alumno;
@@ -58,8 +66,27 @@ public class EfDataService : IDataService
         alumno.Codigo = dto.Codigo;
         alumno.Nombre = dto.Nombre;
         // Regenerar QR con los nuevos datos
-        alumno.QrAlumnoBase64 = _qrService.GenerateBase64Qr($"alumno:{alumno.Id}");
+        var qrPayload = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            type = "student",
+            alumnoId = alumno.Id,
+            codigo = alumno.Codigo,
+            nombre = alumno.Nombre,
+            generated = DateTime.UtcNow.ToString("O")
+        });
+        alumno.QrAlumnoBase64 = _qrService.GenerateBase64Qr(qrPayload);
 
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdateAlumnoQrAsync(int id, string qrBase64)
+    {
+        var alumno = await _context.Alumnos.FindAsync(id);
+        if (alumno == null)
+            return false;
+
+        alumno.QrAlumnoBase64 = qrBase64;
         await _context.SaveChangesAsync();
         return true;
     }

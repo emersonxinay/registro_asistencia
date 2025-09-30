@@ -11,6 +11,7 @@ public interface IDataService
     Task<Alumno?> GetAlumnoAsync(int id);
     Task<IEnumerable<Alumno>> GetAlumnosAsync();
     Task<bool> UpdateAlumnoAsync(int id, AlumnoCreateDto dto);
+    Task<bool> UpdateAlumnoQrAsync(int id, string qrBase64);
     Task<bool> DeleteAlumnoAsync(int id);
     
     // Clases
@@ -111,6 +112,15 @@ public class InMemoryDataService : IDataService
 
         alumno.Codigo = dto.Codigo;
         alumno.Nombre = dto.Nombre;
+        return Task.FromResult(true);
+    }
+
+    public Task<bool> UpdateAlumnoQrAsync(int id, string qrBase64)
+    {
+        if (!_alumnos.TryGetValue(id, out var alumno))
+            return Task.FromResult(false);
+
+        alumno.QrAlumnoBase64 = qrBase64;
         return Task.FromResult(true);
     }
 

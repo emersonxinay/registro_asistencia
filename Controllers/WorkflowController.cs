@@ -432,15 +432,28 @@ public class WorkflowController : Controller
         var totalAsistencias = await _context.Asistencias
             .CountAsync(a => a.ClaseId == claseId);
 
-        var totalEstudiantes = await _context.AlumnoCursos
-            .CountAsync(ac => ac.CursoId == clase.Ramo!.Curso.Id && ac.Activo);
+        var totalEstudiantes = 0;
+        var esClaseLibre = clase.RamoId == null;
+
+        if (!esClaseLibre && clase.Ramo?.Curso != null)
+        {
+            // Clase con curso - obtener estudiantes matriculados
+            totalEstudiantes = await _context.AlumnoCursos
+                .CountAsync(ac => ac.CursoId == clase.Ramo.Curso.Id && ac.Activo);
+        }
+        else
+        {
+            // Clase libre - usar el número de estudiantes que registraron asistencia
+            totalEstudiantes = totalAsistencias;
+        }
 
         var viewModel = new GestionarClaseViewModel
         {
             Clase = clase,
             TotalAsistencias = totalAsistencias,
             TotalEstudiantes = totalEstudiantes,
-            PorcentajeAsistencia = totalEstudiantes > 0 ? (double)totalAsistencias / totalEstudiantes * 100 : 0
+            PorcentajeAsistencia = totalEstudiantes > 0 ? (double)totalAsistencias / totalEstudiantes * 100 : 0,
+            EsClaseLibre = esClaseLibre
         };
 
         ViewData["Title"] = $"Gestionar - {clase.Asignatura}";
@@ -591,4 +604,5 @@ public class GestionarClaseViewModel
     public int TotalAsistencias { get; set; }
     public int TotalEstudiantes { get; set; }
     public double PorcentajeAsistencia { get; set; }
+    public bool EsClaseLibre { get; set; }
 }
