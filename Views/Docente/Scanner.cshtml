@@ -1,5 +1,8 @@
 @model List<ClaseActivaViewModel>
 
+<!-- Cargar librería jsQR para detección QR -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
 <div class="scanner-container">
     <div class="scanner-header">
         <div class="header-content">
@@ -103,7 +106,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="studentCode">Código del Estudiante:</label>
-                        <input type="text" id="studentCode" placeholder="Ingresa el código del estudiante">
+                        <input type="text" id="studentCode" placeholder="Ej: EST000001" pattern="[Ee][Ss][Tt][0-9]{6}" title="Formato: EST seguido de 6 dígitos" maxlength="9" style="text-transform: uppercase;">
                     </div>
                     <div class="form-group">
                         <label for="justification">Justificación (opcional):</label>
@@ -745,7 +748,7 @@ function startQRDetection() {
 
             // Para testing: Simular QR de estudiante (solo para desarrollo)
             // Descomenta la línea siguiente para probar con datos de ejemplo:
-            // processQRCode('{"type":"student","studentId":1,"studentCode":"EST001","timestamp":"2024-01-01T10:00:00Z","version":"1.0"}');
+            // processQRCode('{"type":"student","studentId":1,"studentCode":"EST000001","timestamp":"2024-01-01T10:00:00Z","version":"1.0"}');
 
         } catch (error) {
             console.error('Error detectando QR:', error);
@@ -884,27 +887,51 @@ async function registerManual() {
     }
     
     try {
+        // Primero buscar el alumno por código
+        const alumnoResponse = await fetch(`/api/alumnos?codigo=${encodeURIComponent(studentCode)}`);
+        const alumnos = await alumnoResponse.json();
+
+        if (!alumnos || alumnos.length === 0) {
+            throw new Error(`Estudiante con código ${studentCode} no encontrado`);
+        }
+
+        const alumno = alumnos[0];
+
         const response = await fetch('/api/attendance/manual', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                alumnoId: alumno.id,
                 claseId: selectedClassId,
-                studentCode: studentCode,
-                justification: justification,
-                metodo: 'Manual'
+                justificacion: justification
             })
         });
         
         const result = await response.json();
-        addScanResult(result);
-        
-        if (result.success) {
-            showSuccess(`✅ ${result.studentName} registrado manualmente`);
+
+        if (response.ok && result.success) {
+            const scanResult = {
+                success: true,
+                studentName: alumno.nombre,
+                studentCode: alumno.codigo,
+                estado: 'Manual',
+                message: `Registrado manualmente: ${justification || 'Sin justificación'}`
+            };
+            addScanResult(scanResult);
+            showSuccess(`✅ ${alumno.nombre} (${alumno.codigo}) registrado manualmente`);
             closeModal();
         } else {
-            showError(`❌ ${result.message}`);
+            const errorMsg = result.message || 'Error en el registro manual';
+            const errorResult = {
+                success: false,
+                studentName: studentCode,
+                estado: 'Error',
+                message: errorMsg
+            };
+            addScanResult(errorResult);
+            showError(`❌ ${errorMsg}`);
         }
         
     } catch (error) {
@@ -1055,6 +1082,35 @@ document.getElementById('manualEntryModal').addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+    }
+
+    // Agregar validación en tiempo real para el input de código de estudiante
+    const studentCodeInput = document.getElementById('studentCode');
+    if (studentCodeInput) {
+        studentCodeInput.addEventListener('input', function(e) {
+            const value = e.target.value.toUpperCase();
+            e.target.value = value; // Force uppercase
+
+            // Remove invalid characters (keep only letters and numbers)
+            const cleanValue = value.replace(/[^A-Z0-9]/g, '');
+            if (cleanValue !== value) {
+                e.target.value = cleanValue;
+            }
+
+            // Validate format and provide visual feedback
+            const isValid = /^EST\d{6}$/.test(cleanValue);
+            const isPartiallyValid = /^(E|ES|EST|EST\d{1,5})$/.test(cleanValue);
+
+            if (cleanValue.length === 0) {
+                e.target.style.borderColor = '#e9ecef'; // Default
+            } else if (isValid) {
+                e.target.style.borderColor = '#27ae60'; // Green for valid
+            } else if (isPartiallyValid) {
+                e.target.style.borderColor = '#f39c12'; // Orange for in-progress
+            } else {
+                e.target.style.borderColor = '#e74c3c'; // Red for invalid
+            }
+        });
     }
 });
 </script>

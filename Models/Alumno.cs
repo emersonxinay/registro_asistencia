@@ -12,4 +12,4 @@ public class Alumno
     public virtual ICollection<AlumnoCurso> AlumnoCursos { get; set; } = new List<AlumnoCurso>();
 }
 
-public record AlumnoCreateDto(string Codigo, string Nombre);
+public record AlumnoCreateDto(string? Codigo, string Nombre);

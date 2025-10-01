@@ -9,6 +9,7 @@ public interface IDataService
     // Alumnos
     Task<Alumno> CreateAlumnoAsync(AlumnoCreateDto dto);
     Task<Alumno?> GetAlumnoAsync(int id);
+    Task<Alumno?> GetAlumnoByCodigoAsync(string codigo);
     Task<IEnumerable<Alumno>> GetAlumnosAsync();
     Task<bool> UpdateAlumnoAsync(int id, AlumnoCreateDto dto);
     Task<bool> UpdateAlumnoQrAsync(int id, string qrBase64);
@@ -97,6 +98,12 @@ public class InMemoryDataService : IDataService
     public Task<Alumno?> GetAlumnoAsync(int id)
     {
         _alumnos.TryGetValue(id, out var alumno);
+        return Task.FromResult(alumno);
+    }
+
+    public Task<Alumno?> GetAlumnoByCodigoAsync(string codigo)
+    {
+        var alumno = _alumnos.Values.FirstOrDefault(a => a.Codigo == codigo);
         return Task.FromResult(alumno);
     }
 

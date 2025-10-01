@@ -54,6 +54,7 @@ public enum MetodoRegistro
 // DTOs
 public record ProfesorScanDto(int AlumnoId, int ClaseId);
 public record AlumnoScanDto(int AlumnoId, int ClaseId, string Nonce);
+public record AlumnoScanByCodigoDto(string CodigoAlumno, int ClaseId, string Nonce);
 public record RegistroAsistenciaDto(int AlumnoId, int ClaseId, MetodoRegistro Metodo, string? Justificacion = null);
 
 // Configuración de asistencia

@@ -582,6 +582,47 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        .code-readonly {
+            background: var(--bg-secondary) !important;
+            color: var(--text-secondary) !important;
+            cursor: not-allowed !important;
+            font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+            font-weight: 600;
+            border-style: dashed !important;
+        }
+
+        .code-preview-container {
+            position: relative;
+        }
+
+        .code-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-hint {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            margin-top: 0.5rem;
+        }
+
         .form-actions {
             display: flex;
             gap: 1rem;
@@ -725,12 +766,26 @@
             <form id="createStudentForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label" for="studentCode">Código del Estudiante</label>
-                        <input type="text" id="studentCode" class="form-input" placeholder="Ej: EST001" required>
+                        <label class="form-label" for="studentCode">
+                            <i data-lucide="hash"></i>
+                            Código del Estudiante
+                        </label>
+                        <div class="code-preview-container">
+                            <input type="text" id="studentCode" class="form-input code-readonly"
+                                   placeholder="Se generará automáticamente: EST######" readonly>
+                            <div class="code-info">
+                                <i data-lucide="info"></i>
+                                <span>Código generado automáticamente</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="studentName">Nombre Completo</label>
-                        <input type="text" id="studentName" class="form-input" placeholder="Ej: Juan Pérez García" required>
+                        <label class="form-label" for="studentName">
+                            <i data-lucide="user"></i>
+                            Nombre Completo
+                        </label>
+                        <input type="text" id="studentName" class="form-input"
+                               placeholder="Ej: Juan Pérez García" required>
                     </div>
                 </div>
 
@@ -1029,8 +1084,216 @@
             }
 
             async editStudent(id) {
-                // TODO: Implement edit functionality
-                this.showInfo('Función de edición en desarrollo');
+                const student = this.students.find(s => s.id === id);
+                if (!student) {
+                    this.showError('Estudiante no encontrado');
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="edit-modal-content">
+                        <div class="edit-modal-header">
+                            <div class="edit-modal-title">
+                                <div class="edit-modal-icon">
+                                    <i data-lucide="edit-3"></i>
+                                </div>
+                                <div>
+                                    <h3>Editar Estudiante</h3>
+                                    <p>Modificar datos de ${student.nombre}</p>
+                                </div>
+                            </div>
+                            <button class="edit-modal-close">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="edit-modal-body">
+                            <form id="editStudentForm">
+                                <div class="edit-form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label" for="editStudentCode">
+                                            <i data-lucide="hash"></i>
+                                            Código del Estudiante
+                                        </label>
+                                        <input type="text" id="editStudentCode" class="form-input code-readonly" value="${student.codigo}" readonly>
+                                        <div class="form-hint">
+                                            <i data-lucide="lock"></i>
+                                            Los códigos no se pueden modificar para mantener consistencia
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="editStudentName">
+                                            <i data-lucide="user"></i>
+                                            Nombre Completo
+                                        </label>
+                                        <input type="text" id="editStudentName" class="form-input" value="${student.nombre}" required autocomplete="off">
+                                        <div class="form-hint">Nombre y apellidos del estudiante</div>
+                                    </div>
+                                </div>
+
+                                <div class="edit-options">
+                                    <div class="option-card">
+                                        <div class="option-header">
+                                            <input type="checkbox" id="regenerateQR" class="option-checkbox">
+                                            <label for="regenerateQR" class="option-label">
+                                                <i data-lucide="refresh-cw"></i>
+                                                Regenerar código QR
+                                            </label>
+                                        </div>
+                                        <p class="option-description">Marcar si se cambió el código y necesitas regenerar el QR</p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="edit-modal-footer">
+                            <button class="edit-action-btn secondary" onclick="this.closest('.modal-overlay').remove()">
+                                <i data-lucide="x"></i>
+                                <span>Cancelar</span>
+                            </button>
+                            <button class="edit-action-btn primary" onclick="studentsManager.saveStudentEdit(${id})">
+                                <i data-lucide="save"></i>
+                                <span>Guardar Cambios</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                modal.querySelector('.edit-modal-close').onclick = () => modal.remove();
+                modal.onclick = (e) => e.target === modal && modal.remove();
+
+                document.body.appendChild(modal);
+                setTimeout(() => modal.classList.add('show'), 10);
+
+                // Focus on first input
+                setTimeout(() => {
+                    document.getElementById('editStudentCode').focus();
+                }, 100);
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            async saveStudentEdit(id) {
+                const codeInput = document.getElementById('editStudentCode');
+                const nameInput = document.getElementById('editStudentName');
+                const regenerateQRCheckbox = document.getElementById('regenerateQR');
+
+                // Validation
+                const codigo = codeInput.value.trim();
+                const nombre = nameInput.value.trim();
+
+                if (!nombre) {
+                    this.showError('El nombre es requerido');
+                    nameInput.focus();
+                    return;
+                }
+
+                const originalStudent = this.students.find(s => s.id === id);
+                const nameChanged = originalStudent.nombre !== nombre;
+
+                // Note: Los códigos no se pueden cambiar (readonly)
+                if (!nameChanged) {
+                    this.showInfo('No hay cambios para guardar');
+                    return;
+                }
+
+                // Disable save button and show loading
+                const saveBtn = document.querySelector('.edit-action-btn.primary');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i data-lucide="loader-2" class="spinning"></i><span>Guardando...</span>';
+
+                try {
+                    // Update student data
+                    const response = await fetch(`/api/alumnos/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            codigo: codigo,
+                            nombre: nombre
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al actualizar estudiante');
+                    }
+
+                    const updatedStudent = await response.json();
+
+                    // Update local data
+                    originalStudent.codigo = updatedStudent.codigo;
+                    originalStudent.nombre = updatedStudent.nombre;
+
+                    // Regenerate QR if requested
+                    if (regenerateQRCheckbox.checked) {
+                        try {
+                            await this.generateQRForStudent(id);
+                        } catch (qrError) {
+                            console.warn('Error regenerando QR:', qrError);
+                            // Don't fail the whole operation for QR issues
+                        }
+                    }
+
+                    // Close modal
+                    document.querySelector('.modal-overlay').remove();
+
+                    // Update UI
+                    this.renderStudents();
+                    this.updateStats();
+
+                    // Show success message
+                    const changes = [];
+                    if (nameChanged) changes.push('nombre');
+                    if (regenerateQRCheckbox.checked) changes.push('QR');
+
+                    this.showSuccess(`Estudiante actualizado: ${changes.join(', ')}`);
+
+                    // Highlight updated student
+                    setTimeout(() => {
+                        const studentCard = document.querySelector(`[data-id="${id}"]`);
+                        if (studentCard) {
+                            studentCard.style.background = 'linear-gradient(90deg, rgba(34, 197, 94, 0.1), transparent)';
+                            setTimeout(() => studentCard.style.background = '', 3000);
+                        }
+                    }, 500);
+
+                } catch (error) {
+                    console.error('❌ Error updating student:', error);
+                    this.showError('Error al actualizar estudiante: ' + error.message);
+                } finally {
+                    // Restore save button
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            async generateQRForStudent(id) {
+                const response = await fetch(`/api/alumnos/${id}/regenerate-qr`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error regenerando QR');
+                }
+
+                const result = await response.json();
+
+                // Update student data
+                const student = this.students.find(s => s.id === id);
+                if (student) {
+                    student.qrAlumnoBase64 = result.qrCode;
+                }
+
+                return result;
             }
 
             async deleteStudent(id) {
@@ -1094,7 +1357,6 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            codigo: document.getElementById('studentCode').value,
                             nombre: document.getElementById('studentName').value
                         })
                     });
@@ -1596,6 +1858,264 @@
             @@keyframes slideOut {
                 from { transform: translateX(0); opacity: 1; }
                 to { transform: translateX(100%); opacity: 0; }
+            }
+
+            /* Edit Modal Styles */
+            .edit-modal-content {
+                background: var(--surface);
+                border-radius: var(--radius-2xl);
+                box-shadow: var(--shadow-xl);
+                max-width: 600px;
+                width: 100%;
+                max-height: 90vh;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                transform: scale(0.9) translateY(20px);
+                transition: all 0.3s ease;
+            }
+
+            .modal-overlay.show .edit-modal-content {
+                transform: scale(1) translateY(0);
+            }
+
+            .edit-modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 2rem 2rem 1rem 2rem;
+                border-bottom: 1px solid var(--border);
+                background: linear-gradient(135deg, var(--warning), #f59e0b);
+                color: white;
+            }
+
+            .edit-modal-title {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .edit-modal-icon {
+                width: 3rem;
+                height: 3rem;
+                border-radius: var(--radius-lg);
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .edit-modal-title h3 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            .edit-modal-title p {
+                margin: 0;
+                opacity: 0.9;
+                font-size: 0.875rem;
+            }
+
+            .edit-modal-close {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                border-radius: var(--radius-md);
+                width: 2.5rem;
+                height: 2.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-size: 1.25rem;
+            }
+
+            .edit-modal-close:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(1.05);
+            }
+
+            .edit-modal-body {
+                padding: 2rem;
+            }
+
+            .edit-form-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .form-label {
+                font-weight: 600;
+                color: var(--text-primary);
+                font-size: 0.875rem;
+            }
+
+            .form-input {
+                padding: 0.875rem 1rem;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+                font-size: 1rem;
+                background: var(--bg-secondary);
+                transition: all 0.2s ease;
+            }
+
+            .form-input:focus {
+                outline: none;
+                border-color: var(--primary);
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                background: white;
+            }
+
+            .form-hint {
+                font-size: 0.75rem;
+                color: var(--text-tertiary);
+                margin-top: 0.25rem;
+            }
+
+            .edit-options {
+                margin-bottom: 1.5rem;
+            }
+
+            .option-card {
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+                padding: 1rem;
+                background: var(--bg-secondary);
+                transition: all 0.2s ease;
+            }
+
+            .option-card:hover {
+                border-color: var(--primary);
+                background: var(--surface);
+            }
+
+            .option-header {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .option-checkbox {
+                width: 1.25rem;
+                height: 1.25rem;
+                accent-color: var(--primary);
+            }
+
+            .option-label {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                cursor: pointer;
+                font-size: 0.875rem;
+            }
+
+            .option-description {
+                margin: 0;
+                color: var(--text-secondary);
+                font-size: 0.75rem;
+                margin-left: 2rem;
+            }
+
+            .edit-modal-footer {
+                display: flex;
+                gap: 1rem;
+                padding: 1.5rem 2rem 2rem 2rem;
+                background: var(--bg-secondary);
+                justify-content: flex-end;
+            }
+
+            .edit-action-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.875rem 1.5rem;
+                border: none;
+                border-radius: var(--radius-lg);
+                font-size: 0.875rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                min-width: 120px;
+            }
+
+            .edit-action-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .edit-action-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .edit-action-btn.secondary {
+                background: var(--bg-tertiary);
+                color: var(--text-secondary);
+                border: 1px solid var(--border);
+            }
+
+            .edit-action-btn.secondary:hover {
+                background: var(--surface);
+                color: var(--text-primary);
+            }
+
+            .edit-action-btn.primary {
+                background: linear-gradient(135deg, var(--warning), #f59e0b);
+                color: white;
+            }
+
+            .edit-action-btn.primary:hover {
+                background: linear-gradient(135deg, #f59e0b, #d97706);
+            }
+
+            .spinning {
+                animation: spin 1s linear infinite;
+            }
+
+            @@keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+            /* Responsive Edit Modal */
+            @@media (max-width: 768px) {
+                .edit-modal-content {
+                    margin: 1rem;
+                    max-width: calc(100% - 2rem);
+                }
+
+                .edit-modal-header {
+                    padding: 1.5rem;
+                }
+
+                .edit-modal-body {
+                    padding: 1.5rem;
+                }
+
+                .edit-modal-footer {
+                    flex-direction: column;
+                    padding: 1.5rem;
+                }
+
+                .edit-action-btn {
+                    width: 100%;
+                }
             }
         `;
         document.head.appendChild(style);

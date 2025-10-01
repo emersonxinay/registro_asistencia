@@ -74,6 +74,40 @@ public class AsistenciasController : ControllerBase
         }
     }
 
+    [HttpPost("alumno-scan-codigo")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AlumnoScanByCodigo([FromBody] AlumnoScanByCodigoDto dto)
+    {
+        try
+        {
+            var clase = await _dataService.GetClaseAsync(dto.ClaseId);
+            if (clase == null)
+                return BadRequest(new { message = $"La clase {dto.ClaseId} no existe" });
+
+            if (!clase.Activa)
+                return BadRequest(new { message = "La clase no está activa" });
+
+            var alumno = await _dataService.GetAlumnoByCodigoAsync(dto.CodigoAlumno);
+            if (alumno == null)
+                return BadRequest(new { message = $"El alumno con código '{dto.CodigoAlumno}' no existe. Verifica tu código de estudiante." });
+
+            if (!await _dataService.ValidarTokenAsync(dto.Nonce, dto.ClaseId))
+                return BadRequest(new { message = "Token QR inválido o expirado. Escanea nuevamente el código QR." });
+
+            await _dataService.ConsumeTokenAsync(dto.Nonce);
+
+            if (await _dataService.ExisteAsistenciaAsync(alumno.Id, dto.ClaseId))
+                return Ok(new { mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente." });
+
+            await _dataService.RegistrarAsistenciaAsync(alumno.Id, dto.ClaseId, "ALUMNO_ESCANEA");
+            return Ok(new { mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente." });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = $"Error al procesar la solicitud: {ex.Message}" });
+        }
+    }
+
     // FUTURO: Endpoint para estudiantes autenticados (registro automático)
     [HttpPost("alumno-scan-auto")]
     [Authorize] // Requiere autenticación de estudiante cuando se implemente
