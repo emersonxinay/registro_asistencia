@@ -1,5 +1,5 @@
 /**
- * QuantumAttend - Advanced Attendance Management System
+ * Registro Asistencia por QR - Advanced Attendance Management System
  * Ultra-modern JavaScript architecture with real-time features
  */
 
@@ -9,7 +9,7 @@
 // 🌟 GLOBAL UTILITIES & CONFIGURATION
 // ============================================================================
 
-window.QuantumAttend = {
+window.RegistroAsistencia = {
     version: '2.0.0',
     theme: 'system',
     config: {
@@ -277,7 +277,7 @@ window.ThemeManager = {
 
         // Save preference
         Utils.setStorageItem('theme', theme);
-        window.QuantumAttend.theme = theme;
+        window.RegistroAsistencia.theme = theme;
 
         // Dispatch theme change event
         window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
@@ -295,7 +295,7 @@ window.ThemeManager = {
         if (!toggle) return;
 
         toggle.addEventListener('click', () => {
-            const currentTheme = window.QuantumAttend.theme;
+            const currentTheme = window.RegistroAsistencia.theme;
             const themes = ['light', 'dark', 'system'];
             const currentIndex = themes.indexOf(currentTheme);
             const nextTheme = themes[(currentIndex + 1) % themes.length];
@@ -336,7 +336,7 @@ window.ThemeManager = {
     watchSystemTheme() {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         mediaQuery.addEventListener('change', () => {
-            if (window.QuantumAttend.theme === 'system') {
+            if (window.RegistroAsistencia.theme === 'system') {
                 this.updateThemeToggle('system');
             }
         });
@@ -499,7 +499,7 @@ window.QRManager = {
             if (this.currentClassId && !document.hidden) {
                 this.loadQr();
             }
-        }, window.QuantumAttend.config.qrRefreshInterval);
+        }, window.RegistroAsistencia.config.qrRefreshInterval);
         
         console.log('📱 QR auto-refresh started');
     },
@@ -666,7 +666,7 @@ window.StatsManager = {
             if (!document.hidden) {
                 this.loadQuickStats();
             }
-        }, window.QuantumAttend.config.refreshInterval * 2); // Double the interval
+        }, window.RegistroAsistencia.config.refreshInterval * 2); // Double the interval
     },
 
     stop() {
@@ -1491,8 +1491,8 @@ window.MobileManager = {
 // 🚀 INITIALIZATION & SETUP
 // ============================================================================
 
-function initializeQuantumAttend() {
-    console.log('🚀 Initializing QuantumAttend v' + window.QuantumAttend.version);
+function initializeRegistroAsistencia() {
+    console.log('🚀 Initializing Registro Asistencia por QR v' + window.RegistroAsistencia.version);
 
     // Initialize core systems
     ThemeManager.init();
@@ -1564,10 +1564,10 @@ function initializeQuantumAttend() {
             console.log('✅ All elements forced visible');
         }, 100);
         
-        console.log('✅ QuantumAttend fully loaded');
+        console.log('✅ Registro Asistencia por QR fully loaded');
     });
 
-    console.log('✅ QuantumAttend initialization complete');
+    console.log('✅ Registro Asistencia por QR initialization complete');
 }
 
 // ============================================================================
@@ -1595,11 +1595,11 @@ function fixVisibilityIssues() {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         fixVisibilityIssues();
-        initializeQuantumAttend();
+        initializeRegistroAsistencia();
     });
 } else {
     fixVisibilityIssues();
-    initializeQuantumAttend();
+    initializeRegistroAsistencia();
 }
 
 // Add CSS for notifications and animations
@@ -1932,10 +1932,13 @@ const styleElement = document.createElement('style');
 styleElement.textContent = dynamicStyles;
 document.head.appendChild(styleElement);
 
-console.log('🎨 QuantumAttend dynamic styles injected');
+console.log('🎨 Registro Asistencia por QR dynamic styles injected');
 
 // Export for global access
-window.QuantumAttend.Utils = Utils;
-window.QuantumAttend.ThemeManager = ThemeManager;
-window.QuantumAttend.QRManager = QRManager;
-window.QuantumAttend.StatsManager = StatsManager;
+window.RegistroAsistencia.Utils = Utils;
+window.RegistroAsistencia.ThemeManager = ThemeManager;
+window.RegistroAsistencia.QRManager = QRManager;
+window.RegistroAsistencia.StatsManager = StatsManager;
+
+// Backward compatibility
+window.QuantumAttend = window.RegistroAsistencia;

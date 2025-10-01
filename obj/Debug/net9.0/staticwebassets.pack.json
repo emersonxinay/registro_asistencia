@@ -9,6 +9,10 @@
       "PackagePath": "staticwebassets\\css\\modern-ui.css"
     },
     {
+      "Id": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css",
+      "PackagePath": "staticwebassets\\css\\responsive-nav.css"
+    },
+    {
       "Id": "E:\\csharp\\registro_clonado\\wwwroot\\css\\styles.css",
       "PackagePath": "staticwebassets\\css\\styles.css"
     },
