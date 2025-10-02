@@ -24,9 +24,9 @@ public class AlumnosController : ControllerBase
     {
         try
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.Codigo) || string.IsNullOrWhiteSpace(dto.Nombre))
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
             {
-                return BadRequest(new { message = "Código y nombre son requeridos" });
+                return BadRequest(new { message = "Nombre es requerido" });
             }
 
             var alumno = await _dataService.CreateAlumnoAsync(dto);
@@ -39,11 +39,18 @@ public class AlumnosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] string? codigo = null)
     {
         try
         {
             var alumnos = await _dataService.GetAlumnosAsync();
+
+            // Si se proporciona un código, filtrar por él
+            if (!string.IsNullOrEmpty(codigo))
+            {
+                alumnos = alumnos.Where(a => a.Codigo.Equals(codigo, StringComparison.OrdinalIgnoreCase));
+            }
+
             return Ok(alumnos ?? new List<Alumno>());
         }
         catch (Exception ex)
@@ -66,9 +73,9 @@ public class AlumnosController : ControllerBase
     {
         try
         {
-            if (dto == null || string.IsNullOrWhiteSpace(dto.Codigo) || string.IsNullOrWhiteSpace(dto.Nombre))
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Nombre))
             {
-                return BadRequest(new { message = "Código y nombre son requeridos" });
+                return BadRequest(new { message = "Nombre es requerido" });
             }
             
             var updated = await _dataService.UpdateAlumnoAsync(id, dto);

@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="format-detection" content="telephone=no">
-    <title>Registro de Asistencia - QuantumAttend</title>
+    <title>Registro de Asistencia - Registro Asistencia por QR</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
@@ -903,7 +903,7 @@
     <div class="app-container">
         <div class="container">
             <header class="header">
-                <div class="brand">QuantumAttend</div>
+                <div class="brand">Registro Asistencia por QR</div>
                 <div class="app-icon">📱</div>
                 <h1>Registro de Asistencia</h1>
                 <p>Escanea tu QR o ingresa tu ID manualmente</p>
@@ -991,16 +991,18 @@
             <section class="form-section">
                 <div class="form-header">
                     <h2 class="form-title">Registro Manual</h2>
-                    <p class="form-subtitle">¿No tienes tu QR? Ingresa tu ID de estudiante</p>
+                    <p class="form-subtitle">¿No tienes tu QR? Ingresa tu código de estudiante</p>
                 </div>
 
                 <form id="scanForm">
                     <div class="form-group">
-                        <label class="form-label" for="alumnoId">ID de Estudiante</label>
+                        <label class="form-label" for="codigoAlumno">Código de Estudiante</label>
                         <div class="input-container">
                             <span class="input-icon">👤</span>
-                            <input type="number" id="alumnoId" class="form-input" min="1" required
-                                   placeholder="Ej: 12345" autocomplete="off">
+                            <input type="text" id="codigoAlumno" class="form-input" required
+                                   placeholder="Ej: EST000001" autocomplete="off" pattern="[Ee][Ss][Tt][0-9]{6}"
+                                   title="Formato: EST seguido de 6 dígitos (ej: EST000001)"
+                                   maxlength="9" style="text-transform: uppercase;">
                         </div>
                     </div>
 
@@ -1160,13 +1162,13 @@
                 navigator.vibrate && navigator.vibrate([100, 50, 100]);
             } catch (e) { /* ignore */ }
 
-            // Extract student ID from QR data
-            const alumnoId = extractAlumnoIdFromQR(qrData);
+            // Extract student code from QR data
+            const codigoAlumno = extractCodigoAlumnoFromQR(qrData);
 
-            if (alumnoId) {
+            if (codigoAlumno) {
                 // Stop scanning and process attendance
                 stopScanning();
-                processAttendanceWithId(alumnoId);
+                processAttendanceWithCodigo(codigoAlumno);
             } else {
                 // QR format not recognized
                 setTimeout(() => {
@@ -1181,31 +1183,31 @@
             }
         }
 
-        function extractAlumnoIdFromQR(qrData) {
+        function extractCodigoAlumnoFromQR(qrData) {
             try {
-                // Try different QR formats that might contain student ID
+                // Try different QR formats that might contain student code
 
-                // Format 1: Direct number (simple ID)
-                if (/^\d+$/.test(qrData)) {
-                    return parseInt(qrData);
+                // Format 1: Direct code (EST000001)
+                if (/^EST\d{6}$/.test(qrData)) {
+                    return qrData;
                 }
 
-                // Format 2: JSON format like {"alumnoId": 123, ...}
+                // Format 2: JSON format like {"studentCode": "EST000001", "studentId": 123, ...}
                 if (qrData.startsWith('{')) {
                     const data = JSON.parse(qrData);
-                    return data.alumnoId || data.id || data.studentId;
+                    return data.studentCode || data.codigo || data.code;
                 }
 
-                // Format 3: URL format like "student/123" or "alumno/123"
-                const urlMatch = qrData.match(/(?:student|alumno)\/(\d+)/i);
+                // Format 3: URL format like "student/EST000001" or "alumno/EST000001"
+                const urlMatch = qrData.match(/(?:student|alumno)\/(EST\d{6})/i);
                 if (urlMatch) {
-                    return parseInt(urlMatch[1]);
+                    return urlMatch[1];
                 }
 
-                // Format 4: Key-value format like "ID:123" or "ALUMNO:123"
-                const kvMatch = qrData.match(/(?:ID|ALUMNO|STUDENT):(\d+)/i);
+                // Format 4: Key-value format like "CODE:EST000001" or "ALUMNO:EST000001"
+                const kvMatch = qrData.match(/(?:CODE|CODIGO|ALUMNO|STUDENT):(EST\d{6})/i);
                 if (kvMatch) {
-                    return parseInt(kvMatch[1]);
+                    return kvMatch[1];
                 }
 
                 console.log('QR format not recognized:', qrData);
@@ -1250,34 +1252,40 @@
             stopScanning();
         }
 
-        async function processAttendanceWithId(alumnoId) {
+        async function processAttendanceWithCodigo(codigoAlumno) {
             if (isSubmitting) return;
 
-            console.log('Processing attendance for student ID:', alumnoId);
+            console.log('Processing attendance for student code:', codigoAlumno);
 
             // Update UI to show processing
-            document.getElementById('alumnoId').value = alumnoId;
-            showMessage(`🔍 Procesando asistencia para estudiante #${alumnoId}...`, 'success');
+            document.getElementById('codigoAlumno').value = codigoAlumno;
+            showMessage(`🔍 Procesando asistencia para estudiante ${codigoAlumno}...`, 'success');
 
             // Submit attendance automatically
-            await submitAttendance(alumnoId);
+            await submitAttendance(codigoAlumno);
         }
 
         // Form submission for manual input
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const alumnoId = document.getElementById('alumnoId').value;
-            if (!alumnoId) {
-                showMessage('Por favor ingresa tu ID de estudiante', 'error');
+            const codigoAlumno = document.getElementById('codigoAlumno').value.trim().toUpperCase();
+            if (!codigoAlumno) {
+                showMessage('Por favor ingresa tu código de estudiante', 'error');
                 return;
             }
 
-            await submitAttendance(parseInt(alumnoId));
+            // Validate code format
+            if (!/^EST\d{6}$/.test(codigoAlumno)) {
+                showMessage('❌ Formato de código inválido. Debe ser EST seguido de 6 dígitos (ej: EST000001)', 'error');
+                return;
+            }
+
+            await submitAttendance(codigoAlumno);
         });
 
         // Unified attendance submission function
-        async function submitAttendance(alumnoId) {
+        async function submitAttendance(codigoAlumno) {
             if (isSubmitting) return;
 
             isSubmitting = true;
@@ -1285,15 +1293,15 @@
             loadingBtn.classList.remove('hidden');
 
             try {
-                console.log('Enviando registro:', { alumnoId, claseId, nonce: currentNonce });
+                console.log('Enviando registro:', { codigoAlumno, claseId, nonce: currentNonce });
 
-                const response = await fetch('/api/asistencias/alumno-scan', {
+                const response = await fetch('/api/asistencias/alumno-scan-codigo', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        alumnoId: alumnoId,
+                        codigoAlumno: codigoAlumno,
                         claseId: claseId,
                         nonce: currentNonce
                     })
@@ -1359,12 +1367,41 @@
         // Auto-focus on student ID input on desktop only
         if (window.innerWidth >= 768) {
             setTimeout(() => {
-                document.getElementById('alumnoId').focus();
+                document.getElementById('codigoAlumno').focus();
             }, 500);
         }
 
+        // Add real-time validation for student code input
+        const codigoInput = document.getElementById('codigoAlumno');
+        if (codigoInput) {
+            codigoInput.addEventListener('input', function(e) {
+                const value = e.target.value.toUpperCase();
+                e.target.value = value; // Force uppercase
+
+                // Remove invalid characters (keep only letters and numbers)
+                const cleanValue = value.replace(/[^A-Z0-9]/g, '');
+                if (cleanValue !== value) {
+                    e.target.value = cleanValue;
+                }
+
+                // Validate format and provide visual feedback
+                const isValid = /^EST\d{6}$/.test(cleanValue);
+                const isPartiallyValid = /^(E|ES|EST|EST\d{1,5})$/.test(cleanValue);
+
+                if (cleanValue.length === 0) {
+                    e.target.style.borderColor = '#e5e7eb'; // Default
+                } else if (isValid) {
+                    e.target.style.borderColor = '#10b981'; // Green for valid
+                } else if (isPartiallyValid) {
+                    e.target.style.borderColor = '#f59e0b'; // Orange for in-progress
+                } else {
+                    e.target.style.borderColor = '#ef4444'; // Red for invalid
+                }
+            });
+        }
+
         // Log inicial
-        console.log('📱 QuantumAttend - Página de registro cargada');
+        console.log('📱 Registro Asistencia por QR - Página de registro cargada');
         console.log('Clase:', claseId, 'Sesión:', currentNonce);
         
         // Show initial instructions with enhanced messaging

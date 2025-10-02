@@ -1,4 +1,4 @@
-# 🚀 QuantumAttend - Sistema de Registro de Asistencia Avanzado
+# 🚀 Registro Asistencia por QR - Sistema de Registro de Asistencia Avanzado
 
 Aplicación web ASP.NET Core de última generación para el registro de asistencia de estudiantes mediante códigos QR inteligentes con UI ultra-moderna.
 

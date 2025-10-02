@@ -8,7 +8,7 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        ViewData["Title"] = "Bienvenido a QuantumAttend";
+        ViewData["Title"] = "Bienvenido a Registro Asistencia por QR";
         ViewData["Subtitle"] = "Sistema inteligente de registro de asistencia con tecnología QR";
         return View();
     }
@@ -97,7 +97,7 @@ public class HomeController : Controller
     public IActionResult Help()
     {
         ViewData["Title"] = "Ayuda e Instrucciones";
-        ViewData["Subtitle"] = "Guía completa para usar QuantumAttend eficientemente";
+        ViewData["Subtitle"] = "Guía completa para usar Registro Asistencia por QR eficientemente";
         return View();
     }
 }

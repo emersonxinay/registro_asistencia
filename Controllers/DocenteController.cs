@@ -132,9 +132,45 @@ public class DocenteController : Controller
             _context.DocenteCursos.Add(docenteCurso);
             await _context.SaveChangesAsync();
 
+            // Crear los ramos del curso si hay alguno
+            if (model.Ramos != null && model.Ramos.Count > 0)
+            {
+                foreach (var ramoModel in model.Ramos)
+                {
+                    // Verificar que el código del ramo no exista
+                    var existeCodigoRamo = await _context.Ramos.AnyAsync(r => r.Codigo == ramoModel.Codigo);
+                    if (existeCodigoRamo)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError($"Ramos[{model.Ramos.IndexOf(ramoModel)}].Codigo",
+                            $"Ya existe un ramo con el código '{ramoModel.Codigo}'");
+                        return View(model);
+                    }
+
+                    var ramo = new Ramo
+                    {
+                        Nombre = ramoModel.Nombre,
+                        Codigo = ramoModel.Codigo,
+                        Descripcion = ramoModel.Descripcion,
+                        CursoId = curso.Id,
+                        Activo = true,
+                        FechaCreacion = DateTime.UtcNow
+                    };
+
+                    _context.Ramos.Add(ramo);
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
             await transaction.CommitAsync();
 
-            TempData["SuccessMessage"] = $"Curso '{curso.Nombre}' creado exitosamente";
+            var ramoCount = model.Ramos?.Count ?? 0;
+            var successMessage = ramoCount > 0
+                ? $"Curso '{curso.Nombre}' creado exitosamente con {ramoCount} ramo(s)"
+                : $"Curso '{curso.Nombre}' creado exitosamente";
+
+            TempData["SuccessMessage"] = successMessage;
             return RedirectToAction("DetalleCurso", new { id = curso.Id });
         }
         catch (Exception ex)
@@ -1096,6 +1132,21 @@ public class CursoCreateViewModel
 
     [StringLength(500, ErrorMessage = "La descripción no puede exceder 500 caracteres")]
     public string? Descripcion { get; set; }
+
+    // Configuración académica
+    public string? Nivel { get; set; }
+
+    [Range(1, 20, ErrorMessage = "Los créditos deben estar entre 1 y 20")]
+    public int? Creditos { get; set; }
+
+    [Range(1, 40, ErrorMessage = "Las horas semanales deben estar entre 1 y 40")]
+    public int? HorasSemanales { get; set; }
+
+    [Range(5, 200, ErrorMessage = "La capacidad máxima debe estar entre 5 y 200")]
+    public int? CapacidadMaxima { get; set; }
+
+    // Ramos del curso
+    public List<RamoCreateViewModel> Ramos { get; set; } = new();
 }
 
 public class RamoCreateViewModel
@@ -1110,6 +1161,9 @@ public class RamoCreateViewModel
 
     [StringLength(500, ErrorMessage = "La descripción no puede exceder 500 caracteres")]
     public string? Descripcion { get; set; }
+
+    [Range(1, 20, ErrorMessage = "Las horas semanales deben estar entre 1 y 20")]
+    public int? HorasSemanales { get; set; }
 }
 
 public class ClaseActivaViewModel

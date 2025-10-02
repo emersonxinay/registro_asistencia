@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - QuantumAttend</title>
+    <title>@ViewData["Title"] - Registro Asistencia por QR</title>
     
     <!-- Preload fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,6 +17,7 @@
     <!-- Styles -->
     <link href="~/css/styles.css" rel="stylesheet" />
     <link href="~/css/modern-ui.css" rel="stylesheet" />
+    <link href="~/css/responsive-nav.css" rel="stylesheet" />
     
     <!-- Meta tags -->
     <meta name="theme-color" content="#0ea5e9">
@@ -35,178 +36,327 @@
         <div class="quantum-mesh"></div>
     </div>
     
-    <!-- Modern Navigation -->
-    <nav class="modern-nav">
-        <div class="nav-container">
-            <!-- Brand -->
-            <div class="nav-brand">
-                <div class="brand-logo">
-                    <i data-lucide="graduation-cap"></i>
-                </div>
-                <div class="brand-text">
-                    <span class="brand-name">QuantumAttend</span>
-                    <span class="brand-tagline">Sistema de Asistencia</span>
-                </div>
-            </div>
-
+    <!-- Navbar Refactorizado - Verdaderamente Responsive -->
+    <header class="main-header" id="mainHeader">
+        <div class="header-container">
             @if (User.Identity?.IsAuthenticated == true)
             {
-                <!-- Main Navigation -->
-                <div class="nav-main">
-                    <!-- Dashboard -->
-                    <a href="/docente/dashboard" class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Docente" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")" data-tooltip="Dashboard">
-                        <i data-lucide="home"></i>
-                        <span>Dashboard</span>
+                <!-- Brand -->
+                <div class="header-brand">
+                    <a href="/" class="brand-link">
+                        <i data-lucide="graduation-cap" class="brand-icon"></i>
+                        <span class="brand-text">Registro QR</span>
                     </a>
+                </div>
 
-                    <!-- Crear Clase (Acción Principal) -->
-                    <a href="/workflow/cursos" class="nav-item primary @(ViewContext.RouteData.Values["controller"]?.ToString() == "Workflow" ? "active" : "")" data-tooltip="Crear Nueva Clase">
-                        <i data-lucide="plus"></i>
-                        <span>Nueva Clase</span>
-                    </a>
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <div class="nav-group nav-primary">
+                        <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+                            <i data-lucide="home"></i>
+                            <span>Dashboard</span>
+                        </a>
 
-                    <!-- Dropdown: Gestión -->
-                    <div class="nav-dropdown">
-                        <button class="nav-item dropdown-toggle" data-tooltip="Gestionar">
-                            <i data-lucide="folder"></i>
-                            <span>Gestión</span>
-                            <i data-lucide="chevron-down" class="dropdown-arrow"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a href="/workflow/mis-clases" class="dropdown-item">
-                                <i data-lucide="calendar-days"></i>
-                                <span>Mis Clases</span>
-                                <small>Ver todas las clases</small>
-                            </a>
-                            <a href="/docente/cursos" class="dropdown-item">
-                                <i data-lucide="book-open"></i>
-                                <span>Mis Cursos</span>
-                                <small>Gestionar cursos</small>
-                            </a>
-                            <a href="/asistencias" class="dropdown-item">
-                                <i data-lucide="users-check"></i>
-                                <span>Asistencias</span>
-                                <small>Ver reportes</small>
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="/workflow/qr-students" class="dropdown-item">
-                                <i data-lucide="smartphone"></i>
-                                <span>QR Estudiantes</span>
-                                <small>Códigos para imprimir</small>
-                            </a>
+                        <!-- Dropdown Clases -->
+                        <div class="nav-dropdown">
+                            <div class="nav-dropdown-toggle">
+                                <i data-lucide="graduation-cap"></i>
+                                <span>Clases</span>
+                            </div>
+                            <div class="nav-dropdown-menu">
+                                <a href="/workflow/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="plus-circle"></i>
+                                    <span>Nueva Clase</span>
+                                </a>
+                                <a href="/workflow/mis-clases" class="nav-dropdown-item">
+                                    <i data-lucide="calendar-days"></i>
+                                    <span>Mis Clases</span>
+                                </a>
+                                <a href="/docente/scanner" class="nav-dropdown-item">
+                                    <i data-lucide="qr-code"></i>
+                                    <span>Escáner QR</span>
+                                </a>
+                                <div class="nav-dropdown-divider"></div>
+                                <a href="/workflow/qr-students" class="nav-dropdown-item">
+                                    <i data-lucide="smartphone"></i>
+                                    <span>QR Estudiantes</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Gestión -->
+                        <div class="nav-dropdown">
+                            <div class="nav-dropdown-toggle">
+                                <i data-lucide="folder"></i>
+                                <span>Gestión</span>
+                            </div>
+                            <div class="nav-dropdown-menu">
+                                <a href="/docente/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="book-open"></i>
+                                    <span>Mis Cursos</span>
+                                </a>
+                                <a href="/alumnos" class="nav-dropdown-item">
+                                    <i data-lucide="users"></i>
+                                    <span>Lista de Alumnos</span>
+                                </a>
+                                <a href="/asistencias" class="nav-dropdown-item">
+                                    <i data-lucide="users-check"></i>
+                                    <span>Asistencias</span>
+                                </a>
+                                <div class="nav-dropdown-divider"></div>
+                                <a href="/ramos" class="nav-dropdown-item">
+                                    <i data-lucide="library"></i>
+                                    <span>Ramos</span>
+                                </a>
+                                <a href="/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="school"></i>
+                                    <span>Cursos</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Escáner QR -->
-                    <a href="/docente/scanner" class="nav-item scanner @(ViewContext.RouteData.Values["action"]?.ToString() == "Scanner" ? "active" : "")" data-tooltip="Escáner QR">
-                        <i data-lucide="qr-code"></i>
-                        <span>Escáner</span>
-                    </a>
-                </div>
+                    <div class="nav-group nav-secondary">
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <div class="nav-dropdown">
+                                <div class="nav-dropdown-toggle admin">
+                                    <i data-lucide="shield-check"></i>
+                                    <span>Admin</span>
+                                </div>
+                                <div class="nav-dropdown-menu">
+                                    <a href="/dashboard" class="nav-dropdown-item">
+                                        <i data-lucide="layout-dashboard"></i>
+                                        <span>Panel Admin</span>
+                                    </a>
+                                    <a href="/usuarios" class="nav-dropdown-item">
+                                        <i data-lucide="user-cog"></i>
+                                        <span>Gestión Usuarios</span>
+                                    </a>
+                                    <div class="nav-dropdown-divider"></div>
+                                    <a href="/swagger" target="_blank" class="nav-dropdown-item">
+                                        <i data-lucide="code"></i>
+                                        <span>API Docs</span>
+                                    </a>
+                                </div>
+                            </div>
+                        }
 
-                <!-- User Actions -->
-                <div class="nav-user">
-                    @if (User.IsInRole("Administrador"))
-                    {
-                        <a href="/dashboard" class="nav-item admin" data-tooltip="Panel Admin">
-                            <i data-lucide="shield-check"></i>
-                            <span>Admin</span>
+                        <a href="/ayuda" class="nav-item">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ayuda</span>
                         </a>
+                    </div>
+                </nav>
+
+                <!-- User Info & Actions -->
+                <div class="header-actions">
+                    @{
+                        var userInitials = "";
+                        if (!string.IsNullOrEmpty(User.Identity.Name))
+                        {
+                            var names = User.Identity.Name.Split(' ');
+                            userInitials = names.Length >= 2 ?
+                                $"{names[0][0]}{names[1][0]}" :
+                                names[0].Substring(0, Math.Min(2, names[0].Length));
+                        }
                     }
 
-                    <!-- User Menu -->
-                    <div class="nav-dropdown user-dropdown">
-                        <button class="nav-item user-trigger">
-                            <div class="user-avatar">
-                                <i data-lucide="user"></i>
-                            </div>
+                    <!-- Desktop User Info Simple -->
+                    <div class="desktop-user-info">
+                        <div class="user-avatar">
+                            <span>@userInitials.ToUpper()</span>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-role @(User.IsInRole("Administrador") ? "admin" : "docente")">
+                                @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
+                            </span>
                             <span class="user-name">@User.Identity.Name</span>
-                            <i data-lucide="chevron-down" class="dropdown-arrow"></i>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Logout Button -->
+                    <form method="post" action="/logout" id="desktopLogoutForm" class="desktop-logout">
+                        @Html.AntiForgeryToken()
+                        <button type="button" class="desktop-logout-btn" onclick="confirmLogout('desktop')" title="Cerrar Sesión">
+                            <i data-lucide="log-out"></i>
+                            <span class="logout-text">Cerrar Sesión</span>
                         </button>
-                        <div class="dropdown-menu user-menu">
-                            <div class="user-info">
-                                <div class="user-avatar-large">
-                                    <i data-lucide="user"></i>
-                                </div>
-                                <div class="user-details">
-                                    <span class="user-name">@User.Identity.Name</span>
-                                    <span class="user-role">Docente</span>
-                                </div>
+                    </form>
+
+                    <!-- Mobile Menu Button -->
+                    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
+                        <span class="burger-line"></span>
+                        <span class="burger-line"></span>
+                        <span class="burger-line"></span>
+                    </button>
+                </div>
+
+                <!-- Mobile Navigation -->
+                <nav class="mobile-nav" id="mobileNav">
+                    <div class="mobile-nav-content">
+                        <!-- User Profile -->
+                        <div class="mobile-user-profile">
+                            <div class="user-avatar">
+                                <span>@userInitials.ToUpper()</span>
                             </div>
-                            <div class="dropdown-divider"></div>
-                            <a href="/perfil" class="dropdown-item">
+                            <div class="user-details">
+                                <h3>@User.Identity.Name</h3>
+                                <p>@(User.IsInRole("Administrador") ? "Administrador" : "Docente")</p>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Menu Items -->
+                        <div class="mobile-menu-section">
+                            <h4>Principal</h4>
+                            <a href="/dashboard" class="mobile-nav-item">
+                                <i data-lucide="home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/workflow/cursos" class="mobile-nav-item featured">
+                                <i data-lucide="plus-circle"></i>
+                                <span>Nueva Clase</span>
+                            </a>
+                            <a href="/docente/scanner" class="mobile-nav-item scanner">
+                                <i data-lucide="qr-code"></i>
+                                <span>Escáner QR</span>
+                            </a>
+                        </div>
+
+                        <div class="mobile-menu-section">
+                            <h4>Gestión</h4>
+                            <a href="/workflow/mis-clases" class="mobile-nav-item">
+                                <i data-lucide="calendar-days"></i>
+                                <span>Mis Clases</span>
+                            </a>
+                            <a href="/docente/cursos" class="mobile-nav-item">
+                                <i data-lucide="book-open"></i>
+                                <span>Mis Cursos</span>
+                            </a>
+                            <a href="/asistencias" class="mobile-nav-item">
+                                <i data-lucide="users-check"></i>
+                                <span>Asistencias</span>
+                            </a>
+                            <a href="/workflow/qr-students" class="mobile-nav-item">
+                                <i data-lucide="smartphone"></i>
+                                <span>QR Estudiantes</span>
+                            </a>
+                        </div>
+
+                        @if (User.IsInRole("Administrador"))
+                        {
+                            <div class="mobile-menu-section">
+                                <h4>Administración</h4>
+                                <a href="/dashboard" class="mobile-nav-item admin">
+                                    <i data-lucide="shield-check"></i>
+                                    <span>Panel Admin</span>
+                                </a>
+                            </div>
+                        }
+
+                        <div class="mobile-menu-section">
+                            <h4>Mi Cuenta</h4>
+                            <a href="/perfil" class="mobile-nav-item">
                                 <i data-lucide="settings"></i>
                                 <span>Mi Perfil</span>
                             </a>
-                            <a href="/ayuda" class="dropdown-item">
+                            <a href="/ayuda" class="mobile-nav-item">
                                 <i data-lucide="help-circle"></i>
                                 <span>Ayuda</span>
                             </a>
-                            <div class="dropdown-divider"></div>
-                            <form method="post" action="/logout">
+                            <form method="post" action="/logout" id="mobileLogoutForm">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="dropdown-item logout">
+                                <button type="button" class="mobile-nav-item logout" onclick="confirmLogout('mobile')">
                                     <i data-lucide="log-out"></i>
                                     <span>Cerrar Sesión</span>
                                 </button>
                             </form>
                         </div>
                     </div>
-                </div>
+                </nav>
+
+                <!-- Mobile Overlay -->
+                <div class="mobile-overlay" id="mobileOverlay"></div>
             }
             else
             {
-                <!-- Guest Navigation -->
-                <div class="nav-guest">
-                    <a href="/login" class="nav-item">
-                        <i data-lucide="log-in"></i>
-                        <span>Iniciar Sesión</span>
+                <!-- Guest Header -->
+                <div class="header-brand">
+                    <a href="/" class="brand-link">
+                        <i data-lucide="graduation-cap" class="brand-icon"></i>
+                        <span class="brand-text">Registro QR</span>
                     </a>
-                    <a href="/register" class="nav-item">
+                </div>
+
+                <div class="header-actions">
+                    <a href="/login" class="btn btn-outline">
+                        <i data-lucide="log-in"></i>
+                        <span>Ingresar</span>
+                    </a>
+                    <a href="/register" class="btn btn-primary">
                         <i data-lucide="user-plus"></i>
-                        <span>Registrarse</span>
+                        <span class="hide-mobile">Registrarse</span>
                     </a>
                 </div>
             }
-
-            <!-- Mobile Menu Toggle -->
-            <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                <i data-lucide="menu"></i>
-            </button>
         </div>
-    </nav>
+    </header>
 
     <!-- Main Content -->
     <main class="modern-main">
         @RenderBody()
     </main>
 
-    <!-- Footer -->
-    <footer class="modern-footer">
+    <!-- Footer Refactorizado -->
+    <footer class="main-footer">
         <div class="footer-container">
             <div class="footer-content">
+                <!-- Footer Brand -->
                 <div class="footer-brand">
-                    <div class="brand-logo">
+                    <div class="footer-logo">
                         <i data-lucide="graduation-cap"></i>
+                        <span>Registro QR</span>
                     </div>
-                    <div class="footer-text">
-                        <h4>QuantumAttend</h4>
-                        <p>Sistema de Asistencia Inteligente</p>
-                    </div>
+                    <p class="footer-description">Sistema de Asistencia Inteligente</p>
                 </div>
-                <div class="footer-links">
-                    <a href="/ayuda" class="footer-link">
-                        <i data-lucide="help-circle"></i>
-                        <span>Ayuda</span>
-                    </a>
-                    <a href="/swagger" target="_blank" class="footer-link">
-                        <i data-lucide="code"></i>
-                        API Docs
-                    </a>
-                    <a href="/ayuda" class="footer-link">
-                        <i data-lucide="help-circle"></i>
-                        Ayuda
-                    </a>
+
+                <!-- Footer Navigation -->
+                <div class="footer-nav">
+                    <div class="footer-section">
+                        <h5>Sistema</h5>
+                        <a href="/ayuda" class="footer-link">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ayuda</span>
+                        </a>
+                        <a href="/swagger" target="_blank" class="footer-link">
+                            <i data-lucide="code"></i>
+                            <span>API Docs</span>
+                        </a>
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="footer-section">
+                            <h5>Accesos Rápidos</h5>
+                            <a href="/dashboard" class="footer-link">
+                                <i data-lucide="home"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/docente/scanner" class="footer-link">
+                                <i data-lucide="qr-code"></i>
+                                <span>Escáner QR</span>
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <!-- Footer Bottom -->
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Sistema de Registro QR. Todos los derechos reservados.</p>
+                    <div class="footer-meta">
+                        <span class="version">v2.0</span>
+                        <span class="build">Build @DateTime.Now.ToString("yyyyMMdd")</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,16 +390,156 @@
 
         // Modern Navigation functionality
         function initializeModernNavigation() {
-            // Initialize dropdowns
+            // Initialize responsive navigation
+            initializeResponsiveNavigation();
+
+            // Initialize dropdowns (legacy support)
             initializeDropdowns();
 
-            // Initialize mobile menu
+            // Initialize mobile menu (legacy support)
             initializeMobileMenu();
 
             // Update connection status
             updateConnectionStatus();
 
             console.log('✅ Modern navigation initialized');
+        }
+
+        // Nueva Navegación Refactorizada
+        function initializeResponsiveNavigation() {
+            const header = document.getElementById('mainHeader');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const mobileOverlay = document.getElementById('mobileOverlay');
+
+            if (!header || !mobileMenuBtn || !mobileNav) {
+                console.log('❌ Elementos de navegación refactorizada no encontrados');
+                return;
+            }
+
+            console.log('🔍 Inicializando navegación refactorizada...');
+
+            // Toggle navigation - FUNCIÓN PRINCIPAL
+            mobileMenuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🍔 Mobile menu button clickeado');
+
+                const isOpen = document.body.classList.contains('mobile-nav-open');
+
+                if (isOpen) {
+                    closeMobileNavigation();
+                } else {
+                    openMobileNavigation();
+                }
+            });
+
+            // Close navigation when clicking overlay
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', function() {
+                    console.log('🔘 Mobile overlay clickeado - cerrando menú');
+                    closeMobileNavigation();
+                });
+            }
+
+            // Close navigation when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!header.contains(e.target) &&
+                    !mobileNav.contains(e.target) &&
+                    document.body.classList.contains('mobile-nav-open')) {
+                    console.log('🌐 Click fuera del menú móvil - cerrando');
+                    closeMobileNavigation();
+                }
+            });
+
+            // Close navigation on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+                    console.log('⌨️ Escape presionado - cerrando menú móvil');
+                    closeMobileNavigation();
+                }
+            });
+
+            // Close navigation on window resize to desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024 && document.body.classList.contains('mobile-nav-open')) {
+                    console.log('📱➡️💻 Resize a desktop - cerrando menú móvil');
+                    closeMobileNavigation();
+                }
+            });
+
+            // Handle mobile navigation link clicks
+            const mobileNavItems = mobileNav.querySelectorAll('.mobile-nav-item');
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Close navigation on mobile when clicking a link
+                    if (window.innerWidth < 1024) {
+                        console.log('🔗 Mobile nav item clickeado - cerrando menú');
+                        setTimeout(closeMobileNavigation, 150);
+                    }
+                });
+            });
+
+            function openMobileNavigation() {
+                console.log('📂 Abriendo navegación móvil');
+                document.body.classList.add('mobile-nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'true');
+                mobileNav.setAttribute('aria-hidden', 'false');
+
+                // Prevent body scroll
+                document.body.style.overflow = 'hidden';
+
+                // Focus trap
+                const firstFocusable = mobileNav.querySelector('a, button');
+                if (firstFocusable) {
+                    setTimeout(() => firstFocusable.focus(), 100);
+                }
+            }
+
+            function closeMobileNavigation() {
+                console.log('📁 Cerrando navegación móvil');
+                document.body.classList.remove('mobile-nav-open');
+                mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                mobileNav.setAttribute('aria-hidden', 'true');
+
+                // Restore body scroll
+                document.body.style.overflow = '';
+
+                // Return focus to button
+                mobileMenuBtn.focus();
+            }
+
+            console.log('✅ Navegación refactorizada inicializada correctamente');
+        }
+
+        // Logout confirmation - Refactorizado
+        function confirmLogout(source = 'desktop') {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                const formId = source === 'mobile' ? 'mobileLogoutForm' : 'logoutForm';
+                const form = document.getElementById(formId);
+
+                if (form) {
+                    form.submit();
+                } else {
+                    // Fallback - crear form dinámico
+                    const dynamicForm = document.createElement('form');
+                    dynamicForm.method = 'post';
+                    dynamicForm.action = '/logout';
+
+                    // Add antiforgery token if available
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                    if (token) {
+                        const tokenInput = document.createElement('input');
+                        tokenInput.type = 'hidden';
+                        tokenInput.name = '__RequestVerificationToken';
+                        tokenInput.value = token.value;
+                        dynamicForm.appendChild(tokenInput);
+                    }
+
+                    document.body.appendChild(dynamicForm);
+                    dynamicForm.submit();
+                }
+            }
         }
 
         // Dropdown functionality

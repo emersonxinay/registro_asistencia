@@ -422,50 +422,21 @@ public class AttendanceController : ControllerBase
                 return BadRequest(new { message = "La clase no está activa" });
             }
 
-            // Parsear el QR del estudiante - soportar múltiples formatos
-            QrStudentPayload? qrData = null;
+            // Extraer código de estudiante del QR (misma lógica que funciona en ruta de estudiantes)
+            string? codigoAlumno = ExtractCodigoAlumnoFromQR(request.QrData);
 
-            // Intentar deserializar como JSON
-            try
+            if (string.IsNullOrEmpty(codigoAlumno))
             {
-                qrData = System.Text.Json.JsonSerializer.Deserialize<QrStudentPayload>(request.QrData);
-            }
-            catch
-            {
-                // Si falla el JSON, intentar como formato simple "STUDENT:ID:CODIGO"
-                try
-                {
-                    var parts = request.QrData.Split(':');
-                    if (parts.Length >= 3 && parts[0] == "STUDENT")
-                    {
-                        qrData = new QrStudentPayload
-                        {
-                            type = "student",
-                            studentId = int.Parse(parts[1]),
-                            studentCode = parts[2],
-                            timestamp = DateTime.UtcNow.ToString("O"),
-                            version = "1.0"
-                        };
-                    }
-                }
-                catch
-                {
-                    return BadRequest(new { message = "QR de estudiante inválido - formato no reconocido" });
-                }
+                return BadRequest(new { message = "QR de estudiante inválido - no se pudo extraer código" });
             }
 
-            if (qrData == null || qrData.type != "student")
-            {
-                return BadRequest(new { message = "QR no es de un estudiante válido" });
-            }
-
-            // Verificar que el estudiante existe
+            // Verificar que el estudiante existe por código
             var alumno = await _context.Alumnos
-                .FirstOrDefaultAsync(a => a.Id == qrData.studentId && a.Codigo == qrData.studentCode);
+                .FirstOrDefaultAsync(a => a.Codigo == codigoAlumno);
 
             if (alumno == null)
             {
-                return BadRequest(new { message = $"Estudiante no encontrado: {qrData.studentCode}" });
+                return BadRequest(new { message = $"Estudiante no encontrado: {codigoAlumno}" });
             }
 
             // Verificar que no haya asistencia previa
@@ -663,6 +634,70 @@ public class AttendanceController : ControllerBase
             Pendientes = pendientes,
             PorcentajeAsistencia = totalEstudiantes > 0 ? Math.Round((double)(presentes + tardanzas + excusados) / totalEstudiantes * 100, 1) : 0
         };
+    }
+
+    private static string? ExtractCodigoAlumnoFromQR(string qrData)
+    {
+        try
+        {
+            // Formato 1: Código directo (EST000001)
+            if (System.Text.RegularExpressions.Regex.IsMatch(qrData, @"^EST\d{6}$"))
+            {
+                return qrData;
+            }
+
+            // Formato 2: JSON format - soportar AMBOS formatos de QR de estudiantes
+            if (qrData.StartsWith('{'))
+            {
+                using var document = System.Text.Json.JsonDocument.Parse(qrData);
+                var root = document.RootElement;
+
+                // FORMATO NUEVO (persistente en BD): {"type":"student", "alumnoId":123, "codigo":"EST000001", "nombre":"...", "generated":"..."}
+                if (root.TryGetProperty("codigo", out var codigoElement))
+                    return codigoElement.GetString();
+
+                // FORMATO ANTERIOR (temporal/API): {"type":"student", "studentId":123, "studentCode":"EST000001", "timestamp":"...", "version":"1.0"}
+                if (root.TryGetProperty("studentCode", out var studentCodeElement))
+                    return studentCodeElement.GetString();
+
+                // Otras alternativas comunes
+                if (root.TryGetProperty("code", out var codeElement))
+                    return codeElement.GetString();
+                if (root.TryGetProperty("alumno_codigo", out var alumnoCodigoElement))
+                    return alumnoCodigoElement.GetString();
+                if (root.TryGetProperty("student_code", out var studentCode2Element))
+                    return studentCode2Element.GetString();
+            }
+
+            // Formato 3: URL format como "student/EST000001" o "alumno/EST000001"
+            var urlMatch = System.Text.RegularExpressions.Regex.Match(qrData, @"(?:student|alumno)/(EST\d{6})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (urlMatch.Success)
+            {
+                return urlMatch.Groups[1].Value;
+            }
+
+            // Formato 4: Key-value format como "CODE:EST000001" o "ALUMNO:EST000001"
+            var kvMatch = System.Text.RegularExpressions.Regex.Match(qrData, @"(?:CODE|CODIGO|ALUMNO|STUDENT):(EST\d{6})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (kvMatch.Success)
+            {
+                return kvMatch.Groups[1].Value;
+            }
+
+            // Formato 5: Líneas múltiples o texto con código embebido
+            var embeddedMatch = System.Text.RegularExpressions.Regex.Match(qrData, @"(EST\d{6})", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (embeddedMatch.Success)
+            {
+                return embeddedMatch.Groups[1].Value.ToUpper();
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // Log para debug si es necesario
+            System.Diagnostics.Debug.WriteLine($"Error parsing QR: {ex.Message}, QR Data: {qrData}");
+            return null;
+        }
     }
 }
 

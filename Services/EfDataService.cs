@@ -22,9 +22,13 @@ public class EfDataService : IDataService
 
     public async Task<Alumno> CreateAlumnoAsync(AlumnoCreateDto dto)
     {
+        // Generar código automático si no se proporciona uno
+        string codigo = string.IsNullOrWhiteSpace(dto.Codigo) ?
+            await GenerarCodigoAutomaticoAsync() : dto.Codigo;
+
         var alumno = new Alumno
         {
-            Codigo = dto.Codigo,
+            Codigo = codigo,
             Nombre = dto.Nombre,
             QrAlumnoBase64 = ""
         };
@@ -50,6 +54,11 @@ public class EfDataService : IDataService
     public async Task<Alumno?> GetAlumnoAsync(int id)
     {
         return await _context.Alumnos.FindAsync(id);
+    }
+
+    public async Task<Alumno?> GetAlumnoByCodigoAsync(string codigo)
+    {
+        return await _context.Alumnos.FirstOrDefaultAsync(a => a.Codigo == codigo);
     }
 
     public async Task<IEnumerable<Alumno>> GetAlumnosAsync()
@@ -647,5 +656,73 @@ public class EfDataService : IDataService
             .CountAsync();
 
         return cursosActuales < 2;
+    }
+
+    /// <summary>
+    /// Genera código automático con formato EST######
+    /// </summary>
+    private async Task<string> GenerarCodigoAutomaticoAsync()
+    {
+        try
+        {
+            // Buscar el último código generado con formato EST######
+            var ultimoCodigo = await _context.Alumnos
+                .Where(a => a.Codigo.StartsWith("EST") && a.Codigo.Length == 9)
+                .OrderByDescending(a => a.Codigo)
+                .Select(a => a.Codigo)
+                .FirstOrDefaultAsync();
+
+            int siguienteNumero = 1;
+
+            if (ultimoCodigo != null)
+            {
+                // Extraer el número del código (últimos 6 caracteres)
+                var numeroStr = ultimoCodigo.Substring(3); // Quitar "EST"
+                if (int.TryParse(numeroStr, out int numeroActual))
+                {
+                    siguienteNumero = numeroActual + 1;
+                }
+            }
+
+            // Formatear con 6 dígitos: EST000001, EST000002, etc.
+            string nuevoCodigo = $"EST{siguienteNumero:D6}";
+
+            // Verificar que no exista (por seguridad)
+            var existe = await _context.Alumnos.AnyAsync(a => a.Codigo == nuevoCodigo);
+            if (existe)
+            {
+                // Si por alguna razón existe, buscar el siguiente disponible
+                return await BuscarSiguienteCodigoDisponibleAsync(siguienteNumero);
+            }
+
+            _logger.LogInformation("Código automático generado: {Codigo}", nuevoCodigo);
+            return nuevoCodigo;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generando código automático");
+            // Fallback: usar timestamp para evitar duplicados
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return $"EST{timestamp.ToString()[^6..]}"; // Últimos 6 dígitos del timestamp
+        }
+    }
+
+    /// <summary>
+    /// Busca el siguiente código disponible en caso de conflictos
+    /// </summary>
+    private async Task<string> BuscarSiguienteCodigoDisponibleAsync(int numeroInicial)
+    {
+        for (int i = numeroInicial; i <= 999999; i++)
+        {
+            string codigo = $"EST{i:D6}";
+            var existe = await _context.Alumnos.AnyAsync(a => a.Codigo == codigo);
+            if (!existe)
+            {
+                return codigo;
+            }
+        }
+
+        // Si llegamos aquí, algo está muy mal (999,999 estudiantes!)
+        throw new InvalidOperationException("No hay códigos disponibles - límite alcanzado");
     }
 }
