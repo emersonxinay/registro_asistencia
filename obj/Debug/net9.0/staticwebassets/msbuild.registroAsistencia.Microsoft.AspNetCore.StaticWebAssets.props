@@ -48,8 +48,8 @@
       <RelatedAsset></RelatedAsset>
       <AssetTraitName></AssetTraitName>
       <AssetTraitValue></AssetTraitValue>
-      <Fingerprint>2qtvanx1gt</Fingerprint>
-      <Integrity>Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=</Integrity>
+      <Fingerprint>gadrnddwcb</Fingerprint>
+      <Integrity>CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=</Integrity>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <OriginalItemSpec>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\responsive-nav.css'))</OriginalItemSpec>

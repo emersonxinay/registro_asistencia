@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Nj7gWKYDpnWYT9c7OlHfbdRvg2HNPCnu2SROHv52HDk=",
+  "Hash": "c1vFUmL8iTmjR7wBhg/afFkZqLytKuTBC9bBLQyVpZQ=",
   "Source": "registroAsistencia",
   "BasePath": "_content/registroAsistencia",
   "Mode": "Default",
@@ -101,12 +101,12 @@
       "OriginalItemSpec": "E:\\csharp\\registro_clonado\\wwwroot\\css\\clases.css"
     },
     {
-      "Identity": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-2qtvanx1gt.gz",
+      "Identity": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-gadrnddwcb.gz",
       "SourceId": "registroAsistencia",
       "SourceType": "Discovered",
       "ContentRoot": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\",
       "BasePath": "_content/registroAsistencia",
-      "RelativePath": "css/responsive-nav#[.{fingerprint=2qtvanx1gt}]?.css.gz",
+      "RelativePath": "css/responsive-nav#[.{fingerprint=gadrnddwcb}]?.css.gz",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Alternative",
@@ -115,8 +115,8 @@
       "RelatedAsset": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css",
       "AssetTraitName": "Content-Encoding",
       "AssetTraitValue": "gzip",
-      "Fingerprint": "y5ov3bzes0",
-      "Integrity": "Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs=",
+      "Fingerprint": "i1bsgzntlj",
+      "Integrity": "5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css"
@@ -178,8 +178,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "2qtvanx1gt",
-      "Integrity": "Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=",
+      "Fingerprint": "gadrnddwcb",
+      "Integrity": "CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\css\\responsive-nav.css"
@@ -825,13 +825,13 @@
       ]
     },
     {
-      "Route": "css/responsive-nav.2qtvanx1gt.css",
-      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-2qtvanx1gt.gz",
+      "Route": "css/responsive-nav.css",
+      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-gadrnddwcb.gz",
       "Selectors": [
         {
           "Name": "Content-Encoding",
           "Value": "gzip",
-          "Quality": "0.000298596596"
+          "Quality": "0.000447227191"
         }
       ],
       "ResponseHeaders": [
@@ -841,19 +841,19 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3348"
+          "Value": "2235"
         },
         {
           "Name": "ETag",
-          "Value": "\"Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs=\""
+          "Value": "\"5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
         },
         {
           "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
+          "Value": "no-cache"
         },
         {
           "Name": "Content-Encoding",
@@ -869,26 +869,18 @@
         },
         {
           "Name": "ETag",
-          "Value": "W/\"Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=\""
+          "Value": "W/\"CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=\""
         }
       ],
       "EndpointProperties": [
         {
-          "Name": "fingerprint",
-          "Value": "2qtvanx1gt"
-        },
-        {
-          "Name": "label",
-          "Value": "css/responsive-nav.css"
-        },
-        {
           "Name": "integrity",
-          "Value": "sha256-Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw="
+          "Value": "sha256-CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA="
         }
       ]
     },
     {
-      "Route": "css/responsive-nav.2qtvanx1gt.css",
+      "Route": "css/responsive-nav.css",
       "AssetFile": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -898,7 +890,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "16829"
+          "Value": "11232"
         },
         {
           "Name": "Content-Type",
@@ -906,11 +898,156 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=\""
+          "Value": "\"CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA="
+        }
+      ]
+    },
+    {
+      "Route": "css/responsive-nav.css.gz",
+      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-gadrnddwcb.gz",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2235"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8="
+        }
+      ]
+    },
+    {
+      "Route": "css/responsive-nav.gadrnddwcb.css",
+      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-gadrnddwcb.gz",
+      "Selectors": [
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip",
+          "Quality": "0.000447227191"
+        }
+      ],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2235"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Encoding",
+          "Value": "gzip"
+        },
+        {
+          "Name": "Vary",
+          "Value": "Content-Encoding"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "W/\"CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=\""
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "gadrnddwcb"
+        },
+        {
+          "Name": "label",
+          "Value": "css/responsive-nav.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA="
+        }
+      ]
+    },
+    {
+      "Route": "css/responsive-nav.gadrnddwcb.css",
+      "AssetFile": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "11232"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -920,7 +1057,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "2qtvanx1gt"
+          "Value": "gadrnddwcb"
         },
         {
           "Name": "label",
@@ -928,13 +1065,13 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw="
+          "Value": "sha256-CBfP4DZjz+Rhm3TPuJ6+kWewFwJ49QJCXFD8ZqlTruA="
         }
       ]
     },
     {
-      "Route": "css/responsive-nav.2qtvanx1gt.css.gz",
-      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-2qtvanx1gt.gz",
+      "Route": "css/responsive-nav.gadrnddwcb.css.gz",
+      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-gadrnddwcb.gz",
       "Selectors": [],
       "ResponseHeaders": [
         {
@@ -943,7 +1080,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "3348"
+          "Value": "2235"
         },
         {
           "Name": "Content-Type",
@@ -951,11 +1088,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs=\""
+          "Value": "\"5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
+          "Value": "Thu, 02 Oct 2025 12:47:11 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -973,7 +1110,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "2qtvanx1gt"
+          "Value": "gadrnddwcb"
         },
         {
           "Name": "label",
@@ -981,144 +1118,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs="
-        }
-      ]
-    },
-    {
-      "Route": "css/responsive-nav.css",
-      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-2qtvanx1gt.gz",
-      "Selectors": [
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip",
-          "Quality": "0.000298596596"
-        }
-      ],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "3348"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "W/\"Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=\""
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw="
-        }
-      ]
-    },
-    {
-      "Route": "css/responsive-nav.css",
-      "AssetFile": "E:\\csharp\\registro_clonado\\wwwroot\\css\\responsive-nav.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "16829"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-Ov5uS/Um7p1dVckJl823YqMk83DpOOH3cod6tHTehEw="
-        }
-      ]
-    },
-    {
-      "Route": "css/responsive-nav.css.gz",
-      "AssetFile": "E:\\csharp\\registro_clonado\\obj\\Debug\\net9.0\\compressed\\zm3l414izm-2qtvanx1gt.gz",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "3348"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Wed, 01 Oct 2025 21:53:14 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "no-cache"
-        },
-        {
-          "Name": "Content-Encoding",
-          "Value": "gzip"
-        },
-        {
-          "Name": "Vary",
-          "Value": "Content-Encoding"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "integrity",
-          "Value": "sha256-Fiur8zT8X8demSkHJYxXrb6LozbQuehM8PNTuPQ3NGs="
+          "Value": "sha256-5lKrhTm9ZOlre1BERK4qqH7h9jU/Rm0y578VCcuDvY8="
         }
       ]
     },

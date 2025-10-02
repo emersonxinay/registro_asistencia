@@ -56,43 +56,133 @@
                             <i data-lucide="home"></i>
                             <span>Dashboard</span>
                         </a>
-                        <a href="/workflow/cursos" class="nav-item featured">
-                            <i data-lucide="plus-circle"></i>
-                            <span>Nueva Clase</span>
-                        </a>
-                        <a href="/docente/scanner" class="nav-item scanner">
-                            <i data-lucide="qr-code"></i>
-                            <span>Escáner QR</span>
-                        </a>
+
+                        <!-- Dropdown Clases -->
+                        <div class="nav-dropdown">
+                            <div class="nav-dropdown-toggle">
+                                <i data-lucide="graduation-cap"></i>
+                                <span>Clases</span>
+                            </div>
+                            <div class="nav-dropdown-menu">
+                                <a href="/workflow/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="plus-circle"></i>
+                                    <span>Nueva Clase</span>
+                                </a>
+                                <a href="/workflow/mis-clases" class="nav-dropdown-item">
+                                    <i data-lucide="calendar-days"></i>
+                                    <span>Mis Clases</span>
+                                </a>
+                                <a href="/docente/scanner" class="nav-dropdown-item">
+                                    <i data-lucide="qr-code"></i>
+                                    <span>Escáner QR</span>
+                                </a>
+                                <div class="nav-dropdown-divider"></div>
+                                <a href="/workflow/qr-students" class="nav-dropdown-item">
+                                    <i data-lucide="smartphone"></i>
+                                    <span>QR Estudiantes</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Gestión -->
+                        <div class="nav-dropdown">
+                            <div class="nav-dropdown-toggle">
+                                <i data-lucide="folder"></i>
+                                <span>Gestión</span>
+                            </div>
+                            <div class="nav-dropdown-menu">
+                                <a href="/docente/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="book-open"></i>
+                                    <span>Mis Cursos</span>
+                                </a>
+                                <a href="/alumnos" class="nav-dropdown-item">
+                                    <i data-lucide="users"></i>
+                                    <span>Lista de Alumnos</span>
+                                </a>
+                                <a href="/asistencias" class="nav-dropdown-item">
+                                    <i data-lucide="users-check"></i>
+                                    <span>Asistencias</span>
+                                </a>
+                                <div class="nav-dropdown-divider"></div>
+                                <a href="/ramos" class="nav-dropdown-item">
+                                    <i data-lucide="library"></i>
+                                    <span>Ramos</span>
+                                </a>
+                                <a href="/cursos" class="nav-dropdown-item">
+                                    <i data-lucide="school"></i>
+                                    <span>Cursos</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="nav-group nav-secondary">
-                        <a href="/workflow/mis-clases" class="nav-item">
-                            <i data-lucide="calendar-days"></i>
-                            <span>Mis Clases</span>
-                        </a>
-                        <a href="/asistencias" class="nav-item">
-                            <i data-lucide="users-check"></i>
-                            <span>Asistencias</span>
-                        </a>
                         @if (User.IsInRole("Administrador"))
                         {
-                            <a href="/dashboard" class="nav-item admin">
-                                <i data-lucide="shield-check"></i>
-                                <span>Admin</span>
-                            </a>
+                            <div class="nav-dropdown">
+                                <div class="nav-dropdown-toggle admin">
+                                    <i data-lucide="shield-check"></i>
+                                    <span>Admin</span>
+                                </div>
+                                <div class="nav-dropdown-menu">
+                                    <a href="/dashboard" class="nav-dropdown-item">
+                                        <i data-lucide="layout-dashboard"></i>
+                                        <span>Panel Admin</span>
+                                    </a>
+                                    <a href="/usuarios" class="nav-dropdown-item">
+                                        <i data-lucide="user-cog"></i>
+                                        <span>Gestión Usuarios</span>
+                                    </a>
+                                    <div class="nav-dropdown-divider"></div>
+                                    <a href="/swagger" target="_blank" class="nav-dropdown-item">
+                                        <i data-lucide="code"></i>
+                                        <span>API Docs</span>
+                                    </a>
+                                </div>
+                            </div>
                         }
+
+                        <a href="/ayuda" class="nav-item">
+                            <i data-lucide="help-circle"></i>
+                            <span>Ayuda</span>
+                        </a>
                     </div>
                 </nav>
 
-                <!-- User Info & Mobile Toggle -->
+                <!-- User Info & Actions -->
                 <div class="header-actions">
-                    <div class="user-info">
-                        <span class="user-badge @(User.IsInRole("Administrador") ? "admin" : "docente")">
-                            @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
-                        </span>
-                        <span class="user-name">@User.Identity.Name</span>
+                    @{
+                        var userInitials = "";
+                        if (!string.IsNullOrEmpty(User.Identity.Name))
+                        {
+                            var names = User.Identity.Name.Split(' ');
+                            userInitials = names.Length >= 2 ?
+                                $"{names[0][0]}{names[1][0]}" :
+                                names[0].Substring(0, Math.Min(2, names[0].Length));
+                        }
+                    }
+
+                    <!-- Desktop User Info Simple -->
+                    <div class="desktop-user-info">
+                        <div class="user-avatar">
+                            <span>@userInitials.ToUpper()</span>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-role @(User.IsInRole("Administrador") ? "admin" : "docente")">
+                                @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
+                            </span>
+                            <span class="user-name">@User.Identity.Name</span>
+                        </div>
                     </div>
+
+                    <!-- Desktop Logout Button -->
+                    <form method="post" action="/logout" id="desktopLogoutForm" class="desktop-logout">
+                        @Html.AntiForgeryToken()
+                        <button type="button" class="desktop-logout-btn" onclick="confirmLogout('desktop')" title="Cerrar Sesión">
+                            <i data-lucide="log-out"></i>
+                            <span class="logout-text">Cerrar Sesión</span>
+                        </button>
+                    </form>
 
                     <!-- Mobile Menu Button -->
                     <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
@@ -108,17 +198,7 @@
                         <!-- User Profile -->
                         <div class="mobile-user-profile">
                             <div class="user-avatar">
-                                @{
-                                    var initials = "";
-                                    if (!string.IsNullOrEmpty(User.Identity.Name))
-                                    {
-                                        var names = User.Identity.Name.Split(' ');
-                                        initials = names.Length >= 2 ?
-                                            $"{names[0][0]}{names[1][0]}" :
-                                            names[0].Substring(0, Math.Min(2, names[0].Length));
-                                    }
-                                }
-                                <span>@initials.ToUpper()</span>
+                                <span>@userInitials.ToUpper()</span>
                             </div>
                             <div class="user-details">
                                 <h3>@User.Identity.Name</h3>
