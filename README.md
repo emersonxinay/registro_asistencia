@@ -66,20 +66,253 @@ cd registroAsistencia
 dotnet restore
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configurar Base de Datos
 ```bash
-# Opcional: Configurar puerto específico
-export ASPNETCORE_URLS="https://localhost:5001;http://localhost:5000"
+# Instalar PostgreSQL (si no lo tienes)
+# Windows: Descargar desde https://www.postgresql.org/download/
+# Linux: sudo apt-get install postgresql
+# Mac: brew install postgresql
+
+# Crear base de datos
+psql -U postgres
+CREATE DATABASE registroasistencia;
+\q
 ```
 
-### 3. Ejecutar Aplicación
+### 3. Configurar Variables de Entorno
+```bash
+# Editar appsettings.json o appsettings.Production.json
+# Actualizar la cadena de conexión con tus credenciales de PostgreSQL
+```
+
+### 4. Aplicar Migraciones
+```bash
+dotnet ef database update
+```
+
+### 5. Ejecutar Aplicación
 ```bash
 dotnet run
 ```
 
-### 4. Acceder
-- **Web**: `https://localhost:5001`
-- **API Docs**: `https://localhost:5001/swagger`
+### 6. Acceder
+- **Web**: `http://localhost:5055`
+- **API Docs**: `http://localhost:5055/swagger`
+
+## 🐳 Despliegue en DigitalOcean Droplet
+
+### Requisitos Previos
+- Droplet con Ubuntu 22.04 LTS
+- Acceso SSH al servidor
+- Dominio apuntando al droplet (opcional)
+
+### 1. Preparar el Servidor
+
+```bash
+# Conectar al droplet
+ssh root@tu-ip-del-droplet
+
+# Actualizar sistema
+apt update && apt upgrade -y
+
+# Instalar .NET 9.0 Runtime
+wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh --channel 9.0 --runtime aspnetcore
+export PATH="$PATH:$HOME/.dotnet"
+echo 'export PATH="$PATH:$HOME/.dotnet"' >> ~/.bashrc
+
+# Instalar PostgreSQL
+apt install postgresql postgresql-contrib -y
+
+# Configurar PostgreSQL
+sudo -u postgres psql
+CREATE DATABASE registroasistencia;
+CREATE USER tuusuario WITH PASSWORD 'tupassword';
+GRANT ALL PRIVILEGES ON DATABASE registroasistencia TO tuusuario;
+\q
+
+# Instalar Nginx
+apt install nginx -y
+
+# Configurar firewall
+ufw allow 'Nginx Full'
+ufw allow OpenSSH
+ufw enable
+```
+
+### 2. Clonar y Configurar el Proyecto
+
+```bash
+# Crear directorio para la aplicación
+mkdir -p /var/www/registroasistencia
+cd /var/www/registroasistencia
+
+# Clonar repositorio
+git clone <repository-url> .
+
+# Restaurar dependencias
+dotnet restore
+
+# Crear archivo de configuración de producción
+cp appsettings.Production.json.example appsettings.Production.json
+nano appsettings.Production.json
+```
+
+### 3. Configurar appsettings.Production.json
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=registroasistencia;Username=tuusuario;Password=tupassword"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "PublicBaseUrl": "https://tu-dominio.com"
+}
+```
+
+### 4. Aplicar Migraciones y Publicar
+
+```bash
+# Aplicar migraciones
+dotnet ef database update
+
+# Publicar aplicación
+dotnet publish -c Release -o ./publish
+```
+
+### 5. Configurar Servicio Systemd
+
+```bash
+# Crear archivo de servicio
+nano /etc/systemd/system/registroasistencia.service
+```
+
+Contenido del archivo:
+```ini
+[Unit]
+Description=Registro Asistencia ASP.NET Core App
+After=network.target
+
+[Service]
+WorkingDirectory=/var/www/registroasistencia/publish
+ExecStart=/root/.dotnet/dotnet /var/www/registroasistencia/publish/registroAsistencia.dll
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=registroasistencia
+User=www-data
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=ASPNETCORE_URLS=http://localhost:5055
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+# Habilitar y arrancar el servicio
+systemctl enable registroasistencia.service
+systemctl start registroasistencia.service
+systemctl status registroasistencia.service
+```
+
+### 6. Configurar Nginx como Proxy Inverso
+
+```bash
+nano /etc/nginx/sites-available/registroasistencia
+```
+
+Contenido del archivo:
+```nginx
+server {
+    listen 80;
+    server_name tu-dominio.com www.tu-dominio.com;
+
+    location / {
+        proxy_pass http://localhost:5055;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection keep-alive;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+```bash
+# Habilitar sitio
+ln -s /etc/nginx/sites-available/registroasistencia /etc/nginx/sites-enabled/
+nginx -t
+systemctl restart nginx
+```
+
+### 7. Configurar SSL con Let's Encrypt (Opcional pero Recomendado)
+
+```bash
+# Instalar Certbot
+apt install certbot python3-certbot-nginx -y
+
+# Obtener certificado SSL
+certbot --nginx -d tu-dominio.com -d www.tu-dominio.com
+
+# Verificar renovación automática
+certbot renew --dry-run
+```
+
+### 8. Actualizar la Aplicación
+
+```bash
+# Script de actualización (crear en /var/www/registroasistencia/update.sh)
+#!/bin/bash
+cd /var/www/registroasistencia
+git pull
+dotnet publish -c Release -o ./publish
+systemctl restart registroasistencia.service
+echo "Aplicación actualizada correctamente"
+```
+
+```bash
+chmod +x /var/www/registroasistencia/update.sh
+```
+
+### 9. Monitoreo y Logs
+
+```bash
+# Ver logs de la aplicación
+journalctl -u registroasistencia.service -f
+
+# Ver logs de Nginx
+tail -f /var/log/nginx/access.log
+tail -f /var/log/nginx/error.log
+
+# Ver estado del servicio
+systemctl status registroasistencia.service
+```
+
+### Comandos Útiles
+
+```bash
+# Reiniciar aplicación
+systemctl restart registroasistencia.service
+
+# Detener aplicación
+systemctl stop registroasistencia.service
+
+# Ver uso de recursos
+htop
+
+# Backup de base de datos
+pg_dump -U tuusuario registroasistencia > backup_$(date +%Y%m%d).sql
+```
 
 ## 🎮 Guía de Uso
 

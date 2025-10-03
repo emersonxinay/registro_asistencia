@@ -1,0 +1,13 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=registroasistencia;Username=postgres;Password=YOUR_PRODUCTION_PASSWORD"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "PublicBaseUrl": "https://tu-dominio.com"
+}
