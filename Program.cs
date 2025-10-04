@@ -89,13 +89,17 @@ var app = builder.Build();
 //     // Los datos se crean una sola vez. Usa la API para crear más datos.
 // }
 
-// Habilitar Swagger en todos los entornos
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+// Habilitar Swagger SOLO en Development
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Registro Asistencia API v1");
-    c.RoutePrefix = "swagger";
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Registro Asistencia API v1");
+        c.RoutePrefix = "swagger";
+        c.DocumentTitle = "API - Registro Asistencia QR";
+    });
+}
 
 app.UseStaticFiles();
 app.UseRouting();
