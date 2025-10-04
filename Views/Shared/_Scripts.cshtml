@@ -1,0 +1,307 @@
+<!-- Scripts -->
+<script src="~/js/app.js?v=@DateTime.Now.Ticks"></script>
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Initialize theme and navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeTheme();
+        initializeModernNavigation();
+        // Load stats after a delay to avoid conflicts
+        setTimeout(loadQuickStats, 500);
+    });
+
+    // Modern Navigation functionality
+    function initializeModernNavigation() {
+        // Initialize responsive navigation
+        initializeResponsiveNavigation();
+
+        // Initialize dropdowns (legacy support)
+        initializeDropdowns();
+
+        // Initialize mobile menu (legacy support)
+        initializeMobileMenu();
+
+        // Update connection status
+        updateConnectionStatus();
+
+        console.log('✅ Modern navigation initialized');
+    }
+
+    // Nueva Navegación Refactorizada
+    function initializeResponsiveNavigation() {
+        const header = document.getElementById('mainHeader');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileNav = document.getElementById('mobileNav');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        if (!header || !mobileMenuBtn || !mobileNav) {
+            console.log('❌ Elementos de navegación refactorizada no encontrados');
+            return;
+        }
+
+        console.log('🔍 Inicializando navegación refactorizada...');
+
+        // Toggle navigation - FUNCIÓN PRINCIPAL
+        mobileMenuBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🍔 Mobile menu button clickeado');
+
+            const isOpen = document.body.classList.contains('mobile-nav-open');
+
+            if (isOpen) {
+                closeMobileNavigation();
+            } else {
+                openMobileNavigation();
+            }
+        });
+
+        // Close navigation when clicking overlay
+        if (mobileOverlay) {
+            mobileOverlay.addEventListener('click', function() {
+                console.log('🔘 Mobile overlay clickeado - cerrando menú');
+                closeMobileNavigation();
+            });
+        }
+
+        // Close navigation when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!header.contains(e.target) &&
+                !mobileNav.contains(e.target) &&
+                document.body.classList.contains('mobile-nav-open')) {
+                console.log('🌐 Click fuera del menú móvil - cerrando');
+                closeMobileNavigation();
+            }
+        });
+
+        // Close navigation on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+                console.log('⌨️ Escape presionado - cerrando menú móvil');
+                closeMobileNavigation();
+            }
+        });
+
+        // Close navigation on window resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024 && document.body.classList.contains('mobile-nav-open')) {
+                console.log('📱➡️💻 Resize a desktop - cerrando menú móvil');
+                closeMobileNavigation();
+            }
+        });
+
+        // Handle mobile navigation link clicks
+        const mobileNavItems = mobileNav.querySelectorAll('.mobile-nav-item');
+        mobileNavItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Close navigation on mobile when clicking a link
+                if (window.innerWidth < 1024) {
+                    console.log('🔗 Mobile nav item clickeado - cerrando menú');
+                    setTimeout(closeMobileNavigation, 150);
+                }
+            });
+        });
+
+        function openMobileNavigation() {
+            console.log('📂 Abriendo navegación móvil');
+            document.body.classList.add('mobile-nav-open');
+            mobileMenuBtn.setAttribute('aria-expanded', 'true');
+            mobileNav.setAttribute('aria-hidden', 'false');
+
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+
+            // Focus trap
+            const firstFocusable = mobileNav.querySelector('a, button');
+            if (firstFocusable) {
+                setTimeout(() => firstFocusable.focus(), 100);
+            }
+        }
+
+        function closeMobileNavigation() {
+            console.log('📁 Cerrando navegación móvil');
+            document.body.classList.remove('mobile-nav-open');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            mobileNav.setAttribute('aria-hidden', 'true');
+
+            // Restore body scroll
+            document.body.style.overflow = '';
+
+            // Return focus to button
+            mobileMenuBtn.focus();
+        }
+
+        console.log('✅ Navegación refactorizada inicializada correctamente');
+    }
+
+    // Logout confirmation - Refactorizado
+    function confirmLogout(source = 'desktop') {
+        if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+            const formId = source === 'mobile' ? 'mobileLogoutForm' : 'logoutForm';
+            const form = document.getElementById(formId);
+
+            if (form) {
+                form.submit();
+            } else {
+                // Fallback - crear form dinámico
+                const dynamicForm = document.createElement('form');
+                dynamicForm.method = 'post';
+                dynamicForm.action = '/logout';
+
+                // Add antiforgery token if available
+                const token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    dynamicForm.appendChild(tokenInput);
+                }
+
+                document.body.appendChild(dynamicForm);
+                dynamicForm.submit();
+            }
+        }
+    }
+
+    // Dropdown functionality
+    function initializeDropdowns() {
+        const dropdowns = document.querySelectorAll('.nav-dropdown');
+
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+
+            if (toggle && menu) {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Close other dropdowns
+                    dropdowns.forEach(otherDropdown => {
+                        if (otherDropdown !== dropdown) {
+                            otherDropdown.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle current dropdown
+                    dropdown.classList.toggle('active');
+                });
+            }
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.nav-dropdown')) {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+
+        // Close dropdowns on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                dropdowns.forEach(dropdown => {
+                    dropdown.classList.remove('active');
+                });
+            }
+        });
+    }
+
+    // Mobile menu functionality
+    function initializeMobileMenu() {
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const navMain = document.querySelector('.nav-main');
+        const navUser = document.querySelector('.nav-user');
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.body.classList.toggle('mobile-menu-open');
+            });
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.modern-nav') && !e.target.closest('#mobileMenuToggle')) {
+                document.body.classList.remove('mobile-menu-open');
+            }
+        });
+
+        // Close mobile menu on window resize to desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                document.body.classList.remove('mobile-menu-open');
+            }
+        });
+    }
+
+    function updateConnectionStatus() {
+        // Simple online/offline status update
+        if (navigator.onLine) {
+            console.log('✅ Online');
+        } else {
+            console.log('⚠️ Offline');
+        }
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+
+    // Global loadQuickStats function
+    async function loadQuickStats() {
+        try {
+            const [students, classes, attendances] = await Promise.all([
+                fetch('/api/alumnos').then(r => r.ok ? r.json() : []),
+                fetch('/api/clases').then(r => r.ok ? r.json() : []),
+                fetch('/api/asistencias').then(r => r.ok ? r.json() : [])
+            ]);
+
+            // Calculate today's attendance safely
+            const today = new Date().toDateString();
+            const todayAttendance = attendances.filter(a => {
+                try {
+                    return new Date(a.marcadaUtc).toDateString() === today;
+                } catch {
+                    return false;
+                }
+            }).length;
+
+            // Update stats with safe values
+            updateStatElement('totalStudents', Array.isArray(students) ? students.length : 0);
+            updateStatElement('activeClasses', Array.isArray(classes) ? classes.filter(c => c && c.activa).length : 0);
+            updateStatElement('todayAttendance', todayAttendance);
+
+            console.log('✅ Quick stats loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading quick stats:', error);
+            // Set safe default values
+            updateStatElement('totalStudents', 0);
+            updateStatElement('activeClasses', 0);
+            updateStatElement('todayAttendance', 0);
+        }
+    }
+
+    // Safe stat update function
+    function updateStatElement(elementId, newValue) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        const currentValue = parseInt(element.textContent) || 0;
+        const safeValue = Math.max(0, newValue || 0);
+
+        if (currentValue !== safeValue) {
+            element.textContent = safeValue;
+
+            // Add a subtle flash effect
+            element.style.color = 'var(--primary-color)';
+            setTimeout(() => {
+                element.style.color = '';
+            }, 300);
+        }
+    }
+</script>

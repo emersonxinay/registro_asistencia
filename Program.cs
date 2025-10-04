@@ -12,7 +12,44 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Registro Asistencia QR API",
+        Version = "v1",
+        Description = "API para el sistema de registro de asistencia con código QR",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Sistema de Registro QR"
+        }
+    });
+
+    // Configurar para que Swagger ignore la autenticación en la generación de documentación
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "Autenticación con Cookie",
+        Name = "Cookie",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Cookie"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Autenticación con cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -52,11 +89,13 @@ var app = builder.Build();
 //     // Los datos se crean una sola vez. Usa la API para crear más datos.
 // }
 
-if (app.Environment.IsDevelopment())
+// Habilitar Swagger en todos los entornos
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Registro Asistencia API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseStaticFiles();
 app.UseRouting();

@@ -1,0 +1,236 @@
+@{
+    var userInitials = "";
+    if (!string.IsNullOrEmpty(User.Identity.Name))
+    {
+        var names = User.Identity.Name.Split(' ');
+        userInitials = names.Length >= 2 ?
+            $"{names[0][0]}{names[1][0]}" :
+            names[0].Substring(0, Math.Min(2, names[0].Length));
+    }
+}
+
+<!-- Brand -->
+<div class="header-brand">
+    <a href="/" class="brand-link">
+        <i data-lucide="graduation-cap" class="brand-icon"></i>
+        <span class="brand-text">Registro QR</span>
+    </a>
+</div>
+
+<!-- Desktop Navigation -->
+<nav class="desktop-nav">
+    <div class="nav-group nav-primary">
+        <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i data-lucide="home"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <!-- Dropdown Clases -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-toggle">
+                <i data-lucide="graduation-cap"></i>
+                <span>Clases</span>
+            </div>
+            <div class="nav-dropdown-menu">
+                <a href="/workflow/cursos" class="nav-dropdown-item">
+                    <i data-lucide="plus-circle"></i>
+                    <span>Nueva Clase</span>
+                </a>
+                <a href="/workflow/mis-clases" class="nav-dropdown-item">
+                    <i data-lucide="calendar-days"></i>
+                    <span>Mis Clases</span>
+                </a>
+                <a href="/docente/scanner" class="nav-dropdown-item">
+                    <i data-lucide="qr-code"></i>
+                    <span>Escáner QR</span>
+                </a>
+                <div class="nav-dropdown-divider"></div>
+                <a href="/workflow/qr-students" class="nav-dropdown-item">
+                    <i data-lucide="smartphone"></i>
+                    <span>QR Estudiantes</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Dropdown Gestión -->
+        <div class="nav-dropdown">
+            <div class="nav-dropdown-toggle">
+                <i data-lucide="folder"></i>
+                <span>Gestión</span>
+            </div>
+            <div class="nav-dropdown-menu">
+                <a href="/docente/cursos" class="nav-dropdown-item">
+                    <i data-lucide="book-open"></i>
+                    <span>Mis Cursos</span>
+                </a>
+                <a href="/alumnos" class="nav-dropdown-item">
+                    <i data-lucide="users"></i>
+                    <span>Lista de Alumnos</span>
+                </a>
+                <a href="/asistencias" class="nav-dropdown-item">
+                    <i data-lucide="users-check"></i>
+                    <span>Asistencias</span>
+                </a>
+                <div class="nav-dropdown-divider"></div>
+                <a href="/ramos" class="nav-dropdown-item">
+                    <i data-lucide="library"></i>
+                    <span>Ramos</span>
+                </a>
+                <a href="/cursos" class="nav-dropdown-item">
+                    <i data-lucide="school"></i>
+                    <span>Cursos</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-group nav-secondary">
+        @if (User.IsInRole("Administrador"))
+        {
+            <div class="nav-dropdown">
+                <div class="nav-dropdown-toggle admin">
+                    <i data-lucide="shield-check"></i>
+                    <span>Admin</span>
+                </div>
+                <div class="nav-dropdown-menu">
+                    <a href="/dashboard" class="nav-dropdown-item">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>Panel Admin</span>
+                    </a>
+                    <a href="/usuarios" class="nav-dropdown-item">
+                        <i data-lucide="user-cog"></i>
+                        <span>Gestión Usuarios</span>
+                    </a>
+                    <div class="nav-dropdown-divider"></div>
+                    <a href="/swagger" target="_blank" class="nav-dropdown-item">
+                        <i data-lucide="code"></i>
+                        <span>API Docs</span>
+                    </a>
+                </div>
+            </div>
+        }
+
+        <a href="/ayuda" class="nav-item">
+            <i data-lucide="help-circle"></i>
+            <span>Ayuda</span>
+        </a>
+    </div>
+</nav>
+
+<!-- User Info & Actions -->
+<div class="header-actions">
+    <!-- Desktop User Info Simple -->
+    <div class="desktop-user-info">
+        <div class="user-avatar">
+            <span>@userInitials.ToUpper()</span>
+        </div>
+        <div class="user-details">
+            <span class="user-role @(User.IsInRole("Administrador") ? "admin" : "docente")">
+                @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
+            </span>
+            <span class="user-name">@User.Identity.Name</span>
+        </div>
+    </div>
+
+    <!-- Desktop Logout Button -->
+    <form method="post" action="/logout" id="desktopLogoutForm" class="desktop-logout">
+        @Html.AntiForgeryToken()
+        <button type="button" class="desktop-logout-btn" onclick="confirmLogout('desktop')" title="Cerrar Sesión">
+            <i data-lucide="log-out"></i>
+            <span class="logout-text">Cerrar Sesión</span>
+        </button>
+    </form>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+    </button>
+</div>
+
+<!-- Mobile Navigation -->
+<nav class="mobile-nav" id="mobileNav">
+    <div class="mobile-nav-content">
+        <!-- User Profile -->
+        <div class="mobile-user-profile">
+            <div class="user-avatar">
+                <span>@userInitials.ToUpper()</span>
+            </div>
+            <div class="user-details">
+                <h3>@User.Identity.Name</h3>
+                <p>@(User.IsInRole("Administrador") ? "Administrador" : "Docente")</p>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Items -->
+        <div class="mobile-menu-section">
+            <h4>Principal</h4>
+            <a href="/dashboard" class="mobile-nav-item">
+                <i data-lucide="home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/workflow/cursos" class="mobile-nav-item featured">
+                <i data-lucide="plus-circle"></i>
+                <span>Nueva Clase</span>
+            </a>
+            <a href="/docente/scanner" class="mobile-nav-item scanner">
+                <i data-lucide="qr-code"></i>
+                <span>Escáner QR</span>
+            </a>
+        </div>
+
+        <div class="mobile-menu-section">
+            <h4>Gestión</h4>
+            <a href="/workflow/mis-clases" class="mobile-nav-item">
+                <i data-lucide="calendar-days"></i>
+                <span>Mis Clases</span>
+            </a>
+            <a href="/docente/cursos" class="mobile-nav-item">
+                <i data-lucide="book-open"></i>
+                <span>Mis Cursos</span>
+            </a>
+            <a href="/asistencias" class="mobile-nav-item">
+                <i data-lucide="users-check"></i>
+                <span>Asistencias</span>
+            </a>
+            <a href="/workflow/qr-students" class="mobile-nav-item">
+                <i data-lucide="smartphone"></i>
+                <span>QR Estudiantes</span>
+            </a>
+        </div>
+
+        @if (User.IsInRole("Administrador"))
+        {
+            <div class="mobile-menu-section">
+                <h4>Administración</h4>
+                <a href="/dashboard" class="mobile-nav-item admin">
+                    <i data-lucide="shield-check"></i>
+                    <span>Panel Admin</span>
+                </a>
+            </div>
+        }
+
+        <div class="mobile-menu-section">
+            <h4>Mi Cuenta</h4>
+            <a href="/perfil" class="mobile-nav-item">
+                <i data-lucide="settings"></i>
+                <span>Mi Perfil</span>
+            </a>
+            <a href="/ayuda" class="mobile-nav-item">
+                <i data-lucide="help-circle"></i>
+                <span>Ayuda</span>
+            </a>
+            <form method="post" action="/logout" id="mobileLogoutForm">
+                @Html.AntiForgeryToken()
+                <button type="button" class="mobile-nav-item logout" onclick="confirmLogout('mobile')">
+                    <i data-lucide="log-out"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobileOverlay"></div>

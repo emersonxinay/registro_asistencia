@@ -30,6 +30,7 @@ public class WorkflowController : Controller
     }
 
     // PASO 1: Seleccionar Curso
+    [HttpGet]
     [Route("workflow")]
     [Route("workflow/cursos")]
     [Route("workflow/inicio")]
@@ -57,6 +58,7 @@ public class WorkflowController : Controller
     }
 
     // PASO 2: Seleccionar Ramo/Asignatura
+    [HttpGet]
     [Route("workflow/curso/{cursoId:int}/ramos")]
     [Route("workflow/ramos/{cursoId:int}")] // Compatibilidad
     public async Task<IActionResult> SeleccionarRamo(int cursoId)
@@ -123,6 +125,7 @@ public class WorkflowController : Controller
     }
 
     // PASO 3: Configurar y Crear Clase
+    [HttpGet]
     [Route("workflow/curso/{cursoId:int}/ramo/{ramoId:int}/crear-clase")]
     [Route("workflow/crear-clase/{cursoId:int}/{ramoId:int}")] // Compatibilidad
     public async Task<IActionResult> CrearClase(int cursoId, int ramoId)
@@ -160,6 +163,7 @@ public class WorkflowController : Controller
     }
 
     // Vista para generar QRs físicos de estudiantes
+    [HttpGet]
     [Route("workflow/qr-students")]
     [Route("workflow/codigos-qr")]
     public IActionResult QRStudents()
@@ -224,6 +228,7 @@ public class WorkflowController : Controller
     }
 
     // PASO 4: Clase Creada - Mostrar QR y Opciones
+    [HttpGet]
     [Route("workflow/clase/{claseId:int}/creada")]
     [Route("workflow/clase-creada/{claseId:int}")] // Compatibilidad
     public async Task<IActionResult> ClaseCreada(int claseId)
@@ -328,6 +333,7 @@ public class WorkflowController : Controller
     // RUTAS ADICIONALES PARA NAVEGACIÓN Y GESTIÓN
 
     // Ver asistencias por curso
+    [HttpGet]
     [Route("workflow/curso/{cursoId:int}/asistencias")]
     public async Task<IActionResult> AsistenciasPorCurso(int cursoId)
     {
@@ -357,6 +363,7 @@ public class WorkflowController : Controller
     }
 
     // Ver asistencias por ramo
+    [HttpGet]
     [Route("workflow/curso/{cursoId:int}/ramo/{ramoId:int}/asistencias")]
     public async Task<IActionResult> AsistenciasPorRamo(int cursoId, int ramoId)
     {
@@ -385,6 +392,7 @@ public class WorkflowController : Controller
     }
 
     // Ver asistencias por clase específica
+    [HttpGet]
     [Route("workflow/clase/{claseId:int}/asistencias")]
     public async Task<IActionResult> AsistenciasPorClase(int claseId)
     {
@@ -414,6 +422,7 @@ public class WorkflowController : Controller
     }
 
     // Gestionar clase específica (editar, finalizar, etc.)
+    [HttpGet]
     [Route("workflow/clase/{claseId:int}/gestionar")]
     public async Task<IActionResult> GestionarClase(int claseId)
     {
@@ -482,6 +491,7 @@ public class WorkflowController : Controller
     }
 
     // Lista de clases del docente
+    [HttpGet]
     [Route("workflow/mis-clases")]
     [Route("workflow/misclases")]
     public async Task<IActionResult> MisClases()
