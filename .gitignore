@@ -401,6 +401,7 @@ FodyWeavers.xsd
 # Custom - Archivos sensibles del proyecto
 cookies.txt
 appsettings.Production.json
+appsettings.json
 *.db
 *.db-shm
 *.db-wal
