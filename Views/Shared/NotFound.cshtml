@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Página no encontrada";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/error-404.css" />
+}
+
+<div class="error-container">
+    <!-- Background floating icons -->
+    <div class="error-bg-icon">🔍</div>
+    <div class="error-bg-icon">📍</div>
+    <div class="error-bg-icon">🧭</div>
+
+    <div class="error-content">
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Página no encontrada</h2>
+        <p class="error-description">
+            Lo sentimos, la página que estás buscando no existe o ha sido movida.
+            Verifica la URL o regresa al inicio.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                Ir al inicio
+            </a>
+            <a href="javascript:history.back()" class="btn-secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Volver atrás
+            </a>
+        </div>
+    </div>
+</div>
