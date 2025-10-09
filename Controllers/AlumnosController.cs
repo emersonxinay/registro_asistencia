@@ -12,11 +12,13 @@ public class AlumnosController : ControllerBase
 {
     private readonly IDataService _dataService;
     private readonly IQrService _qrService;
+    private readonly ICsvService _csvService;
 
-    public AlumnosController(IDataService dataService, IQrService qrService)
+    public AlumnosController(IDataService dataService, IQrService qrService, ICsvService csvService)
     {
         _dataService = dataService;
         _qrService = qrService;
+        _csvService = csvService;
     }
 
     [HttpPost]
@@ -257,5 +259,94 @@ public class AlumnosController : ControllerBase
         {
             return StatusCode(500, new { message = "Error preparando QRs para impresión: " + ex.Message });
         }
+    }
+
+    // Importar alumnos masivamente desde CSV/Excel
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportFromCsv(IFormFile file)
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No se ha proporcionado ningún archivo" });
+            }
+
+            // Validar extensión del archivo
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (extension != ".csv" && extension != ".txt")
+            {
+                return BadRequest(new { message = "Solo se permiten archivos CSV (.csv, .txt)" });
+            }
+
+            // Validar tamaño (máximo 5MB)
+            if (file.Length > 5 * 1024 * 1024)
+            {
+                return BadRequest(new { message = "El archivo no puede superar los 5MB" });
+            }
+
+            // Parsear el CSV
+            List<AlumnoCreateDto> alumnosDto;
+            using (var stream = file.OpenReadStream())
+            {
+                alumnosDto = await _csvService.ParseAlumnosCsvAsync(stream);
+            }
+
+            if (alumnosDto.Count == 0)
+            {
+                return BadRequest(new { message = "No se encontraron alumnos válidos en el archivo" });
+            }
+
+            // Crear alumnos en batch
+            var createdAlumnos = new List<Alumno>();
+            var errors = new List<string>();
+
+            foreach (var dto in alumnosDto)
+            {
+                try
+                {
+                    var alumno = await _dataService.CreateAlumnoAsync(dto);
+                    createdAlumnos.Add(alumno);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Error creando '{dto.Nombre}': {ex.Message}");
+                }
+            }
+
+            return Ok(new
+            {
+                message = $"Importación completada: {createdAlumnos.Count} alumnos creados",
+                created = createdAlumnos.Count,
+                total = alumnosDto.Count,
+                errors = errors,
+                alumnos = createdAlumnos.Select(a => new
+                {
+                    id = a.Id,
+                    codigo = a.Codigo,
+                    nombre = a.Nombre
+                })
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = "Error procesando archivo: " + ex.Message });
+        }
+    }
+
+    // Descargar plantilla CSV de ejemplo
+    [HttpGet("template")]
+    [AllowAnonymous]
+    public IActionResult DownloadTemplate()
+    {
+        var csvContent = @"nombre
+Juan Pérez García
+María López González
+Carlos Rodríguez Sánchez
+Ana Martínez Torres
+Pedro González Ramírez";
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
+        return File(bytes, "text/csv", "plantilla_alumnos.csv");
     }
 }

@@ -811,6 +811,10 @@
                         <i data-lucide="search" class="search-icon"></i>
                         <input type="text" class="search-input" placeholder="Buscar estudiantes..." id="searchInput">
                     </div>
+                    <button class="btn btn-success" id="importBtn">
+                        <i data-lucide="upload"></i>
+                        Importar CSV
+                    </button>
                     <button class="btn btn-ghost" id="exportBtn">
                         <i data-lucide="download"></i>
                         Exportar
@@ -1335,6 +1339,7 @@
                 }, 300));
 
                 // Action buttons
+                document.getElementById('importBtn').addEventListener('click', () => this.showImportModal());
                 document.getElementById('refreshBtn').addEventListener('click', () => this.loadStudents());
                 document.getElementById('exportBtn').addEventListener('click', () => this.exportStudents());
                 document.getElementById('printQRBtn').addEventListener('click', () => this.printQRs());
@@ -1456,6 +1461,200 @@
 
                 } catch (error) {
                     this.showError('Error preparando impresión');
+                }
+            }
+
+            showImportModal() {
+                const modal = document.createElement('div');
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="import-modal-content">
+                        <div class="import-modal-header">
+                            <div class="import-modal-title">
+                                <div class="import-modal-icon">
+                                    <i data-lucide="upload-cloud"></i>
+                                </div>
+                                <div>
+                                    <h3>Importar Estudiantes desde CSV</h3>
+                                    <p>Carga un archivo CSV para agregar estudiantes masivamente</p>
+                                </div>
+                            </div>
+                            <button class="import-modal-close">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="import-modal-body">
+                            <div class="import-instructions">
+                                <h4><i data-lucide="info"></i> Formato del archivo CSV:</h4>
+                                <ul>
+                                    <li>El archivo debe tener una columna llamada <code>nombre</code></li>
+                                    <li>Primera línea debe ser el encabezado</li>
+                                    <li>Los códigos se generarán automáticamente</li>
+                                    <li>Máximo 5MB de tamaño</li>
+                                </ul>
+                                <button class="btn btn-ghost btn-sm" onclick="studentsManager.downloadTemplate()">
+                                    <i data-lucide="download"></i>
+                                    Descargar plantilla de ejemplo
+                                </button>
+                            </div>
+
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <input type="file" id="csvFileInput" accept=".csv,.txt" style="display: none;">
+                                <div class="upload-placeholder" id="uploadPlaceholder">
+                                    <i data-lucide="file-plus" style="width: 3rem; height: 3rem; margin-bottom: 1rem; color: var(--text-tertiary);"></i>
+                                    <h4>Arrastra tu archivo CSV aquí</h4>
+                                    <p>o haz clic para seleccionar</p>
+                                    <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">
+                                        <i data-lucide="upload"></i>
+                                        Seleccionar archivo
+                                    </button>
+                                </div>
+                                <div class="file-info" id="fileInfo" style="display: none;">
+                                    <i data-lucide="file-text"></i>
+                                    <div>
+                                        <strong id="fileName"></strong>
+                                        <p id="fileSize"></p>
+                                    </div>
+                                    <button class="btn-icon" onclick="document.getElementById('csvFileInput').value=''; document.getElementById('fileInfo').style.display='none'; document.getElementById('uploadPlaceholder').style.display='block';">
+                                        <i data-lucide="x"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="import-modal-footer">
+                            <button class="import-action-btn secondary" onclick="this.closest('.modal-overlay').remove()">
+                                <i data-lucide="x"></i>
+                                <span>Cancelar</span>
+                            </button>
+                            <button class="import-action-btn primary" id="uploadBtn" disabled>
+                                <i data-lucide="upload"></i>
+                                <span>Importar Estudiantes</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                modal.querySelector('.import-modal-close').onclick = () => modal.remove();
+                modal.onclick = (e) => e.target === modal && modal.remove();
+
+                // File upload handling
+                const fileInput = modal.querySelector('#csvFileInput');
+                const uploadArea = modal.querySelector('#fileUploadArea');
+                const fileInfo = modal.querySelector('#fileInfo');
+                const uploadPlaceholder = modal.querySelector('#uploadPlaceholder');
+                const uploadBtn = modal.querySelector('#uploadBtn');
+
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        modal.querySelector('#fileName').textContent = file.name;
+                        modal.querySelector('#fileSize').textContent = `${(file.size / 1024).toFixed(2)} KB`;
+                        fileInfo.style.display = 'flex';
+                        uploadPlaceholder.style.display = 'none';
+                        uploadBtn.disabled = false;
+                    }
+                };
+
+                // Drag and drop
+                uploadArea.ondragover = (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('drag-over');
+                };
+
+                uploadArea.ondragleave = () => {
+                    uploadArea.classList.remove('drag-over');
+                };
+
+                uploadArea.ondrop = (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('drag-over');
+                    const file = e.dataTransfer.files[0];
+                    if (file) {
+                        fileInput.files = e.dataTransfer.files;
+                        fileInput.dispatchEvent(new Event('change'));
+                    }
+                };
+
+                uploadBtn.onclick = () => this.uploadCsvFile(fileInput, modal);
+
+                document.body.appendChild(modal);
+                setTimeout(() => modal.classList.add('show'), 10);
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            async uploadCsvFile(fileInput, modal) {
+                const file = fileInput.files[0];
+                if (!file) {
+                    this.showError('No se ha seleccionado ningún archivo');
+                    return;
+                }
+
+                const uploadBtn = modal.querySelector('#uploadBtn');
+                const originalText = uploadBtn.innerHTML;
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i data-lucide="loader-2" class="spinning"></i><span>Importando...</span>';
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch('/api/alumnos/import', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al importar archivo');
+                    }
+
+                    const result = await response.json();
+
+                    // Close modal
+                    modal.remove();
+
+                    // Reload students
+                    await this.loadStudents();
+
+                    // Show success message with details
+                    let message = result.message;
+                    if (result.errors && result.errors.length > 0) {
+                        message += `\nAdvertencias: ${result.errors.slice(0, 3).join(', ')}`;
+                        if (result.errors.length > 3) {
+                            message += `\n... y ${result.errors.length - 3} más`;
+                        }
+                    }
+
+                    this.showSuccess(message);
+
+                } catch (error) {
+                    console.error('❌ Error uploading CSV:', error);
+                    this.showError(error.message);
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = originalText;
+                    if (window.lucide) lucide.createIcons();
+                }
+            }
+
+            async downloadTemplate() {
+                try {
+                    const response = await fetch('/api/alumnos/template');
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'plantilla_alumnos.csv';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    this.showSuccess('Plantilla descargada exitosamente');
+                } catch (error) {
+                    this.showError('Error al descargar plantilla');
                 }
             }
 
@@ -2115,6 +2314,291 @@
 
                 .edit-action-btn {
                     width: 100%;
+                }
+            }
+
+            /* Import Modal Styles */
+            .import-modal-content {
+                background: var(--surface);
+                border-radius: var(--radius-2xl);
+                box-shadow: var(--shadow-xl);
+                max-width: 700px;
+                width: 100%;
+                max-height: 90vh;
+                overflow: hidden;
+                border: 1px solid var(--border);
+                transform: scale(0.9) translateY(20px);
+                transition: all 0.3s ease;
+            }
+
+            .modal-overlay.show .import-modal-content {
+                transform: scale(1) translateY(0);
+            }
+
+            .import-modal-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 2rem 2rem 1rem 2rem;
+                border-bottom: 1px solid var(--border);
+                background: linear-gradient(135deg, var(--success), var(--success-dark));
+                color: white;
+            }
+
+            .import-modal-title {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .import-modal-icon {
+                width: 3rem;
+                height: 3rem;
+                border-radius: var(--radius-lg);
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+
+            .import-modal-title h3 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            .import-modal-title p {
+                margin: 0;
+                opacity: 0.9;
+                font-size: 0.875rem;
+            }
+
+            .import-modal-close {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                border-radius: var(--radius-md);
+                width: 2.5rem;
+                height: 2.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                font-size: 1.25rem;
+            }
+
+            .import-modal-close:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(1.05);
+            }
+
+            .import-modal-body {
+                padding: 2rem;
+                overflow-y: auto;
+                max-height: calc(90vh - 200px);
+            }
+
+            .import-instructions {
+                background: var(--bg-secondary);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-lg);
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+            }
+
+            .import-instructions h4 {
+                margin: 0 0 1rem 0;
+                font-size: 1rem;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: var(--text-primary);
+            }
+
+            .import-instructions ul {
+                margin: 0 0 1rem 0;
+                padding-left: 1.5rem;
+                list-style: disc;
+            }
+
+            .import-instructions li {
+                margin: 0.5rem 0;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+            }
+
+            .import-instructions code {
+                background: var(--bg-tertiary);
+                padding: 0.125rem 0.375rem;
+                border-radius: var(--radius-sm);
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 0.875rem;
+                color: var(--primary);
+            }
+
+            .btn-sm {
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .file-upload-area {
+                border: 2px dashed var(--border);
+                border-radius: var(--radius-xl);
+                padding: 2rem;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                background: var(--bg-secondary);
+            }
+
+            .file-upload-area.drag-over {
+                border-color: var(--success);
+                background: rgba(16, 185, 129, 0.05);
+            }
+
+            .upload-placeholder h4 {
+                margin: 0 0 0.5rem 0;
+                font-size: 1.125rem;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+
+            .upload-placeholder p {
+                margin: 0 0 1.5rem 0;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+            }
+
+            .file-info {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                background: var(--success);
+                color: white;
+                padding: 1rem;
+                border-radius: var(--radius-lg);
+            }
+
+            .file-info i {
+                font-size: 2rem;
+                flex-shrink: 0;
+            }
+
+            .file-info > div {
+                flex: 1;
+                text-align: left;
+            }
+
+            .file-info strong {
+                display: block;
+                font-size: 1rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .file-info p {
+                margin: 0;
+                opacity: 0.9;
+                font-size: 0.875rem;
+            }
+
+            .btn-icon {
+                background: rgba(255, 255, 255, 0.2);
+                border: none;
+                width: 2rem;
+                height: 2rem;
+                border-radius: var(--radius-md);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                color: white;
+            }
+
+            .btn-icon:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
+
+            .import-modal-footer {
+                display: flex;
+                gap: 1rem;
+                padding: 1.5rem 2rem 2rem 2rem;
+                background: var(--bg-secondary);
+                justify-content: flex-end;
+            }
+
+            .import-action-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                padding: 0.875rem 1.5rem;
+                border: none;
+                border-radius: var(--radius-lg);
+                font-size: 0.875rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                min-width: 140px;
+            }
+
+            .import-action-btn:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-lg);
+            }
+
+            .import-action-btn:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            .import-action-btn.secondary {
+                background: var(--bg-tertiary);
+                color: var(--text-secondary);
+                border: 1px solid var(--border);
+            }
+
+            .import-action-btn.secondary:hover {
+                background: var(--surface);
+                color: var(--text-primary);
+            }
+
+            .import-action-btn.primary {
+                background: linear-gradient(135deg, var(--success), var(--success-dark));
+                color: white;
+            }
+
+            /* Responsive Import Modal */
+            @@media (max-width: 768px) {
+                .import-modal-content {
+                    margin: 1rem;
+                    max-width: calc(100% - 2rem);
+                }
+
+                .import-modal-header {
+                    padding: 1.5rem;
+                }
+
+                .import-modal-body {
+                    padding: 1.5rem;
+                }
+
+                .import-modal-footer {
+                    flex-direction: column;
+                    padding: 1.5rem;
+                }
+
+                .import-action-btn {
+                    width: 100%;
+                }
+
+                .file-upload-area {
+                    padding: 1.5rem;
                 }
             }
         `;
