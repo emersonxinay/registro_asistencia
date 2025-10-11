@@ -198,7 +198,7 @@
                             </div>
                         </div>
                         
-                        <button type="button" class="btn-outline" disabled>
+                        <button type="button" class="btn-outline" onclick="agregarRamo()">
                             <i data-lucide="plus"></i>
                             Agregar Ramo
                         </button>
@@ -611,10 +611,121 @@
 }
 </style>
 
-<!-- JavaScript completamente eliminado para evitar cache del navegador -->
-<!-- Formulario funciona con HTML puro sin JavaScript -->
+@section Scripts {
+<script>
+// Contador de ramos
+let ramoCount = 1;
 
-<!-- JavaScript completamente eliminado para evitar cache del navegador -->
-<!-- Formulario funciona con HTML puro sin JavaScript -->
-<!-- JavaScript completamente eliminado para evitar cache del navegador -->
-<!-- Formulario funciona con HTML puro sin JavaScript -->
+// Función para agregar un nuevo ramo
+function agregarRamo() {
+    const ramosLista = document.getElementById('ramosLista');
+    const nuevoRamo = document.createElement('div');
+    nuevoRamo.className = 'ramo-item';
+    nuevoRamo.innerHTML = `
+        <div class="ramo-header">
+            <span class="ramo-number">Ramo ${ramoCount + 1}</span>
+            <button type="button" class="remove-ramo" onclick="eliminarRamo(this)">
+                ✕ Eliminar
+            </button>
+        </div>
+        <div class="ramo-fields">
+            <div class="form-group">
+                <label>
+                    <i data-lucide="book-open"></i>
+                    Nombre del Ramo *
+                </label>
+                <input type="text" name="Ramos[${ramoCount}].Nombre" placeholder="Ej: Álgebra Lineal" required maxlength="100">
+            </div>
+            <div class="form-group">
+                <label>
+                    <i data-lucide="hash"></i>
+                    Código del Ramo *
+                </label>
+                <input type="text" name="Ramos[${ramoCount}].Codigo" placeholder="Ej: ALG101" required maxlength="20" pattern="[A-Z]{2,4}[0-9]{2,3}">
+            </div>
+            <div class="form-group">
+                <label>
+                    <i data-lucide="clock"></i>
+                    Horas Semanales
+                </label>
+                <input type="number" name="Ramos[${ramoCount}].HorasSemanales" min="1" max="20" step="1" placeholder="4">
+            </div>
+        </div>
+        <div class="form-group" style="margin-top: 15px;">
+            <label>
+                <i data-lucide="file-text"></i>
+                Descripción del Ramo
+            </label>
+            <textarea name="Ramos[${ramoCount}].Descripcion" placeholder="Describe el contenido y objetivos del ramo..." rows="2" maxlength="300"></textarea>
+        </div>
+    `;
+
+    ramosLista.appendChild(nuevoRamo);
+    ramoCount++;
+
+    // Actualizar preview
+    actualizarPreview();
+
+    // Reinicializar iconos de Lucide
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+// Función para eliminar un ramo
+function eliminarRamo(button) {
+    const ramoItem = button.closest('.ramo-item');
+    ramoItem.remove();
+
+    // Renumerar los ramos
+    const ramosItems = document.querySelectorAll('.ramo-item');
+    ramosItems.forEach((item, index) => {
+        const ramoNumber = item.querySelector('.ramo-number');
+        if (ramoNumber) {
+            ramoNumber.textContent = `Ramo ${index + 1}`;
+        }
+    });
+
+    actualizarPreview();
+}
+
+// Función para actualizar la vista previa
+function actualizarPreview() {
+    const nombre = document.getElementById('nombre').value;
+    const codigo = document.getElementById('codigo').value;
+    const descripcion = document.getElementById('descripcion').value;
+    const nivel = document.getElementById('nivel').value;
+    const horasSemanales = document.getElementById('horasSemanales').value;
+    const capacidadMaxima = document.getElementById('capacidadMaxima').value;
+    const totalRamos = document.querySelectorAll('.ramo-item').length;
+
+    document.getElementById('previewNombre').textContent = nombre || 'Nombre del curso...';
+    document.getElementById('previewCodigo').textContent = codigo || 'Código del curso...';
+    document.getElementById('previewNivel').textContent = nivel || 'No definido';
+    document.getElementById('previewHoras').textContent = horasSemanales ? horasSemanales + ' hrs/semana' : 'No definido';
+    document.getElementById('previewCapacidad').textContent = capacidadMaxima ? capacidadMaxima + ' estudiantes' : 'No definido';
+    document.getElementById('previewRamos').textContent = totalRamos;
+
+    const previewDescripcion = document.getElementById('previewDescripcion');
+    if (descripcion) {
+        previewDescripcion.textContent = descripcion;
+        previewDescripcion.style.display = 'block';
+    } else {
+        previewDescripcion.style.display = 'none';
+    }
+}
+
+// Event listeners para actualizar preview en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('#nombre, #codigo, #descripcion, #nivel, #horasSemanales, #capacidadMaxima');
+    inputs.forEach(input => {
+        input.addEventListener('input', actualizarPreview);
+    });
+
+    // Inicializar Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+</script>
+}

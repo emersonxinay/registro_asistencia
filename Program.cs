@@ -79,6 +79,7 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddSingleton<IQrService, QrService>();
 builder.Services.AddSingleton<ICsvService, CsvService>();
 builder.Services.AddSingleton<ILoggingService, ConsoleLoggingService>();
+builder.Services.AddSingleton<ITimeZoneService, TimeZoneService>();
 
 var app = builder.Build();
 
