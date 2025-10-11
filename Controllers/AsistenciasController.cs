@@ -22,10 +22,17 @@ public class AsistenciasController : ControllerBase
     [HttpPost("profesor-scan")]
     public async Task<IActionResult> ProfesorScan([FromBody] ProfesorScanDto dto)
     {
+        // Verificar acceso a la clase
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(dto.ClaseId, userId))
+        {
+            return Forbid();
+        }
+
         var clase = await _dataService.GetClaseAsync(dto.ClaseId);
         if (clase == null)
             return NotFound("Clase no existe");
-        
+
         if (!clase.Activa)
             return BadRequest("Clase no activa");
 
@@ -65,7 +72,10 @@ public class AsistenciasController : ControllerBase
             if (await _dataService.ExisteAsistenciaAsync(dto.AlumnoId, dto.ClaseId))
                 return Ok(new { mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente." });
 
-            await _dataService.RegistrarAsistenciaAsync(dto.AlumnoId, dto.ClaseId, "ALUMNO_ESCANEA");
+            var registroExitoso = await _dataService.RegistrarAsistenciaAsync(dto.AlumnoId, dto.ClaseId, "ALUMNO_ESCANEA");
+            if (!registroExitoso)
+                return BadRequest(new { message = "No se pudo registrar la asistencia. Por favor intenta nuevamente." });
+
             return Ok(new { mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente." });
         }
         catch (Exception ex)
@@ -96,11 +106,45 @@ public class AsistenciasController : ControllerBase
 
             await _dataService.ConsumeTokenAsync(dto.Nonce);
 
-            if (await _dataService.ExisteAsistenciaAsync(alumno.Id, dto.ClaseId))
-                return Ok(new { mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente." });
+            // Verificar si ya existe asistencia
+            var yaRegistrado = await _dataService.ExisteAsistenciaAsync(alumno.Id, dto.ClaseId);
 
-            await _dataService.RegistrarAsistenciaAsync(alumno.Id, dto.ClaseId, "ALUMNO_ESCANEA");
-            return Ok(new { mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente." });
+            if (yaRegistrado)
+            {
+                // Obtener la asistencia existente para mostrar el estado
+                var asistencias = await _dataService.GetAsistenciasPorClaseAsync(dto.ClaseId);
+                var miAsistencia = asistencias.FirstOrDefault(a => a.AlumnoId == alumno.Id);
+
+                return Ok(new {
+                    yaRegistrado = true,
+                    mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente.",
+                    estudiante = new {
+                        codigo = alumno.Codigo,
+                        nombre = alumno.Nombre,
+                        estado = miAsistencia?.Estado.ToString() ?? "Registrado",
+                        minutosRetraso = miAsistencia?.MinutosRetraso ?? 0
+                    }
+                });
+            }
+
+            var registroExitoso = await _dataService.RegistrarAsistenciaAsync(alumno.Id, dto.ClaseId, "ALUMNO_ESCANEA");
+            if (!registroExitoso)
+                return BadRequest(new { message = "No se pudo registrar la asistencia. Por favor intenta nuevamente." });
+
+            // Obtener la asistencia recién creada para devolver el estado
+            var asistenciasActualizadas = await _dataService.GetAsistenciasPorClaseAsync(dto.ClaseId);
+            var asistenciaRegistrada = asistenciasActualizadas.FirstOrDefault(a => a.AlumnoId == alumno.Id);
+
+            return Ok(new {
+                yaRegistrado = false,
+                mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente.",
+                estudiante = new {
+                    codigo = alumno.Codigo,
+                    nombre = alumno.Nombre,
+                    estado = asistenciaRegistrada?.Estado.ToString() ?? "Presente",
+                    minutosRetraso = asistenciaRegistrada?.MinutosRetraso ?? 0
+                }
+            });
         }
         catch (Exception ex)
         {
@@ -143,7 +187,10 @@ public class AsistenciasController : ControllerBase
                     automatic = true
                 });
 
-            await _dataService.RegistrarAsistenciaAsync(alumnoIdFromAuth.Value, dto.ClaseId, "ALUMNO_ESCANEA_AUTO");
+            var registroExitoso = await _dataService.RegistrarAsistenciaAsync(alumnoIdFromAuth.Value, dto.ClaseId, "ALUMNO_ESCANEA_AUTO");
+            if (!registroExitoso)
+                return BadRequest(new { message = "No se pudo registrar la asistencia. Por favor intenta nuevamente." });
+
             return Ok(new {
                 mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada automáticamente.",
                 automatic = true,
@@ -164,7 +211,20 @@ public class AsistenciasController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var asistencias = await _dataService.GetAsistenciasAsync();
-        return Ok(asistencias);
+
+        // Si es Admin, devolver todas las asistencias
+        if (IsAdmin())
+        {
+            return Ok(asistencias);
+        }
+
+        // Si es Docente, filtrar solo asistencias de sus clases
+        var userId = GetCurrentUserId();
+        var todasClases = await _dataService.GetClasesAsync();
+        var misClasesIds = todasClases.Where(c => c.DocenteId == userId).Select(c => c.Id).ToHashSet();
+        var misAsistencias = asistencias.Where(a => misClasesIds.Contains(a.ClaseId)).ToList();
+
+        return Ok(misAsistencias);
     }
 
     [HttpGet("clase/{claseId}")]
@@ -173,6 +233,13 @@ public class AsistenciasController : ControllerBase
     {
         try
         {
+            // Verificar acceso a la clase
+            var userId = GetCurrentUserId();
+            if (!await TieneAccesoClase(claseId, userId))
+            {
+                return Forbid();
+            }
+
             var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
             return Ok(asistencias);
         }
@@ -182,18 +249,102 @@ public class AsistenciasController : ControllerBase
         }
     }
 
+    [HttpGet("clase/{claseId}/lista-publica")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetListaPublica(int claseId, string? nonce)
+    {
+        try
+        {
+            // Validar que la clase existe
+            var clase = await _dataService.GetClaseAsync(claseId);
+            if (clase == null)
+                return NotFound(new { message = "Clase no encontrada" });
+
+            // Validar nonce si se proporciona (seguridad adicional)
+            if (!string.IsNullOrEmpty(nonce))
+            {
+                var nonceValido = await _dataService.ValidarTokenAsync(nonce, claseId);
+                if (!nonceValido)
+                    return BadRequest(new { message = "Acceso denegado o expirado" });
+            }
+
+            // Obtener asistencias
+            var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
+
+            // Obtener información del curso si existe
+            var cursoInfo = new { nombre = "Sin curso", codigo = "" };
+            if (clase.RamoId.HasValue)
+            {
+                var ramo = await _dataService.GetRamoAsync(clase.RamoId.Value);
+                if (ramo != null)
+                {
+                    cursoInfo = new {
+                        nombre = ramo.Nombre,
+                        codigo = ramo.Codigo ?? ""
+                    };
+                }
+            }
+
+            return Ok(new
+            {
+                clase = new
+                {
+                    id = clase.Id,
+                    asignatura = clase.Asignatura,
+                    inicioUtc = clase.InicioUtc,
+                    finUtc = clase.FinUtc,
+                    activa = clase.Activa
+                },
+                curso = cursoInfo,
+                asistencias = asistencias.Select(a => new
+                {
+                    alumnoNombre = a.Nombre ?? a.AlumnoNombre,
+                    alumnoCodigo = a.Codigo ?? a.AlumnoCodigo,
+                    estado = a.Estado,
+                    minutosRetraso = a.MinutosRetraso,
+                    marcadaUtc = a.MarcadaUtc ?? a.FechaHoraRegistro
+                }).OrderBy(a => a.alumnoNombre)
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener lista: " + ex.Message });
+        }
+    }
+
     [HttpGet("csv")]
     public async Task<IActionResult> ExportCsv()
     {
         var asistencias = await _dataService.GetAsistenciasAsync();
-        var bytes = _csvService.GenerateAsistenciasCsv(asistencias);
-        return File(bytes, "text/csv; charset=utf-8", "asistencias.csv");
+
+        // Si es Admin, exportar todas las asistencias
+        if (IsAdmin())
+        {
+            var bytes = _csvService.GenerateAsistenciasCsv(asistencias);
+            return File(bytes, "text/csv; charset=utf-8", "asistencias.csv");
+        }
+
+        // Si es Docente, filtrar solo asistencias de sus clases
+        var userId = GetCurrentUserId();
+        var todasClases = await _dataService.GetClasesAsync();
+        var misClasesIds = todasClases.Where(c => c.DocenteId == userId).Select(c => c.Id).ToHashSet();
+        var misAsistencias = asistencias.Where(a => misClasesIds.Contains(a.ClaseId)).ToList();
+        var bytesDocente = _csvService.GenerateAsistenciasCsv(misAsistencias);
+
+        return File(bytesDocente, "text/csv; charset=utf-8", "mis-asistencias.csv");
     }
 
     [HttpGet("clase/{claseId}/csv")]
     [HttpGet("/api/clases/{claseId}/asistencias.csv")] // Ruta alternativa para compatibilidad
     public async Task<IActionResult> ExportCsvByClase(int claseId)
     {
+        // Verificar acceso a la clase
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(claseId, userId))
+        {
+            return Forbid();
+        }
+
         var asistencias = await _dataService.GetAsistenciasPorClaseAsync(claseId);
         var bytes = _csvService.GenerateAsistenciasCsv(asistencias);
         return File(bytes, "text/csv; charset=utf-8", $"asistencias-clase-{claseId}.csv");
@@ -202,6 +353,13 @@ public class AsistenciasController : ControllerBase
     [HttpGet("clase/{claseId}/csv-completo")]
     public async Task<IActionResult> ExportCsvCompletoByClase(int claseId)
     {
+        // Verificar acceso a la clase
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(claseId, userId))
+        {
+            return Forbid();
+        }
+
         // Obtener información de la clase
         var clase = await _dataService.GetClaseAsync(claseId);
         if (clase == null)
@@ -237,6 +395,33 @@ public class AsistenciasController : ControllerBase
         // return int.TryParse(studentIdClaim, out int studentId) ? studentId : null;
 
         return null; // Por ahora retorna null hasta que se implemente auth de estudiantes
+    }
+
+    // Método helper para obtener el ID del usuario actual (docente)
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out int userId) ? userId : 1;
+    }
+
+    // Método helper para verificar si el usuario es Admin
+    private bool IsAdmin()
+    {
+        return User.IsInRole("Administrador");
+    }
+
+    // Método helper para verificar si el usuario tiene acceso a una clase
+    private async Task<bool> TieneAccesoClase(int claseId, int docenteId)
+    {
+        // Si es Admin, tiene acceso a todas las clases
+        if (IsAdmin())
+        {
+            return true;
+        }
+
+        // Si es Docente, solo tiene acceso a sus propias clases
+        var clase = await _dataService.GetClaseAsync(claseId);
+        return clase != null && clase.DocenteId == docenteId;
     }
 }
 

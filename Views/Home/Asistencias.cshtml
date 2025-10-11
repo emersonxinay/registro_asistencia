@@ -547,7 +547,14 @@ async function cargarAsistenciasPorClase() {
             html += `
                 <tr style="border: 2px solid black; background: ${estudiante.color};">
                     <td style="padding: 8px; border: 1px solid black; font-weight: bold;">${codigoDisplay}</td>
-                    <td style="padding: 8px; border: 1px solid black;">${nombreDisplay}</td>
+                    <td style="padding: 8px; border: 1px solid black;">
+                        ${nombreDisplay}
+                        <button onclick="mostrarQREstudiante(${estudiante.id}, '${nombreDisplay.replace(/'/g, "\\'")}', '${codigoDisplay}')"
+                                style="margin-left: 10px; padding: 4px 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
+                                title="Ver QR para escanear">
+                            📱 QR
+                        </button>
+                    </td>
                     <td style="padding: 8px; border: 1px solid black; color: ${estadoColor}; font-weight: bold; text-align: center;">${estudiante.estadoDisplay}</td>
                     <td style="padding: 8px; border: 1px solid black; text-align: center;">${fechaDisplay}</td>
                     <td style="padding: 8px; border: 1px solid black; text-align: center;">${horaDisplay}</td>
@@ -623,6 +630,77 @@ setInterval(() => {
         refrescarDatos();
     }
 }, 30000);
+
+// Función para mostrar el QR del estudiante en un modal
+async function mostrarQREstudiante(estudianteId, nombre, codigo) {
+    try {
+        // Obtener el QR del estudiante
+        const response = await fetch(`/api/alumnos/${estudianteId}/qr`);
+        if (!response.ok) throw new Error('Error al cargar QR');
+
+        const data = await response.json();
+
+        // Crear modal
+        const modal = document.createElement('div');
+        modal.id = 'qrModal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+
+        modal.innerHTML = `
+            <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; position: relative;">
+                <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px;">✕</button>
+                <h2 style="margin-top: 0; color: #333;">QR para Escanear</h2>
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <div style="font-weight: bold; font-size: 18px; color: #4CAF50; margin-bottom: 5px;">${nombre}</div>
+                    <div style="color: #666; font-family: monospace;">${codigo}</div>
+                </div>
+                <div style="background: white; padding: 20px; border: 3px solid #4CAF50; border-radius: 10px; display: inline-block;">
+                    <img src="data:image/png;base64,${data.qrCode}" style="width: 250px; height: 250px;" alt="QR ${nombre}">
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                    Escanea este QR con tu dispositivo para registrar al estudiante
+                </p>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Cerrar al hacer clic fuera del contenido
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalQR();
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error mostrando QR:', error);
+        alert('Error al cargar el código QR del estudiante');
+    }
+}
+
+function cerrarModalQR() {
+    const modal = document.getElementById('qrModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Cerrar modal con tecla ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarModalQR();
+    }
+});
 </script>
 
 }

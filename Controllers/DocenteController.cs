@@ -158,6 +158,18 @@ public class DocenteController : Controller
                     };
 
                     _context.Ramos.Add(ramo);
+                    await _context.SaveChangesAsync(); // Guardar para obtener el ID del ramo
+
+                    // ⭐ IMPORTANTE: Asignar el ramo al docente
+                    var docenteRamo = new DocenteRamo
+                    {
+                        DocenteId = docenteId,
+                        RamoId = ramo.Id,
+                        AsignadoUtc = DateTime.UtcNow,
+                        Activo = true
+                    };
+
+                    _context.DocenteRamos.Add(docenteRamo);
                 }
 
                 await _context.SaveChangesAsync();

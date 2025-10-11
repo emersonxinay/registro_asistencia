@@ -692,6 +692,159 @@
                 text-align: left;
             }
         }
+
+        /* Accordion Styles */
+        .accordion-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-section:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .accordion-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            background: var(--bg-secondary);
+        }
+
+        .accordion-header:hover {
+            background: var(--surface-hover);
+        }
+
+        .accordion-header.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .accordion-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .accordion-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .accordion-icon.no-course {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+        }
+
+        .accordion-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .accordion-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .accordion-stats {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .accordion-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .accordion-badge.active {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .accordion-toggle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .accordion-header.active .accordion-toggle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: rotate(180deg);
+        }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .accordion-body.active {
+            max-height: 10000px;
+        }
+
+        .accordion-content {
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .empty-course {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-course i {
+            display: block;
+            margin: 0 auto 1rem;
+            width: 3rem;
+            height: 3rem;
+            color: var(--text-tertiary);
+        }
+
+        /* Search highlight */
+        .search-active .accordion-section:not(.matches-search) {
+            opacity: 0.4;
+        }
+
+        .accordion-section.matches-search {
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -866,14 +1019,25 @@
 
             async loadStudents() {
                 try {
-                    const response = await fetch('/api/alumnos');
+                    // Cargar estudiantes agrupados por curso
+                    const response = await fetch('/api/alumnos/grouped-by-courses');
                     if (!response.ok) throw new Error('Error al cargar estudiantes');
 
                     const data = await response.json();
-                    this.students = Array.isArray(data) ? data : [];
-                    this.filteredStudents = [...this.students];
+
+                    // Store grouped data
+                    this.coursesData = data.cursos || [];
+                    this.noCourseData = data.sinCurso || { estudiantes: [] };
+
+                    // Flatten all students for statistics
+                    this.students = [];
+                    this.coursesData.forEach(course => {
+                        this.students.push(...course.estudiantes);
+                    });
+                    this.students.push(...this.noCourseData.estudiantes);
 
                     console.log('📊 Estudiantes cargados:', this.students.length);
+                    console.log('📚 Cursos:', this.coursesData.length);
 
                     this.renderStudents();
                     this.updateStats();
@@ -887,7 +1051,7 @@
             renderStudents() {
                 const container = document.getElementById('studentsContainer');
 
-                if (this.filteredStudents.length === 0) {
+                if (this.students.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
                             <i data-lucide="users" class="empty-icon"></i>
@@ -902,59 +1066,170 @@
                     return;
                 }
 
-                const studentsHTML = this.filteredStudents.map(student => {
-                    const hasQR = student.qrAlumnoBase64 && student.qrAlumnoBase64.trim() !== '';
-                    const initials = student.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                let accordionsHTML = '';
 
-                    return `
-                        <div class="student-card" data-id="${student.id}">
-                            <div class="student-header">
-                                <div class="student-avatar">${initials}</div>
-                                <div class="student-info">
-                                    <h3 class="student-name">${student.nombre}</h3>
-                                    <p class="student-code">${student.codigo}</p>
+                // Render courses with students
+                this.coursesData.forEach((course, index) => {
+                    const isOpen = index === 0; // First course open by default
+                    accordionsHTML += this.renderCourseSection(course, isOpen);
+                });
+
+                // Render students without course
+                if (this.noCourseData.totalEstudiantes > 0) {
+                    accordionsHTML += this.renderNoCourseSection(this.noCourseData);
+                }
+
+                container.innerHTML = accordionsHTML;
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            renderCourseSection(course, isOpen = false) {
+                const { cursoId, cursoNombre, totalEstudiantes, estudiantes } = course;
+
+                const studentsHTML = estudiantes.map(student => this.renderStudentCard(student)).join('');
+
+                return `
+                    <div class="accordion-section">
+                        <div class="accordion-header ${isOpen ? 'active' : ''}" onclick="studentsManager.toggleAccordion(this)">
+                            <div class="accordion-title">
+                                <div class="accordion-icon">
+                                    <i data-lucide="book-open"></i>
+                                </div>
+                                <div class="accordion-info">
+                                    <h3>${cursoNombre}</h3>
+                                    <p>${totalEstudiantes} estudiante${totalEstudiantes !== 1 ? 's' : ''} inscrito${totalEstudiantes !== 1 ? 's' : ''}</p>
                                 </div>
                             </div>
-
-                            <div class="student-meta">
-                                <div class="meta-item">
-                                    <div class="meta-label">ID</div>
-                                    <div class="meta-value">#${student.id}</div>
+                            <div class="accordion-stats">
+                                <div class="accordion-badge ${isOpen ? 'active' : ''}">
+                                    <i data-lucide="users"></i>
+                                    <span>${totalEstudiantes}</span>
                                 </div>
-                                <div class="meta-item">
-                                    <div class="meta-label">Estado QR</div>
-                                    <div class="meta-value" style="color: ${hasQR ? 'var(--success)' : 'var(--warning)'}">
-                                        ${hasQR ? 'Disponible' : 'Pendiente'}
-                                    </div>
+                                <div class="accordion-toggle">
+                                    <i data-lucide="chevron-down"></i>
                                 </div>
-                                <div class="meta-item">
-                                    <div class="meta-label">Creado</div>
-                                    <div class="meta-value">${new Date(student.fechaCreacion || Date.now()).toLocaleDateString()}</div>
-                                </div>
-                            </div>
-
-                            <div class="student-actions">
-                                <button class="action-btn ${hasQR ? 'qr-available' : 'qr-missing'}"
-                                        onclick="studentsManager.${hasQR ? 'showQR' : 'generateQR'}(${student.id})"
-                                        title="${hasQR ? 'Ver código QR' : 'Generar código QR'}">
-                                    <i data-lucide="${hasQR ? 'qr-code' : 'refresh-cw'}"></i>
-                                    ${hasQR ? 'Ver QR' : 'Generar QR'}
-                                </button>
-                                <button class="action-btn" onclick="studentsManager.editStudent(${student.id})" title="Editar estudiante">
-                                    <i data-lucide="edit-3"></i>
-                                    Editar
-                                </button>
-                                <button class="action-btn" onclick="studentsManager.deleteStudent(${student.id})" title="Eliminar estudiante">
-                                    <i data-lucide="trash-2"></i>
-                                    Eliminar
-                                </button>
                             </div>
                         </div>
-                    `;
-                }).join('');
+                        <div class="accordion-body ${isOpen ? 'active' : ''}">
+                            <div class="accordion-content">
+                                ${estudiantes.length > 0 ? `
+                                    <div class="students-grid">
+                                        ${studentsHTML}
+                                    </div>
+                                ` : `
+                                    <div class="empty-course">
+                                        <i data-lucide="user-x"></i>
+                                        <p>No hay estudiantes inscritos en este curso</p>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
 
-                container.innerHTML = `<div class="students-grid">${studentsHTML}</div>`;
+            renderNoCourseSection(noCourseData) {
+                const { totalEstudiantes, estudiantes } = noCourseData;
 
+                if (totalEstudiantes === 0) return '';
+
+                const studentsHTML = estudiantes.map(student => this.renderStudentCard(student)).join('');
+
+                return `
+                    <div class="accordion-section">
+                        <div class="accordion-header" onclick="studentsManager.toggleAccordion(this)">
+                            <div class="accordion-title">
+                                <div class="accordion-icon no-course">
+                                    <i data-lucide="alert-circle"></i>
+                                </div>
+                                <div class="accordion-info">
+                                    <h3>Sin Curso Asignado</h3>
+                                    <p>${totalEstudiantes} estudiante${totalEstudiantes !== 1 ? 's' : ''} sin curso</p>
+                                </div>
+                            </div>
+                            <div class="accordion-stats">
+                                <div class="accordion-badge">
+                                    <i data-lucide="users"></i>
+                                    <span>${totalEstudiantes}</span>
+                                </div>
+                                <div class="accordion-toggle">
+                                    <i data-lucide="chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="accordion-content">
+                                <div class="students-grid">
+                                    ${studentsHTML}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderStudentCard(student) {
+                const hasQR = student.qrAlumnoBase64 && student.qrAlumnoBase64.trim() !== '';
+                const initials = student.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+
+                return `
+                    <div class="student-card" data-id="${student.id}">
+                        <div class="student-header">
+                            <div class="student-avatar">${initials}</div>
+                            <div class="student-info">
+                                <h3 class="student-name">${student.nombre}</h3>
+                                <p class="student-code">${student.codigo}</p>
+                            </div>
+                        </div>
+
+                        <div class="student-meta">
+                            <div class="meta-item">
+                                <div class="meta-label">ID</div>
+                                <div class="meta-value">#${student.id}</div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Estado QR</div>
+                                <div class="meta-value" style="color: ${hasQR ? 'var(--success)' : 'var(--warning)'}">
+                                    ${hasQR ? 'Disponible' : 'Pendiente'}
+                                </div>
+                            </div>
+                            <div class="meta-item">
+                                <div class="meta-label">Creado</div>
+                                <div class="meta-value">${new Date(student.fechaCreacion || Date.now()).toLocaleDateString()}</div>
+                            </div>
+                        </div>
+
+                        <div class="student-actions">
+                            <button class="action-btn ${hasQR ? 'qr-available' : 'qr-missing'}"
+                                    onclick="studentsManager.${hasQR ? 'showQR' : 'generateQR'}(${student.id})"
+                                    title="${hasQR ? 'Ver código QR' : 'Generar código QR'}">
+                                <i data-lucide="${hasQR ? 'qr-code' : 'refresh-cw'}"></i>
+                                ${hasQR ? 'Ver QR' : 'Generar QR'}
+                            </button>
+                            <button class="action-btn" onclick="studentsManager.editStudent(${student.id})" title="Editar estudiante">
+                                <i data-lucide="edit-3"></i>
+                                Editar
+                            </button>
+                            <button class="action-btn" onclick="studentsManager.deleteStudent(${student.id})" title="Eliminar estudiante">
+                                <i data-lucide="trash-2"></i>
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            toggleAccordion(headerElement) {
+                const isActive = headerElement.classList.contains('active');
+                const body = headerElement.nextElementSibling;
+
+                headerElement.classList.toggle('active');
+                body.classList.toggle('active');
+
+                // Recreate icons for the toggle arrow animation
                 if (window.lucide) {
                     lucide.createIcons();
                 }
@@ -1387,18 +1662,65 @@
 
             filterStudents(searchTerm) {
                 const term = searchTerm.toLowerCase().trim();
+                const container = document.getElementById('studentsContainer');
 
                 if (!term) {
-                    this.filteredStudents = [...this.students];
+                    // Show all sections
+                    const sections = container.querySelectorAll('.accordion-section');
+                    sections.forEach(section => section.style.display = 'block');
+
+                    const cards = container.querySelectorAll('.student-card');
+                    cards.forEach(card => card.style.display = 'block');
+
+                    container.classList.remove('search-active');
                 } else {
-                    this.filteredStudents = this.students.filter(student =>
-                        student.nombre.toLowerCase().includes(term) ||
-                        student.codigo.toLowerCase().includes(term) ||
-                        student.id.toString().includes(term)
-                    );
+                    // Filter students
+                    container.classList.add('search-active');
+
+                    const cards = container.querySelectorAll('.student-card');
+                    let hasVisibleStudents = {};
+
+                    cards.forEach(card => {
+                        const student = this.students.find(s => s.id == card.dataset.id);
+                        const matches = student && (
+                            student.nombre.toLowerCase().includes(term) ||
+                            student.codigo.toLowerCase().includes(term) ||
+                            student.id.toString().includes(term)
+                        );
+
+                        card.style.display = matches ? 'block' : 'none';
+
+                        // Track which sections have visible students
+                        const section = card.closest('.accordion-section');
+                        if (section && matches) {
+                            hasVisibleStudents[section.dataset.section || 'other'] = true;
+                        }
+                    });
+
+                    // Show/hide sections based on whether they have visible students
+                    const sections = container.querySelectorAll('.accordion-section');
+                    sections.forEach((section, index) => {
+                        section.dataset.section = `section-${index}`;
+                        const hasVisible = Array.from(section.querySelectorAll('.student-card'))
+                            .some(card => card.style.display !== 'none');
+
+                        if (hasVisible) {
+                            section.style.display = 'block';
+                            section.classList.add('matches-search');
+                            // Auto-expand sections with matches
+                            section.querySelector('.accordion-header').classList.add('active');
+                            section.querySelector('.accordion-body').classList.add('active');
+                        } else {
+                            section.style.display = 'none';
+                            section.classList.remove('matches-search');
+                        }
+                    });
                 }
 
-                this.renderStudents();
+                // Recreate icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
             }
 
             updateStats() {

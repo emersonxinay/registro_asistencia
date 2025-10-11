@@ -177,10 +177,10 @@
                                     </td>
                                     <td>
                                         <div class="acciones-estudiante">
-                                            <a href="@Url.Action("PerfilEstudiante", "Docente", new { id = estudiante.Id })" class="btn-icon" title="Ver Perfil">
+                                            <a href="/docente/estudiantes/@estudiante.Id/perfil" class="btn-icon" title="Ver Perfil">
                                                 <i class="fas fa-user"></i>
                                             </a>
-                                            <a href="@Url.Action("AsistenciasEstudiante", "Docente", new { estudianteId = estudiante.Id, cursoId = Model.Id })" class="btn-icon" title="Ver Asistencias">
+                                            <a href="/docente/estudiantes/@estudiante.Id/asistencias?cursoId=@Model.Id" class="btn-icon" title="Ver Asistencias">
                                                 <i class="fas fa-chart-line"></i>
                                             </a>
                                         </div>

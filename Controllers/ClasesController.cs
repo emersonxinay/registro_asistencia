@@ -46,7 +46,17 @@ public class ClasesController : ControllerBase
         try
         {
             var clases = await _dataService.GetClasesAsync();
-            return Ok(clases ?? new List<Clase>());
+
+            // Si es Admin, devolver todas las clases
+            if (IsAdmin())
+            {
+                return Ok(clases ?? new List<Clase>());
+            }
+
+            // Si es Docente, filtrar solo sus clases
+            var userId = GetCurrentUserId();
+            var misClases = clases.Where(c => c.DocenteId == userId).ToList();
+            return Ok(misClases);
         }
         catch (Exception ex)
         {
@@ -59,8 +69,16 @@ public class ClasesController : ControllerBase
     {
         try
         {
-            var userId = GetCurrentUserId();
             var todasClases = await _dataService.GetClasesAsync();
+
+            // Si es Admin, devolver todas las clases
+            if (IsAdmin())
+            {
+                return Ok(todasClases ?? new List<Clase>());
+            }
+
+            // Si es Docente, filtrar solo sus clases
+            var userId = GetCurrentUserId();
             var misClases = todasClases.Where(c => c.DocenteId == userId).ToList();
 
             return Ok(misClases);
@@ -79,6 +97,14 @@ public class ClasesController : ControllerBase
             var clase = await _dataService.GetClaseAsync(id);
             if (clase == null)
                 return NotFound($"Clase con ID {id} no encontrada");
+
+            // Verificar acceso
+            var userId = GetCurrentUserId();
+            if (!await TieneAccesoClase(id, userId))
+            {
+                return Forbid();
+            }
+
             return Ok(clase);
         }
         catch (Exception ex)
@@ -90,10 +116,17 @@ public class ClasesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] ClaseCreateDto dto)
     {
+        // Verificar acceso
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(id, userId))
+        {
+            return Forbid();
+        }
+
         var updated = await _dataService.UpdateClaseAsync(id, dto);
         if (!updated)
             return NotFound();
-        
+
         var clase = await _dataService.GetClaseAsync(id);
         return Ok(clase);
     }
@@ -101,23 +134,37 @@ public class ClasesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
+        // Verificar acceso
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(id, userId))
+        {
+            return Forbid();
+        }
+
         var deleted = await _dataService.DeleteClaseAsync(id);
         if (!deleted)
             return NotFound();
-        
+
         return NoContent();
     }
 
     [HttpPost("{id}/cerrar")]
     public async Task<IActionResult> Cerrar(int id)
     {
+        // Verificar acceso
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(id, userId))
+        {
+            return Forbid();
+        }
+
         var clase = await _dataService.GetClaseAsync(id);
         if (clase == null)
             return NotFound();
-        
+
         if (clase.FinUtc.HasValue)
             return BadRequest("La clase ya está cerrada.");
-        
+
         await _dataService.CerrarClaseAsync(id);
         return Ok(clase);
     }
@@ -125,10 +172,17 @@ public class ClasesController : ControllerBase
     [HttpPost("{id}/reabrir")]
     public async Task<IActionResult> Reabrir(int id)
     {
+        // Verificar acceso
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(id, userId))
+        {
+            return Forbid();
+        }
+
         var result = await _dataService.ReabrirClaseAsync(id);
         if (!result)
             return BadRequest("No se pudo reabrir la clase.");
-        
+
         var clase = await _dataService.GetClaseAsync(id);
         return Ok(clase);
     }
@@ -138,6 +192,13 @@ public class ClasesController : ControllerBase
     {
         try
         {
+            // Verificar acceso
+            var userId = GetCurrentUserId();
+            if (!await TieneAccesoClase(id, userId))
+            {
+                return Forbid();
+            }
+
             var claseNueva = await _dataService.DuplicarClaseAsync(id);
             return Ok(claseNueva);
         }
@@ -152,6 +213,13 @@ public class ClasesController : ControllerBase
     {
         try
         {
+            // Verificar acceso
+            var userId = GetCurrentUserId();
+            if (!await TieneAccesoClase(id, userId))
+            {
+                return Forbid();
+            }
+
             var clase = await _dataService.GetClaseAsync(id);
             if (clase == null)
             {
@@ -197,10 +265,17 @@ public class ClasesController : ControllerBase
     [HttpGet("{id}/qr.png")]
     public async Task<IActionResult> GetQrPng(int id)
     {
+        // Verificar acceso
+        var userId = GetCurrentUserId();
+        if (!await TieneAccesoClase(id, userId))
+        {
+            return Forbid();
+        }
+
         var clase = await _dataService.GetClaseAsync(id);
         if (clase == null)
             return NotFound();
-        
+
         if (!clase.Activa)
             return BadRequest(new { message = "Clase no activa." });
 
@@ -218,5 +293,25 @@ public class ClasesController : ControllerBase
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out int userId) ? userId : 1;
+    }
+
+    // Método helper para verificar si el usuario es Admin
+    private bool IsAdmin()
+    {
+        return User.IsInRole("Administrador");
+    }
+
+    // Método helper para verificar si el usuario tiene acceso a una clase
+    private async Task<bool> TieneAccesoClase(int claseId, int docenteId)
+    {
+        // Si es Admin, tiene acceso a todas las clases
+        if (IsAdmin())
+        {
+            return true;
+        }
+
+        // Si es Docente, solo tiene acceso a sus propias clases
+        var clase = await _dataService.GetClaseAsync(claseId);
+        return clase != null && clase.DocenteId == docenteId;
     }
 }

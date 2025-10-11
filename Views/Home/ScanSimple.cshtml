@@ -160,11 +160,11 @@
 
         /* Status Card */
         .status-card {
-            margin: 1.5rem;
+            margin: 1rem 1.5rem;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
-            padding: 1rem;
+            padding: 0.75rem 1rem;
             position: relative;
             overflow: hidden;
         }
@@ -236,8 +236,9 @@
         }
         /* Steps Section */
         .steps-section {
-            margin: 1.5rem;
+            margin: 1rem 1.5rem;
             position: relative;
+            display: none; /* Hidden by default on mobile, shown on desktop */
         }
 
         .steps-header {
@@ -312,34 +313,34 @@
         }
         /* Scanner Section */
         .scanner-section {
-            margin: 1.5rem;
+            margin: 1rem 1.5rem;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            padding: 1rem;
             text-align: center;
         }
 
         .scanner-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .scanner-icon {
-            font-size: 3rem;
-            margin-bottom: 0.75rem;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
             display: block;
             opacity: 0.8;
         }
 
         .scanner-title {
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .scanner-subtitle {
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
         }
 
@@ -512,11 +513,11 @@
         }
         /* Form Section */
         .form-section {
-            margin: 1.5rem;
+            margin: 1rem 1.5rem;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            padding: 1rem;
             position: relative;
         }
 
@@ -704,11 +705,12 @@
         }
         /* Help Section */
         .help-section {
-            margin: 1.5rem;
+            margin: 1rem 1.5rem 1.5rem;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-xl);
-            padding: 1.5rem;
+            padding: 1rem;
+            display: none; /* Hidden on mobile by default */
         }
 
         .help-header {
@@ -804,6 +806,14 @@
             }
         }
         /* Responsive Design */
+        @@media (min-width: 768px) {
+            /* Show help and steps on desktop */
+            .steps-section,
+            .help-section {
+                display: block;
+            }
+        }
+
         @@media (max-width: 640px) {
             .app-container {
                 padding: 0;
@@ -816,62 +826,135 @@
             }
 
             .header {
-                padding: 2rem 1.5rem 1.5rem;
+                padding: 1.25rem 1rem 1rem;
+            }
+
+            .brand {
+                font-size: 1rem;
+            }
+
+            .app-icon {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .header p {
+                font-size: 0.8125rem;
+            }
+
+            .status-card {
+                margin: 0.75rem 1rem;
+                padding: 0.75rem;
             }
 
             .status-details {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
                 gap: 0.5rem;
             }
 
             .status-item {
-                padding: 1rem;
+                padding: 0.75rem;
             }
 
             .scanner-section,
             .form-section,
-            .help-section,
             .message-container {
-                margin: 1rem;
+                margin: 0.75rem 1rem;
+                padding: 0.75rem;
             }
 
             .camera-view {
-                height: 200px;
+                height: 240px;
             }
 
-            .help-item {
-                padding: 1rem;
+            .camera-hint {
+                font-size: 0.75rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .scanner-btn,
+            .btn {
+                padding: 0.875rem 1.25rem;
+                font-size: 0.9375rem;
+                min-height: 48px; /* Touch-friendly */
+            }
+
+            /* Improve touch target size */
+            .form-input {
+                padding: 0.875rem 1rem 0.875rem 2.75rem;
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 48px;
+            }
+
+            .input-icon {
+                left: 0.875rem;
             }
         }
 
         @@media (max-width: 480px) {
             .header {
-                padding: 1.5rem 1rem 1rem;
+                padding: 1rem 0.75rem 0.75rem;
             }
 
             .brand {
-                font-size: 1.125rem;
+                font-size: 0.9375rem;
+            }
+
+            .app-icon {
+                font-size: 2rem;
+                margin-bottom: 0.25rem;
             }
 
             .header h1 {
-                font-size: 1.375rem;
+                font-size: 1.125rem;
             }
 
+            .header p {
+                font-size: 0.75rem;
+            }
+
+            .status-card,
             .scanner-section,
             .form-section,
-            .help-section,
             .message-container {
-                margin: 0.75rem;
-            }
-
-            .step {
+                margin: 0.5rem 0.75rem;
                 padding: 0.75rem;
             }
 
-            .step-number {
-                width: 1.75rem;
-                height: 1.75rem;
-                font-size: 0.75rem;
+            .status-item {
+                padding: 0.625rem;
+            }
+
+            .scanner-header {
+                margin-bottom: 0.75rem;
+            }
+
+            .scanner-icon {
+                font-size: 2rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .scanner-title {
+                font-size: 0.9375rem;
+            }
+
+            .camera-view {
+                height: 220px;
+            }
+
+            .form-title {
+                font-size: 0.9375rem;
+            }
+
+            .form-subtitle {
+                font-size: 0.8125rem;
             }
         }
 
@@ -1284,9 +1367,22 @@
             await submitAttendance(codigoAlumno);
         });
 
+        // Check if already registered (session control)
+        let sessionAlreadyRegistered = sessionStorage.getItem(`clase_${claseId}_registered`);
+
         // Unified attendance submission function
         async function submitAttendance(codigoAlumno) {
             if (isSubmitting) return;
+
+            // Check if already registered in this session
+            if (sessionAlreadyRegistered) {
+                showMessage('⚠️ Ya registraste tu asistencia en esta sesión. Solo puedes escanear UNA vez por celular/dispositivo.', 'warning');
+                form.reset();
+                if (isScanning) {
+                    stopScanning();
+                }
+                return;
+            }
 
             isSubmitting = true;
             submitBtn.classList.add('hidden');
@@ -1310,7 +1406,33 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    showMessage('🎉 ¡Asistencia registrada exitosamente! Tu presencia ha sido confirmada.', 'success');
+                    // Mark as registered in this session
+                    sessionStorage.setItem(`clase_${claseId}_registered`, codigoAlumno);
+                    sessionAlreadyRegistered = codigoAlumno;
+
+                    const estudiante = result.estudiante || {};
+                    const estado = estudiante.estado || 'Registrado';
+                    const minutosRetraso = estudiante.minutosRetraso || 0;
+
+                    let estadoEmoji = '✅';
+                    let estadoMsg = '';
+                    if (estado === 'Presente') {
+                        estadoEmoji = '✅';
+                        estadoMsg = '¡Llegaste a tiempo!';
+                    } else if (estado === 'Tardanza') {
+                        estadoEmoji = '⏰';
+                        estadoMsg = `Llegaste ${minutosRetraso} minutos tarde.`;
+                    } else if (estado === 'Ausente') {
+                        estadoEmoji = '❌';
+                        estadoMsg = 'Registrado fuera de horario.';
+                    }
+
+                    if (result.yaRegistrado) {
+                        showMessage(`${estadoEmoji} ${result.mensaje}<br><strong>Tu estado:</strong> ${estado}. ${estadoMsg}`, 'warning');
+                    } else {
+                        showMessage(`🎉 ${result.mensaje}<br><strong>Tu estado:</strong> ${estado}. ${estadoMsg}`, 'success');
+                    }
+
                     form.reset();
 
                     // Stop scanning if active
@@ -1318,13 +1440,13 @@
                         stopScanning();
                     }
 
-                    // Auto-redirect after success (optional)
+                    // Load and show attendance list
                     setTimeout(() => {
-                        showMessage('Puedes cerrar esta ventana. ¡Gracias por registrar tu asistencia!', 'success');
-                    }, 3000);
+                        loadAttendanceList();
+                    }, 2000);
 
                 } else {
-                    throw new Error(result.mensaje || 'Error al registrar asistencia');
+                    throw new Error(result.message || result.mensaje || 'Error al registrar asistencia');
                 }
 
             } catch (error) {
@@ -1332,13 +1454,13 @@
                 let errorMsg = error.message;
 
                 // Provide helpful error messages
-                if (errorMsg.includes('alumno no encontrado')) {
-                    errorMsg = 'ID de estudiante no encontrado. Verifica tu número de ID.';
+                if (errorMsg.includes('alumno no encontrado') || errorMsg.includes('no existe')) {
+                    errorMsg = 'Código de estudiante no encontrado. Verifica tu código.';
                 } else if (errorMsg.includes('clase no activa')) {
                     errorMsg = 'Esta clase ya no está activa. Contacta a tu profesor.';
                 } else if (errorMsg.includes('ya registrada')) {
                     errorMsg = 'Tu asistencia ya fue registrada para esta clase.';
-                } else if (errorMsg.includes('token no válido') || errorMsg.includes('token expirado')) {
+                } else if (errorMsg.includes('token no válido') || errorMsg.includes('token expirado') || errorMsg.includes('Token QR')) {
                     errorMsg = 'El enlace de la clase ha expirado. Solicita un nuevo código QR al profesor.';
                 }
 
@@ -1347,6 +1469,69 @@
                 isSubmitting = false;
                 submitBtn.classList.remove('hidden');
                 loadingBtn.classList.add('hidden');
+            }
+        }
+
+        // Load attendance list for the class
+        async function loadAttendanceList() {
+            try {
+                const response = await fetch(`/api/asistencias/clase/${claseId}/lista-publica?nonce=${currentNonce}`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+
+                // Create attendance list HTML
+                let listaHtml = `
+                    <div class="attendance-list" style="margin: 1rem 1.5rem; background: white; border-radius: 1rem; padding: 1rem; border: 1px solid #e5e7eb;">
+                        <h3 style="text-align: center; margin-bottom: 1rem; font-size: 1.125rem; color: #2c3e50;">📋 Lista de Asistencias</h3>
+                        <div style="background: #f9fafb; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; text-align: center;">
+                            <strong>${data.curso.nombre}</strong><br>
+                            <small style="color: #6b7280;">${data.clase.asignatura}</small>
+                        </div>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                `;
+
+                if (data.asistencias && data.asistencias.length > 0) {
+                    data.asistencias.forEach(asist => {
+                        const estadoColor = asist.estado === 'Presente' ? '#10b981' :
+                                          asist.estado === 'Tardanza' ? '#f59e0b' : '#ef4444';
+                        const estadoEmoji = asist.estado === 'Presente' ? '✅' :
+                                           asist.estado === 'Tardanza' ? '⏰' : '❌';
+
+                        listaHtml += `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #1f2937;">${asist.alumnoNombre || 'N/A'}</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">${asist.alumnoCodigo || 'N/A'}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: ${estadoColor}; font-weight: 600; font-size: 0.875rem;">
+                                        ${estadoEmoji} ${asist.estado}
+                                    </div>
+                                    ${asist.minutosRetraso > 0 ? `<div style="font-size: 0.75rem; color: #9ca3af;">+${asist.minutosRetraso} min</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    listaHtml += `<div style="text-align: center; padding: 2rem; color: #9ca3af;">No hay asistencias registradas aún</div>`;
+                }
+
+                listaHtml += `
+                        </div>
+                    </div>
+                `;
+
+                // Append to page
+                const container = document.querySelector('.container');
+                const existingList = document.querySelector('.attendance-list');
+                if (existingList) {
+                    existingList.remove();
+                }
+                container.insertAdjacentHTML('beforeend', listaHtml);
+
+            } catch (error) {
+                console.error('Error loading attendance list:', error);
             }
         }
 

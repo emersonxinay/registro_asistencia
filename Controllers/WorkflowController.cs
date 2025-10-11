@@ -16,17 +16,20 @@ public class WorkflowController : Controller
     private readonly IAttendanceService _attendanceService;
     private readonly IQrService _qrService;
     private readonly IConfiguration _configuration;
+    private readonly ITimeZoneService _timeZoneService;
 
     public WorkflowController(
-        ApplicationDbContext context, 
+        ApplicationDbContext context,
         IAttendanceService attendanceService,
         IQrService qrService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ITimeZoneService timeZoneService)
     {
         _context = context;
         _attendanceService = attendanceService;
         _qrService = qrService;
         _configuration = configuration;
+        _timeZoneService = timeZoneService;
     }
 
     // PASO 1: Seleccionar Curso
@@ -140,14 +143,17 @@ public class WorkflowController : Controller
             return RedirectToAction("SeleccionarCurso");
         }
 
+        // Obtener fecha y hora actual de Chile
+        var chileNow = _timeZoneService.GetChileNow();
+
         var viewModel = new CrearClaseViewModel
         {
             CursoId = cursoId,
             RamoId = ramoId,
             CursoNombre = tieneAcceso.curso!.Nombre,
             RamoNombre = tieneAcceso.ramo!.Nombre,
-            FechaClase = DateTime.Today,
-            HoraInicio = DateTime.Now.TimeOfDay,
+            FechaClase = chileNow.Date,
+            HoraInicio = chileNow.TimeOfDay,
             DuracionMinutos = 90,
             ConfiguracionAsistencia = new ConfiguracionAsistenciaViewModel
             {
@@ -190,7 +196,10 @@ public class WorkflowController : Controller
         try
         {
             var docenteId = GetCurrentUserId();
-            var inicioUtc = model.FechaClase.Date.Add(model.HoraInicio).ToUniversalTime();
+
+            // Convertir la fecha y hora de Chile a UTC correctamente
+            var fechaHoraChile = model.FechaClase.Date.Add(model.HoraInicio);
+            var inicioUtc = _timeZoneService.ConvertToUtc(fechaHoraChile);
 
             // Crear la clase
             var clase = new Clase
@@ -235,11 +244,18 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
-        var clase = await _context.Clases
-            .Include(c => c.Ramo)
-            .ThenInclude(r => r!.Curso)
-            .Include(c => c.Docente)
-            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+        // Si es Admin, no filtrar por DocenteId
+        var clase = IsAdmin()
+            ? await _context.Clases
+                .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+                .Include(c => c.Docente)
+                .FirstOrDefaultAsync(c => c.Id == claseId)
+            : await _context.Clases
+                .Include(c => c.Ramo)
+                .ThenInclude(r => r!.Curso)
+                .Include(c => c.Docente)
+                .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
 
         if (clase == null)
         {
@@ -280,6 +296,11 @@ public class WorkflowController : Controller
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out int userId) ? userId : 1;
+    }
+
+    private bool IsAdmin()
+    {
+        return User.IsInRole("Administrador");
     }
 
     private async Task<(bool success, string message, Curso? curso, Ramo? ramo)> VerificarAccesosCursoRamo(int docenteId, int cursoId, int ramoId)
@@ -398,11 +419,16 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
-        // Primero obtener la clase básica
-        var clase = await _context.Clases
-            .Include(c => c.Ramo)
-                .ThenInclude(r => r!.Curso)
-            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+        // Primero obtener la clase básica (Admin puede ver todas)
+        var clase = IsAdmin()
+            ? await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .FirstOrDefaultAsync(c => c.Id == claseId)
+            : await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
 
         if (clase == null)
             return NotFound();
@@ -428,11 +454,18 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
-        var clase = await _context.Clases
-            .Include(c => c.Ramo)
-                .ThenInclude(r => r!.Curso)
-            .Include(c => c.Docente)
-            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+        // Admin puede gestionar todas las clases
+        var clase = IsAdmin()
+            ? await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .Include(c => c.Docente)
+                .FirstOrDefaultAsync(c => c.Id == claseId)
+            : await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .Include(c => c.Docente)
+                .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
 
         if (clase == null)
             return NotFound();
@@ -477,8 +510,10 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
-        var clase = await _context.Clases
-            .FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
+        // Admin puede finalizar todas las clases
+        var clase = IsAdmin()
+            ? await _context.Clases.FirstOrDefaultAsync(c => c.Id == claseId)
+            : await _context.Clases.FirstOrDefaultAsync(c => c.Id == claseId && c.DocenteId == docenteId);
 
         if (clase == null)
             return NotFound();
@@ -498,13 +533,22 @@ public class WorkflowController : Controller
     {
         var docenteId = GetCurrentUserId();
 
-        var clases = await _context.Clases
-            .Include(c => c.Ramo)
-                .ThenInclude(r => r!.Curso)
-            .Where(c => c.DocenteId == docenteId)
-            .OrderByDescending(c => c.InicioUtc)
-            .Take(50) // Limitar a 50 clases más recientes
-            .ToListAsync();
+        // Admin puede ver todas las clases, Docente solo las suyas
+        var clases = IsAdmin()
+            ? await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .Include(c => c.Docente)
+                .OrderByDescending(c => c.InicioUtc)
+                .Take(50)
+                .ToListAsync()
+            : await _context.Clases
+                .Include(c => c.Ramo)
+                    .ThenInclude(r => r!.Curso)
+                .Where(c => c.DocenteId == docenteId)
+                .OrderByDescending(c => c.InicioUtc)
+                .Take(50)
+                .ToListAsync();
 
         ViewData["Title"] = "Mis Clases";
         return View("MisClases", clases);

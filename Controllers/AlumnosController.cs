@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using registroAsistencia.Models;
 using registroAsistencia.Services;
+using registroAsistencia.Data;
 
 namespace registroAsistencia.Controllers;
 
@@ -13,12 +15,14 @@ public class AlumnosController : ControllerBase
     private readonly IDataService _dataService;
     private readonly IQrService _qrService;
     private readonly ICsvService _csvService;
+    private readonly ApplicationDbContext _context;
 
-    public AlumnosController(IDataService dataService, IQrService qrService, ICsvService csvService)
+    public AlumnosController(IDataService dataService, IQrService qrService, ICsvService csvService, ApplicationDbContext context)
     {
         _dataService = dataService;
         _qrService = qrService;
         _csvService = csvService;
+        _context = context;
     }
 
     [HttpPost]
@@ -41,11 +45,33 @@ public class AlumnosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] string? codigo = null)
+    public async Task<IActionResult> GetAll([FromQuery] string? codigo = null, [FromQuery] bool soloMisCursos = false)
     {
         try
         {
             var alumnos = await _dataService.GetAlumnosAsync();
+
+            // Si soloMisCursos es true, filtrar solo estudiantes de cursos del docente
+            if (soloMisCursos && !IsAdmin())
+            {
+                var userId = GetCurrentUserId();
+
+                // Obtener los IDs de los cursos del docente a través de DocenteCurso
+                var misCursosIds = await _context.DocenteCursos
+                    .Where(dc => dc.DocenteId == userId && dc.Activo)
+                    .Select(dc => dc.CursoId)
+                    .ToListAsync();
+
+                // Obtener los IDs de los alumnos inscritos en esos cursos
+                var alumnosIds = await _context.AlumnoCursos
+                    .Where(ac => misCursosIds.Contains(ac.CursoId))
+                    .Select(ac => ac.AlumnoId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Filtrar solo los alumnos que están en mis cursos
+                alumnos = alumnos.Where(a => alumnosIds.Contains(a.Id));
+            }
 
             // Si se proporciona un código, filtrar por él
             if (!string.IsNullOrEmpty(codigo))
@@ -59,6 +85,19 @@ public class AlumnosController : ControllerBase
         {
             return StatusCode(500, new { message = "Error al obtener alumnos: " + ex.Message });
         }
+    }
+
+    // Método helper para verificar si el usuario es Admin
+    private bool IsAdmin()
+    {
+        return User.IsInRole("Administrador");
+    }
+
+    // Método helper para obtener el ID del usuario actual
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out int userId) ? userId : 1;
     }
 
     [HttpGet("{id}")]
@@ -348,5 +387,83 @@ Pedro González Ramírez";
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(csvContent);
         return File(bytes, "text/csv", "plantilla_alumnos.csv");
+    }
+
+    // Obtener estudiantes agrupados por curso
+    [HttpGet("grouped-by-courses")]
+    public async Task<IActionResult> GetGroupedByCourses()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var isAdmin = IsAdmin();
+
+            // Obtener todos los cursos relevantes (todos si es Admin, solo los del docente si no)
+            IQueryable<Curso> cursosQuery = _context.Cursos;
+
+            if (!isAdmin)
+            {
+                // Filtrar solo cursos del docente
+                var misCursosIds = await _context.DocenteCursos
+                    .Where(dc => dc.DocenteId == userId && dc.Activo)
+                    .Select(dc => dc.CursoId)
+                    .ToListAsync();
+
+                cursosQuery = cursosQuery.Where(c => misCursosIds.Contains(c.Id));
+            }
+
+            var cursos = await cursosQuery.ToListAsync();
+
+            // Obtener todos los alumnos
+            var alumnos = await _dataService.GetAlumnosAsync();
+
+            // Agrupar estudiantes por curso
+            var cursosConEstudiantes = new List<object>();
+
+            foreach (var curso in cursos)
+            {
+                // Obtener IDs de alumnos en este curso
+                var alumnosIds = await _context.AlumnoCursos
+                    .Where(ac => ac.CursoId == curso.Id)
+                    .Select(ac => ac.AlumnoId)
+                    .ToListAsync();
+
+                var estudiantesCurso = alumnos
+                    .Where(a => alumnosIds.Contains(a.Id))
+                    .ToList();
+
+                cursosConEstudiantes.Add(new
+                {
+                    cursoId = curso.Id,
+                    cursoNombre = curso.Nombre,
+                    totalEstudiantes = estudiantesCurso.Count,
+                    estudiantes = estudiantesCurso
+                });
+            }
+
+            // Obtener estudiantes sin curso asignado
+            var todosLosAlumnosEnCursos = await _context.AlumnoCursos
+                .Select(ac => ac.AlumnoId)
+                .Distinct()
+                .ToListAsync();
+
+            var estudiantesSinCurso = alumnos
+                .Where(a => !todosLosAlumnosEnCursos.Contains(a.Id))
+                .ToList();
+
+            return Ok(new
+            {
+                cursos = cursosConEstudiantes,
+                sinCurso = new
+                {
+                    totalEstudiantes = estudiantesSinCurso.Count,
+                    estudiantes = estudiantesSinCurso
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener estudiantes agrupados: " + ex.Message });
+        }
     }
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using registroAsistencia.Data;
 using registroAsistencia.Models;
 using registroAsistencia.Services;
 
@@ -12,11 +14,13 @@ public class CursosController : ControllerBase
 {
     private readonly IDataService _dataService;
     private readonly ILogger<CursosController> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public CursosController(IDataService dataService, ILogger<CursosController> logger)
+    public CursosController(IDataService dataService, ILogger<CursosController> logger, ApplicationDbContext context)
     {
         _dataService = dataService;
         _logger = logger;
+        _context = context;
     }
 
     [HttpGet]
@@ -32,10 +36,22 @@ public class CursosController : ControllerBase
         try
         {
             var userId = GetCurrentUserId();
-            var todosCursos = await _dataService.GetCursosAsync();
-            // Por ahora retornar todos los cursos, pero esto debería filtrarse por docente
-            // cuando se implemente la relación DocenteCurso en el DataService
-            return Ok(todosCursos);
+
+            // Si es Admin, devolver todos los cursos
+            if (IsAdmin())
+            {
+                var todosCursos = await _dataService.GetCursosAsync();
+                return Ok(todosCursos);
+            }
+
+            // Si es Docente, filtrar solo los cursos asignados
+            var misCursos = await _context.DocenteCursos
+                .Where(dc => dc.DocenteId == userId && dc.Activo)
+                .Include(dc => dc.Curso)
+                .Select(dc => dc.Curso)
+                .ToListAsync();
+
+            return Ok(misCursos);
         }
         catch (Exception ex)
         {
@@ -131,5 +147,11 @@ public class CursosController : ControllerBase
     {
         var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         return int.TryParse(userIdClaim, out int userId) ? userId : 1;
+    }
+
+    // Método helper para verificar si el usuario es Admin
+    private bool IsAdmin()
+    {
+        return User.IsInRole("Administrador");
     }
 }
