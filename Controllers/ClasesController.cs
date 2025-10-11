@@ -69,8 +69,16 @@ public class ClasesController : ControllerBase
     {
         try
         {
-            var userId = GetCurrentUserId();
             var todasClases = await _dataService.GetClasesAsync();
+
+            // Si es Admin, devolver todas las clases
+            if (IsAdmin())
+            {
+                return Ok(todasClases ?? new List<Clase>());
+            }
+
+            // Si es Docente, filtrar solo sus clases
+            var userId = GetCurrentUserId();
             var misClases = todasClases.Where(c => c.DocenteId == userId).ToList();
 
             return Ok(misClases);
