@@ -10,7 +10,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Registro Asistencia por QR</title>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Theme System CSS -->
+    <link href="~/css/theme-system.css" rel="stylesheet" />
     <link href="~/css/styles.css" rel="stylesheet" />
+
+    <!-- Theme Initialization Script -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('user-theme-preference') ||
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add('theme-loading');
+        })();
+    </script>
+
     <style>
         :root {
             --primary: #667eea;
@@ -21,25 +35,6 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #3b82f6;
-
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --surface: #ffffff;
-            --surface-hover: #f8fafc;
-
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-
-            --border: #e2e8f0;
-            --border-hover: #cbd5e1;
-
-            --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
             --radius-sm: 0.375rem;
             --radius: 0.5rem;
@@ -848,6 +843,12 @@
     </style>
 </head>
 <body>
+    <!-- Theme Toggle Button (Fixed Position) -->
+    <button class="theme-toggle" id="themeToggle" title="Cambiar modo de color" aria-label="Cambiar tema" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <i data-lucide="moon" class="theme-toggle-icon icon-moon"></i>
+        <i data-lucide="sun" class="theme-toggle-icon icon-sun"></i>
+    </button>
+
     <div class="container">
         <!-- Page Header -->
         <header class="page-header">
@@ -2926,5 +2927,8 @@
         `;
         document.head.appendChild(style);
     </script>
+
+    <!-- Theme Manager Script -->
+    <script src="~/js/theme-manager.js"></script>
 </body>
 </html>

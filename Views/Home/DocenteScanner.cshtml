@@ -9,6 +9,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
+
+    <!-- Theme System CSS -->
+    <link href="~/css/theme-system.css" rel="stylesheet" />
+
+    <!-- Theme Initialization Script -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('user-theme-preference') ||
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add('theme-loading');
+        })();
+    </script>
     <link href="~/css/styles.css" rel="stylesheet" />
     <!-- QR Scanner Library -->
     <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
@@ -338,5 +351,7 @@
             }
         });
     </script>
+    <!-- Theme Manager Script -->
+    <script src="~/js/theme-manager.js"></script>
 </body>
 </html>

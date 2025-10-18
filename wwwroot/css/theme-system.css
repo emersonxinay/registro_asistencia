@@ -518,3 +518,146 @@ select {
 .theme-loading {
   transition: none !important;
 }
+
+/* ================================
+   GLOBAL COLOR FIXES
+   Ensure proper contrast everywhere
+   ================================ */
+
+/* Override any inline white backgrounds to use theme variables */
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Common card, panel, and container elements */
+.card,
+.panel,
+.container,
+.content-box,
+.modal-content,
+.results-container,
+.stat-item,
+.qr-modal-content,
+.qr-code-box {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Tables */
+table,
+.table,
+.attendance-table {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary);
+}
+
+table thead,
+.table thead,
+.attendance-table thead {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary);
+}
+
+table tbody tr,
+.table tbody tr,
+.attendance-table tbody tr {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+table tbody tr:hover,
+.table tbody tr:hover,
+.attendance-table tbody tr:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* Buttons with white backgrounds */
+.btn-primary,
+.tab-btn.active,
+button.active {
+  background: var(--primary) !important;
+  color: var(--text-inverse) !important;
+}
+
+/* Inputs and form elements */
+input,
+textarea,
+select,
+.form-control {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border) !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+  border-color: var(--primary) !important;
+}
+
+/* Modal backgrounds */
+.modal,
+.modal-dialog,
+.modal-body,
+.modal-header,
+.modal-footer {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Alert and message boxes */
+.alert,
+.message-box,
+.notification,
+.toast {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+/* Badges and pills */
+.badge,
+.pill,
+.tag {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Headers and titles */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+}
+
+/* Links */
+a {
+  color: var(--primary);
+}
+
+a:hover {
+  color: var(--primary-dark);
+}
+
+/* Paragraphs */
+p {
+  color: var(--text-secondary);
+}
+
+/* List items */
+li {
+  color: var(--text-primary);
+}
+
+/* Strong and bold */
+strong, b {
+  color: var(--text-primary);
+}
+
+/* Small and muted text */
+small, .text-muted {
+  color: var(--text-muted);
+}
