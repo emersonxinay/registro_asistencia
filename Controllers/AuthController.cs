@@ -109,10 +109,20 @@ public class AuthController : Controller
 
         try
         {
+            // Generar código de docente automáticamente si no se proporcionó
+            string codigoDocente = model.CodigoDocente;
+            if (string.IsNullOrWhiteSpace(codigoDocente))
+            {
+                // Formato: DOC-{timestamp}-{random}
+                var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                var random = new Random().Next(1000, 9999);
+                codigoDocente = $"DOC-{timestamp}-{random}";
+            }
+
             var usuario = await _authService.RegisterAsync(
                 model.Nombre,
                 model.Email,
-                model.CodigoDocente,
+                codigoDocente,
                 model.Password,
                 model.Departamento,
                 false // Los nuevos usuarios no son administradores por defecto
@@ -202,10 +212,9 @@ public class RegisterViewModel
     [StringLength(255, ErrorMessage = "El email no puede exceder 255 caracteres")]
     public string Email { get; set; } = "";
 
-    [Required(ErrorMessage = "El código de docente es requerido")]
     [StringLength(50, ErrorMessage = "El código no puede exceder 50 caracteres")]
     [Display(Name = "Código de Docente")]
-    public string CodigoDocente { get; set; } = "";
+    public string? CodigoDocente { get; set; }
 
     [Required(ErrorMessage = "La contraseña es requerida")]
     [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres")]

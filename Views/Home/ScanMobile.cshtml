@@ -8,6 +8,20 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <title>Registrar Asistencia</title>
+
+    <!-- Theme System CSS -->
+    <link href="~/css/theme-system.css" rel="stylesheet" />
+
+    <!-- Theme Initialization Script -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('user-theme-preference') ||
+                         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add('theme-loading');
+        })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
         * {
@@ -769,5 +783,8 @@
 
         console.log('📱 Registro móvil cargado - Clase:', claseId);
     </script>
+
+    <!-- Theme Manager Script -->
+    <script src="~/js/theme-manager.js"></script>
 </body>
 </html>

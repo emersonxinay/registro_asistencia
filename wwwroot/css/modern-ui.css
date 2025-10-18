@@ -102,13 +102,13 @@
 .brand-name {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--text-primary);
   line-height: 1;
 }
 
 .brand-tagline {
   font-size: 0.75rem;
-  color: var(--gray-500);
+  color: var(--text-secondary);
   line-height: 1;
   margin-top: 0.125rem;
 }
@@ -127,7 +127,7 @@
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--gray-700);
+  color: var(--text-secondary);
   font-weight: 500;
   font-size: 0.875rem;
   transition: var(--transition);
@@ -138,8 +138,8 @@
 }
 
 .nav-item:hover {
-  background: var(--gray-100);
-  color: var(--gray-900);
+  background: var(--bg-hover);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -194,8 +194,8 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  background: white;
-  border: 1px solid var(--gray-200);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   min-width: 16rem;
@@ -219,7 +219,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   text-decoration: none;
-  color: var(--gray-700);
+  color: var(--text-primary);
   transition: var(--transition);
   border: none;
   background: none;
@@ -229,26 +229,26 @@
 }
 
 .dropdown-item:hover {
-  background: var(--gray-50);
-  color: var(--primary-color);
+  background: var(--bg-hover);
+  color: var(--primary);
 }
 
 .dropdown-item small {
-  color: var(--gray-500);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   margin-top: 0.125rem;
 }
 
 .dropdown-item.logout {
   color: var(--danger-color);
-  border-top: 1px solid var(--gray-200);
+  border-top: 1px solid var(--border);
   margin-top: var(--space-2);
   padding-top: var(--space-3);
 }
 
 .dropdown-divider {
   height: 1px;
-  background: var(--gray-200);
+  background: var(--border);
   margin: var(--space-2) 0;
 }
 
@@ -371,19 +371,19 @@
 .welcome-content h1 {
   font-size: 2.25rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--text-primary);
   margin: 0 0 var(--space-2) 0;
 }
 
 .welcome-message {
   font-size: 1.125rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin: 0 0 var(--space-1) 0;
 }
 
 .current-date {
   font-size: 0.875rem;
-  color: var(--gray-500);
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -417,14 +417,14 @@
 }
 
 .btn-secondary {
-  background: white;
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: var(--gray-50);
-  border-color: var(--gray-400);
+  background: var(--bg-hover);
+  border-color: var(--primary);
 }
 
 /* Stats Overview */
@@ -436,8 +436,8 @@
 }
 
 .stat-card {
-  background: white;
-  border: 1px solid var(--gray-200);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
   display: flex;
@@ -513,13 +513,13 @@
 .stat-number {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--text-primary);
   line-height: 1;
 }
 
 .stat-label {
   font-size: 0.875rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   font-weight: 500;
   margin-top: var(--space-1);
 }
@@ -533,34 +533,34 @@
 }
 
 .dashboard-panel {
-  background: white;
-  border: 1px solid var(--gray-200);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   overflow: hidden;
   transition: var(--transition);
 }
 
 .dashboard-panel:hover {
-  border-color: var(--gray-300);
+  border-color: var(--primary);
   box-shadow: var(--shadow-md);
 }
 
 .panel-header {
   padding: var(--space-6);
-  border-bottom: 1px solid var(--gray-200);
-  background: var(--gray-50);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
 }
 
 .panel-header h3 {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--gray-900);
+  color: var(--text-primary);
   margin: 0 0 var(--space-1) 0;
 }
 
 .panel-header p {
   font-size: 0.875rem;
-  color: var(--gray-600);
+  color: var(--text-secondary);
   margin: 0;
 }
 
@@ -579,18 +579,19 @@
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  border: 1px solid var(--gray-200);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--gray-700);
+  color: var(--text-primary);
+  background: var(--bg-primary);
   transition: var(--transition);
   position: relative;
   overflow: hidden;
 }
 
 .action-card:hover {
-  border-color: var(--primary-color);
-  background: var(--gray-50);
+  border-color: var(--primary);
+  background: var(--bg-hover);
   transform: translateX(4px);
 }
 
@@ -897,23 +898,23 @@
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  background: white;
-  border: 1px solid var(--gray-200);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--gray-700);
+  color: var(--text-primary);
   transition: var(--transition);
   font-size: 0.875rem;
 }
 
 .shortcut-item:hover {
-  border-color: var(--primary-color);
-  background: var(--gray-50);
+  border-color: var(--primary);
+  background: var(--bg-hover);
 }
 
 .shortcut-item i {
   margin-right: var(--space-2);
-  color: var(--primary-color);
+  color: var(--primary);
 }
 
 kbd {
@@ -1192,20 +1193,20 @@ kbd {
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--gray-300);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   text-decoration: none;
-  color: var(--gray-700);
+  color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 500;
   transition: var(--transition);
-  background: white;
+  background: var(--bg-primary);
 }
 
 .nav-guest .nav-item:hover {
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-  background: var(--gray-50);
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--bg-hover);
 }
 
 .nav-guest .nav-item:first-child {

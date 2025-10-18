@@ -218,22 +218,19 @@
         }
 
         .expert-card {
-            background: rgba(34, 34, 117, 0.95);
+            background: var(--bg-secondary);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid var(--border);
             border-radius: 20px;
             padding: var(--space-5);
-            box-shadow:
-                0 10px 40px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow-lg);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .expert-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow:
-                0 20px 60px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
         }
 
         .card-header {
@@ -258,13 +255,13 @@
         .card-title {
             font-size: clamp(1.25rem, 3vw, 1.5rem);
             font-weight: 700;
-            color: white;
+            color: var(--text-primary);
             margin: 0;
         }
 
         .card-subtitle {
             font-size: 0.875rem;
-            color: #E6E6F5;
+            color: var(--text-secondary);
             margin: var(--space-2) 0 0 0;
         }
 
@@ -282,7 +279,7 @@
         .form-label {
             display: block;
             font-weight: 600;
-            color: #07E8E8;
+            color: var(--text-primary);
             margin-bottom: var(--space-3);
             font-size: 0.875rem;
         }
@@ -290,17 +287,18 @@
         .smart-input {
             width: 100%;
             padding: var(--space-4);
-            border: 2px solid var(--gray-200);
+            border: 2px solid var(--border);
             border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             box-sizing: border-box;
         }
 
         .smart-input:focus {
             outline: none;
-            border-color: var(--primary-color);
+            border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
             transform: translateY(-2px);
         }
@@ -496,7 +494,7 @@
 
                 <div class="hero-stats">
                     <div class="stat-bubble">
-                        <div class="stat-value" id="heroStudentCount">0</div>
+                        <div class="stat-value primary" id="heroStudentCount">0</div>
                         <div class="stat-label">Estudiantes</div>
                     </div>
                     <div class="stat-bubble">
@@ -607,6 +605,9 @@
                                 style="background: linear-gradient(135deg, var(--accent-color), #0891b2);">
                             <i data-lucide="zap"></i>
                             <span>Generar QR</span>
+                            <div class="btn-loader" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
                         </button>
                     </div>
 
@@ -815,23 +816,44 @@
             }
 
             bindEvents() {
-                document.getElementById('studentForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createStudent();
-                });
+                const studentForm = document.getElementById('studentForm');
+                const classForm = document.getElementById('classForm');
+                const generateQRBtn = document.getElementById('generateQRBtn');
+                const qrClassSelect = document.getElementById('qrClassSelect');
 
-                document.getElementById('classForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createClass();
-                });
+                if (studentForm) {
+                    studentForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.createStudent();
+                    });
+                }
 
-                document.getElementById('generateQRBtn').addEventListener('click', () => {
-                    this.generateQR();
-                });
+                if (classForm) {
+                    classForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.createClass();
+                    });
+                }
 
-                document.getElementById('qrClassSelect').addEventListener('change', (e) => {
-                    document.getElementById('generateQRBtn').disabled = !e.target.value;
-                });
+                if (generateQRBtn) {
+                    generateQRBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('[Dashboard] Botón QR clickeado');
+                        this.generateQR();
+                    });
+                }
+
+                if (qrClassSelect) {
+                    qrClassSelect.addEventListener('change', (e) => {
+                        const btn = document.getElementById('generateQRBtn');
+                        if (btn) {
+                            btn.disabled = !e.target.value;
+                            console.log('[Dashboard] Clase seleccionada:', e.target.value);
+                        }
+                    });
+                }
+
+                console.log('[Dashboard] Eventos vinculados correctamente');
             }
 
             async createStudent() {
@@ -930,29 +952,51 @@
                     this.setLoading(submitBtn, true);
                     statusDiv.innerHTML = '';
 
-                    const qrUrl = `/clases/${select.value}/qr`;
-                    window.open(qrUrl, '_blank', 'width=600,height=700');
+                    const claseId = select.value;
+                    console.log('[QR] Generando QR para clase ID:', claseId);
 
-                    this.showSuccess(statusDiv, 'QR generado y abierto en nueva ventana');
+                    // Verificar primero si la clase existe
+                    const claseResponse = await fetch(`/api/clases/${claseId}`);
+                    if (!claseResponse.ok) {
+                        throw new Error('No se pudo obtener la información de la clase');
+                    }
+
+                    const clase = await claseResponse.json();
+                    console.log('[QR] Clase encontrada:', clase);
+
+                    // Abrir ventana con QR
+                    const qrUrl = `/clases/${claseId}/qr`;
+                    const qrWindow = window.open(qrUrl, '_blank', 'width=600,height=700,menubar=no,toolbar=no,location=no');
+
+                    if (!qrWindow) {
+                        throw new Error('Por favor habilita las ventanas emergentes para ver el QR');
+                    }
+
+                    this.showSuccess(statusDiv, `QR generado para "${clase.nombreCompleto || clase.asignatura}"`);
                 } catch (error) {
-                    this.showError(statusDiv, 'Error al generar QR');
+                    console.error('[QR] Error:', error);
+                    this.showError(statusDiv, error.message || 'Error al generar QR');
                 } finally {
                     this.setLoading(submitBtn, false);
                 }
             }
 
             setLoading(button, loading) {
+                if (!button) return;
+
                 const loader = button.querySelector('.btn-loader');
                 const span = button.querySelector('span');
 
                 if (loading) {
+                    button.disabled = true;
                     button.classList.add('loading');
-                    loader.style.display = 'block';
-                    span.style.opacity = '0';
+                    if (loader) loader.style.display = 'block';
+                    if (span) span.style.opacity = '0';
                 } else {
+                    button.disabled = false;
                     button.classList.remove('loading');
-                    loader.style.display = 'none';
-                    span.style.opacity = '1';
+                    if (loader) loader.style.display = 'none';
+                    if (span) span.style.opacity = '1';
                 }
             }
 
