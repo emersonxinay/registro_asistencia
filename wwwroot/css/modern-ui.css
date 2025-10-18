@@ -312,7 +312,7 @@
 
 .user-details .user-name {
   font-weight: 600;
-  color: var(--gray-900);
+  color: var(--gray-600);
 }
 
 .user-role {
@@ -1221,7 +1221,7 @@ kbd {
 }
 
 /* Mobile guest navigation */
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
   .mobile-menu-open .nav-guest {
     position: fixed;
     top: 0;

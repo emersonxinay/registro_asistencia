@@ -132,7 +132,7 @@
         }
 
         .hero-title .gradient-text {
-            background: linear-gradient(135deg, #fff, #e0f2fe);
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(224,242,254,0.95));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -172,8 +172,8 @@
         }
 
         .hero-btn-primary {
-            background: white;
-            color: #0ea5e9;
+            background: var(--bg-primary);
+            color: var(--accent-color);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
@@ -253,10 +253,10 @@
         .benefit-card {
             text-align: center;
             padding: 3rem 2rem;
-            background: white;
+            background: var(--bg-primary);
             border-radius: 24px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid transparent;
+            border: 2px solid var(--border-color);
             position: relative;
             overflow: hidden;
         }
@@ -302,7 +302,7 @@
         .benefit-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #1e293b;
+            color: var(--text-primary);
             margin-bottom: 1rem;
             position: relative;
             z-index: 1;
@@ -310,7 +310,7 @@
 
         .benefit-description {
             font-size: 1.05rem;
-            color: #64748b;
+            color: var(--text-secondary);
             line-height: 1.7;
             position: relative;
             z-index: 1;
@@ -319,7 +319,7 @@
         /* How It Works - Simplificado */
         .how-section {
             padding: 6rem 2rem;
-            background: #f8fafc;
+            background: var(--bg-secondary);
         }
 
         .section-header {
@@ -344,14 +344,14 @@
         .section-title {
             font-size: 3rem;
             font-weight: 800;
-            color: #0f172a;
+            color: var(--text-primary);
             margin-bottom: 1rem;
             line-height: 1.2;
         }
 
         .section-subtitle {
             font-size: 1.25rem;
-            color: #64748b;
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
@@ -391,13 +391,13 @@
         .step-title {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text-primary);
             margin-bottom: 0.75rem;
         }
 
         .step-description {
             font-size: 1.05rem;
-            color: #64748b;
+            color: var(--text-secondary);
             line-height: 1.7;
         }
 
@@ -465,8 +465,8 @@
         }
 
         .final-cta-btn-white {
-            background: white;
-            color: #0ea5e9;
+            background: var(--bg-primary);
+            color: var(--accent-color);
             box-shadow: 0 12px 40px rgba(0,0,0,0.3);
         }
 
