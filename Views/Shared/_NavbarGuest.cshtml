@@ -13,12 +13,68 @@
         <i data-lucide="sun" class="theme-toggle-icon icon-sun"></i>
     </button>
 
-    <a href="/login" class="btn btn-outline">
-        <i data-lucide="log-in"></i>
-        <span>Ingresar</span>
-    </a>
-    <a href="/register" class="btn btn-primary">
-        <i data-lucide="user-plus"></i>
-        <span class="hide-mobile">Registrarse</span>
-    </a>
+    <!-- Desktop: Mostrar botones completos -->
+    <div class="guest-auth-buttons-desktop">
+        <a href="/login" class="btn btn-outline">
+            <i data-lucide="log-in"></i>
+            <span>Ingresar</span>
+        </a>
+        <a href="/register" class="btn btn-primary">
+            <i data-lucide="user-plus"></i>
+            <span>Registrarse</span>
+        </a>
+    </div>
+
+    <!-- Mobile: Solo iconos compactos -->
+    <div class="guest-auth-buttons-mobile">
+        <a href="/login" class="btn-icon btn-icon-outline" title="Ingresar" aria-label="Ingresar">
+            <i data-lucide="log-in"></i>
+        </a>
+        <a href="/register" class="btn-icon btn-icon-primary" title="Registrarse" aria-label="Registrarse">
+            <i data-lucide="user-plus"></i>
+        </a>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+        <span class="burger-line"></span>
+    </button>
 </div>
+
+<!-- Mobile Navigation Drawer -->
+<div class="mobile-nav">
+    <div class="mobile-nav-header">
+        <div class="mobile-nav-header-content">
+            <div class="brand-icon-mobile">
+                <i data-lucide="graduation-cap"></i>
+            </div>
+            <div class="mobile-nav-title">Registro QR</div>
+        </div>
+        <button class="mobile-nav-close" id="mobileNavClose">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+
+    <div class="mobile-nav-content">
+        <div class="mobile-menu-section">
+            <h4>Menú</h4>
+            <a href="/" class="mobile-nav-item">
+                <i data-lucide="home"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="/login" class="mobile-nav-item featured">
+                <i data-lucide="log-in"></i>
+                <span>Iniciar Sesión</span>
+            </a>
+            <a href="/register" class="mobile-nav-item scanner">
+                <i data-lucide="user-plus"></i>
+                <span>Registrarse</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Overlay -->
+<div class="mobile-overlay" id="mobileOverlay"></div>

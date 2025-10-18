@@ -12,6 +12,9 @@
     <!-- Theme System CSS -->
     <link href="~/css/theme-system.css" rel="stylesheet" />
 
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <!-- Theme Initialization Script -->
     <script>
         (function() {
@@ -470,7 +473,9 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <div class="app-icon">📱</div>
+                    <div class="app-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
                     <div>
                         <div class="header-title">Registro de Asistencia</div>
                         <div class="header-subtitle">Escanea o ingresa tu código</div>
@@ -488,11 +493,13 @@
             <!-- Scanner Card -->
             <div class="action-card">
                 <div class="card-header">
-                    <div class="card-icon">📸</div>
+                    <div class="card-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
                     <div class="card-title">Opción 1: Escanear QR</div>
                 </div>
                 <button type="button" class="btn-primary" id="startScanBtn">
-                    <span>📱</span>
+                    <i class="fas fa-qrcode"></i>
                     <span>Abrir Cámara</span>
                 </button>
                 <p class="text-sm text-center mt-1">Escanea tu código QR de estudiante</p>
@@ -501,14 +508,16 @@
             <!-- Manual Input Card -->
             <div class="action-card">
                 <div class="card-header">
-                    <div class="card-icon">✏️</div>
+                    <div class="card-icon">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
                     <div class="card-title">Opción 2: Ingreso Manual</div>
                 </div>
                 <form id="scanForm">
                     <div class="input-group">
                         <label class="input-label" for="codigoAlumno">Código de Estudiante</label>
                         <div class="input-wrapper">
-                            <span class="input-icon">👤</span>
+                            <i class="input-icon fas fa-user"></i>
                             <input
                                 type="text"
                                 id="codigoAlumno"
@@ -522,7 +531,7 @@
                         </div>
                     </div>
                     <button type="submit" class="btn-primary" id="submitBtn">
-                        <span>✅</span>
+                        <i class="fas fa-check-circle"></i>
                         <span>Registrar Asistencia</span>
                     </button>
                     <button type="button" class="btn-primary hidden" id="loadingBtn" disabled>
@@ -537,7 +546,9 @@
         <div class="camera-container" id="cameraContainer">
             <div class="camera-header">
                 <div class="camera-title">Escaneando Código QR</div>
-                <button type="button" class="close-btn" id="closeCamera">✕</button>
+                <button type="button" class="close-btn" id="closeCamera">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="camera-view-wrapper">
                 <video id="cameraView" autoplay playsinline muted></video>
@@ -603,7 +614,7 @@
                 canvas.height = cameraView.videoHeight;
 
                 isScanning = true;
-                showMessage('📸 Cámara activada. Apunta hacia tu código QR.', 'success');
+                showMessage('<i class="fas fa-camera"></i> Cámara activada. Apunta hacia tu código QR.', 'success');
 
                 scanningInterval = setInterval(() => {
                     if (cameraView.readyState === cameraView.HAVE_ENOUGH_DATA) {
@@ -613,7 +624,7 @@
 
             } catch (error) {
                 console.error('Camera error:', error);
-                showMessage('❌ No se pudo acceder a la cámara. Verifica los permisos.', 'error');
+                showMessage('<i class="fas fa-exclamation-circle"></i> No se pudo acceder a la cámara. Verifica los permisos.', 'error');
             }
         }
 
@@ -695,7 +706,7 @@
             const codigo = codigoInput.value.trim().toUpperCase();
 
             if (!/^EST\d{6}$/.test(codigo)) {
-                showMessage('❌ Formato inválido. Debe ser EST seguido de 6 dígitos.', 'error');
+                showMessage('<i class="fas fa-exclamation-circle"></i> Formato inválido. Debe ser EST seguido de 6 dígitos.', 'error');
                 return;
             }
 
@@ -707,7 +718,7 @@
 
             const sessionKey = `clase_${claseId}_registered`;
             if (sessionStorage.getItem(sessionKey)) {
-                showMessage('⚠️ Ya registraste tu asistencia en esta sesión.', 'warning');
+                showMessage('<i class="fas fa-exclamation-triangle"></i> Ya registraste tu asistencia en esta sesión.', 'warning');
                 return;
             }
 
@@ -727,8 +738,12 @@
                 if (response.ok) {
                     sessionStorage.setItem(sessionKey, codigo);
                     const estado = result.estudiante?.estado || 'Registrado';
-                    const emoji = estado === 'Presente' ? '✅' : estado === 'Tardanza' ? '⏰' : '❌';
-                    showMessage(`${emoji} ${result.mensaje}<br><strong>Estado:</strong> ${estado}`, 'success');
+                    const icon = estado === 'Presente'
+                        ? '<i class="fas fa-check-circle"></i>'
+                        : estado === 'Tardanza'
+                        ? '<i class="fas fa-clock"></i>'
+                        : '<i class="fas fa-times-circle"></i>';
+                    showMessage(`${icon} ${result.mensaje}<br><strong>Estado:</strong> ${estado}`, 'success');
                     form.reset();
                 } else {
                     throw new Error(result.message || result.mensaje || 'Error al registrar');
@@ -739,7 +754,7 @@
                 if (msg.includes('no encontrado')) msg = 'Código no encontrado. Verifica tu código.';
                 else if (msg.includes('no activa')) msg = 'Clase no activa. Contacta al profesor.';
                 else if (msg.includes('expirado')) msg = 'Enlace expirado. Solicita nuevo código al profesor.';
-                showMessage('❌ ' + msg, 'error');
+                showMessage('<i class="fas fa-exclamation-circle"></i> ' + msg, 'error');
             } finally {
                 isSubmitting = false;
                 submitBtn.classList.remove('hidden');
@@ -748,7 +763,11 @@
         }
 
         function showMessage(html, type) {
-            const icons = { success: '✅', error: '❌', warning: '⚠️' };
+            const icons = {
+                success: '<i class="fas fa-check-circle"></i>',
+                error: '<i class="fas fa-exclamation-circle"></i>',
+                warning: '<i class="fas fa-exclamation-triangle"></i>'
+            };
             messageContainer.innerHTML = `
                 <div class="message ${type}">
                     <span class="message-icon">${icons[type]}</span>
@@ -778,7 +797,7 @@
 
         // Initial message
         setTimeout(() => {
-            showMessage('👋 Elige tu método preferido para registrar tu asistencia.', 'success');
+            showMessage('<i class="fas fa-hand-paper"></i> Elige tu método preferido para registrar tu asistencia.', 'success');
         }, 800);
 
         console.log('📱 Registro móvil cargado - Clase:', claseId);

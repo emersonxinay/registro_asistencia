@@ -1,787 +1,1083 @@
 @{
-    ViewData["Title"] = "Registro de Asistencia";
-    ViewData["Subtitle"] = $"Clase {ViewBag.ClaseId}";
+    ViewData["Title"] = "Registrar Asistencia";
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
 }
 
-<div class="scan-container">
-    <!-- QR Scanner Section -->
-    <div class="scanner-section">
-        <div class="card">
-            <div class="card-header text-center">
-                <h2 class="card-title">Escanear QR</h2>
-                <p class="card-description">Activa la cámara para escanear</p>
-            </div>
+@section Styles {
+    <style>
+        /* Page Container - MOBILE OPTIMIZED */
+        .scan-page {
+            min-height: calc(100vh - var(--header-height));
+            padding: 12px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding-bottom: max(88px, calc(var(--bottom-nav-height, 0px) + 20px));
+        }
 
-            <div class="scanner-controls">
-                <button id="startScanBtn" class="btn btn-primary">
-                    <i data-lucide="camera" class="btn-icon"></i>
-                    Activar Cámara
-                </button>
-                <button id="stopScanBtn" class="btn btn-danger" style="display: none;">
-                    <i data-lucide="x-circle" class="btn-icon"></i>
-                    Cerrar Cámara
-                </button>
-            </div>
+        @@media (min-width: 640px) {
+            .scan-page {
+                padding: 16px;
+                max-width: 640px;
+            }
+        }
 
-            <div id="scannerContainer" style="display: none;">
-                <video id="qrVideo" playsinline></video>
-                <div class="scanner-overlay">
-                    <div class="scanner-frame"></div>
-                    <p class="scanner-help">Apunta al código QR</p>
+        @@media (min-width: 768px) {
+            .scan-page {
+                padding: 20px;
+                max-width: 720px;
+            }
+        }
+
+        @@media (min-width: 1024px) {
+            .scan-page {
+                padding: 24px;
+                max-width: 800px;
+                padding-bottom: 24px;
+            }
+        }
+
+        /* Class Info Badge - MOBILE OPTIMIZED */
+        .class-info-badge {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.08));
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+        }
+
+        @@media (min-width: 640px) {
+            .class-info-badge {
+                border-radius: 16px;
+                padding: 14px 16px;
+                margin-bottom: 20px;
+                gap: 12px;
+                align-items: center;
+            }
+        }
+
+        .class-info-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--gradient-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        @@media (min-width: 640px) {
+            .class-info-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                font-size: 18px;
+            }
+        }
+
+        .class-info-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .class-info-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            line-height: 1.3;
+            /* Permitir que el texto se ajuste en dos líneas en móvil */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @@media (min-width: 640px) {
+            .class-info-title {
+                font-size: 15px;
+                -webkit-line-clamp: 1;
+                white-space: nowrap;
+            }
+        }
+
+        .class-info-name {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        @@media (min-width: 640px) {
+            .class-info-name {
+                font-size: 12px;
+            }
+        }
+
+        .class-id-badge {
+            background: var(--accent-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            flex-shrink: 0;
+            white-space: nowrap;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+
+        @@media (min-width: 640px) {
+            .class-id-badge {
+                padding: 6px 12px;
+                border-radius: 12px;
+                font-size: 11px;
+                align-self: center;
+                margin-top: 0;
+            }
+        }
+
+        /* Cards - MOBILE OPTIMIZED */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @@media (min-width: 640px) {
+            .card {
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 14px;
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        @@media (min-width: 640px) {
+            .card-header {
+                gap: 10px;
+                margin-bottom: 14px;
+                padding-bottom: 12px;
+            }
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        @@media (min-width: 640px) {
+            .card-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+                font-size: 18px;
+            }
+        }
+
+        .card-title {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @@media (min-width: 640px) {
+            .card-title {
+                font-size: 15px;
+            }
+        }
+
+        .card-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        @@media (min-width: 640px) {
+            .card-desc {
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+        }
+
+        /* Instructions Card - MOBILE OPTIMIZED */
+        .instructions-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        @@media (min-width: 640px) {
+            .instructions-card {
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+        }
+
+        .instructions-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        @@media (min-width: 640px) {
+            .instructions-header {
+                gap: 10px;
+                font-size: 16px;
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+            }
+        }
+
+        .instructions-header i {
+            color: var(--accent-color);
+            font-size: 18px;
+        }
+
+        @@media (min-width: 640px) {
+            .instructions-header i {
+                font-size: 20px;
+            }
+        }
+
+        .instructions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @@media (min-width: 640px) {
+            .instructions-list {
+                gap: 12px;
+            }
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-primary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        @@media (min-width: 640px) {
+            .instruction-item {
+                gap: 12px;
+                padding: 12px;
+                border-radius: 12px;
+            }
+        }
+
+        .instruction-number {
+            width: 28px;
+            height: 28px;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .instruction-number i {
+            font-size: 13px;
+        }
+
+        @@media (min-width: 640px) {
+            .instruction-number {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            .instruction-number i {
+                font-size: 15px;
+            }
+        }
+
+        .instruction-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .instruction-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        @@media (min-width: 640px) {
+            .instruction-title {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+        }
+
+        .instruction-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        @@media (min-width: 640px) {
+            .instruction-desc {
+                font-size: 12px;
+            }
+        }
+
+        /* Auth Badge - MOBILE OPTIMIZED */
+        .auth-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @@media (min-width: 640px) {
+            .auth-badge {
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 14px;
+                gap: 12px;
+            }
+        }
+
+        .auth-avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        @@media (min-width: 640px) {
+            .auth-avatar {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+        }
+
+        .auth-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .auth-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        @@media (min-width: 640px) {
+            .auth-name {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+        }
+
+        .auth-status {
+            font-size: 11px;
+            color: #059669;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        @@media (min-width: 640px) {
+            .auth-status {
+                font-size: 12px;
+            }
+        }
+
+        /* Buttons - MOBILE OPTIMIZED */
+        .btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            min-height: 48px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @@media (min-width: 640px) {
+            .btn {
+                padding: 14px 18px;
+                border-radius: 12px;
+                font-size: 15px;
+                min-height: 52px;
+            }
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn i {
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        @@media (min-width: 640px) {
+            .btn i {
+                font-size: 18px;
+            }
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Form - MOBILE OPTIMIZED */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        @@media (min-width: 640px) {
+            .form-group {
+                margin-bottom: 14px;
+            }
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        @@media (min-width: 640px) {
+            .form-label {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        @@media (min-width: 640px) {
+            .form-input {
+                padding: 14px;
+                border-radius: 12px;
+            }
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px var(--focus-ring);
+        }
+
+        @@media (min-width: 640px) {
+            .form-input:focus {
+                box-shadow: 0 0 0 4px var(--focus-ring);
+            }
+        }
+
+        /* Messages */
+        .message {
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+            border: 2px solid;
+        }
+
+        .message i {
+            font-size: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .message-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #059669;
+        }
+
+        .message-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #dc2626;
+        }
+
+        @@keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Camera Fullscreen */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .camera-modal.active {
+            display: flex;
+        }
+
+        .camera-header {
+            padding: 16px;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+        }
+
+        .camera-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-camera {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .camera-viewport {
+            flex: 1;
+            position: relative;
+        }
+
+        #videoElement {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scan-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px;
+            height: 260px;
+            border: 3px solid #10b981;
+            border-radius: 24px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+            animation: scanPulse 2s infinite;
+        }
+
+        .scan-overlay.scanning {
+            border-color: #f59e0b;
+        }
+
+        @@keyframes scanPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .scan-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @@media (min-width: 640px) {
+            .guest-buttons {
+                flex-direction: row;
+            }
+
+            .btn {
+                min-width: 0;
+            }
+        }
+
+        /* iOS Safe Areas */
+        @@supports (-webkit-touch-callout: none) {
+            .header {
+                padding-top: max(12px, env(safe-area-inset-top));
+            }
+
+            .content {
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
+
+            .card,
+            .guest-card {
+                backdrop-filter: blur(15px) !important;
+                -webkit-backdrop-filter: blur(15px) !important;
+            }
+        }
+    </style>
+}
+
+<!-- Scan Page Content -->
+<div class="scan-page">
+    <!-- Class Info Badge -->
+    <div class="class-info-badge">
+        <div class="class-info-icon">
+            <i class="fas fa-qrcode"></i>
+        </div>
+        <div class="class-info-text">
+            <div class="class-info-title" id="claseNombre">Cargando clase...</div>
+            <div class="class-info-name">Registro de Asistencia</div>
+        </div>
+        <div class="class-id-badge">#@ViewBag.ClaseId</div>
+    </div>
+
+    <!-- Instrucciones - Siempre visible -->
+    <div class="instructions-card">
+        <div class="instructions-header">
+            <i class="fas fa-question-circle"></i>
+            <span>¿Cómo registrar tu asistencia?</span>
+        </div>
+        <div class="instructions-list">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="instruction-item">
+                    <div class="instruction-number">1</div>
+                    <div class="instruction-content">
+                        <div class="instruction-title">Registro Rápido (Recomendado)</div>
+                        <div class="instruction-desc">Usa el botón "Registrar Mi Asistencia Ahora" para un registro instantáneo con tu cuenta.</div>
+                    </div>
                 </div>
-                <button id="closeScannerBtn" class="btn-close-scanner">
-                    <i data-lucide="x" class="close-icon"></i>
-                </button>
+            }
+            else
+            {
+                <div class="instruction-item">
+                    <div class="instruction-number">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="instruction-content">
+                        <div class="instruction-title">Tip: Crea una cuenta</div>
+                        <div class="instruction-desc">Con una cuenta puedes registrar tu asistencia con un solo clic. Usa el botón de menú para ingresar o registrarte.</div>
+                    </div>
+                </div>
+            }
+            <div class="instruction-item">
+                <div class="instruction-number">
+                    @if (User.Identity?.IsAuthenticated == true) { <text>2</text> } else { <text>1</text> }
+                </div>
+                <div class="instruction-content">
+                    <div class="instruction-title">Escanear QR del Profesor</div>
+                    <div class="instruction-desc">Abre la cámara y escanea el código QR que muestra tu profesor en pantalla.</div>
+                </div>
             </div>
-
-            <div id="scanStatus" class="scan-feedback"></div>
+            <div class="instruction-item">
+                <div class="instruction-number">
+                    @if (User.Identity?.IsAuthenticated == true) { <text>3</text> } else { <text>2</text> }
+                </div>
+                <div class="instruction-content">
+                    <div class="instruction-title">Registro Manual</div>
+                    <div class="instruction-desc">Ingresa tu ID de estudiante manualmente en el formulario de abajo.</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Manual Entry Section -->
-    <div class="manual-section">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- Usuario autenticado -->
+        <div class="auth-badge">
+            <div class="auth-avatar">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="auth-info">
+                <div class="auth-name">@User.Identity.Name</div>
+                <div class="auth-status">
+                    <i class="fas fa-check-circle"></i>
+                    Registro automático disponible
+                </div>
+            </div>
+        </div>
+
+        <!-- Registro Automático -->
         <div class="card">
-            <div class="card-header text-center">
-                <h3 class="card-title">Registro Manual</h3>
-                <p class="card-description">Ingresa tu ID</p>
-            </div>
-
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <div class="user-authenticated">
-                    <div class="auth-info">
-                        <i data-lucide="user-check" class="auth-icon"></i>
-                        <div>
-                            <p class="auth-name">@User.Identity.Name</p>
-                            <p class="auth-note">Registro automático disponible</p>
-                        </div>
-                    </div>
-                    <button id="autoRegisterBtn" class="btn btn-success" onclick="registrarAutomatico()">
-                        <i data-lucide="zap" class="btn-icon"></i>
-                        Registrar Automáticamente
-                    </button>
-                    <div class="auth-separator"><span>o</span></div>
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-bolt"></i>
                 </div>
-            }
-
-            <form id="asistenciaForm">
-                <div class="form-group">
-                    <label class="form-label" for="alumnoId">ID del Alumno</label>
-                    <input type="number" id="alumnoId" name="alumnoId" class="form-input" min="1" required
-                           placeholder="Ingresa tu ID" autofocus>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-full">Marcar Asistencia</button>
-            </form>
-
-            <div id="mensaje"></div>
-
-            <div class="qr-info">
-                <p><strong>Clase:</strong> @ViewBag.ClaseId</p>
-                <p class="small-text">Token de seguridad activo</p>
+                <div class="card-title">Registro Rápido</div>
             </div>
+            <div class="card-desc">
+                <i class="fas fa-info-circle"></i> Registra tu asistencia con un solo clic usando tu cuenta
+            </div>
+            <button class="btn btn-success" id="autoRegisterBtn">
+                <i class="fas fa-fingerprint"></i>
+                <span>Registrar Mi Asistencia Ahora</span>
+            </button>
+        </div>
+    }
+
+    <!-- Escanear QR -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-camera"></i>
+            </div>
+            <div class="card-title">Escanear Código QR</div>
+        </div>
+        <div class="card-desc">
+            <i class="fas fa-info-circle"></i> Abre la cámara y escanea el código QR de la clase mostrado por el profesor
+        </div>
+        <button class="btn btn-primary" id="openCameraBtn">
+            <i class="fas fa-qrcode"></i>
+            <span>Abrir Cámara</span>
+        </button>
+    </div>
+
+    <!-- Registro Manual -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-keyboard"></i>
+            </div>
+            <div class="card-title">Registro Manual por ID</div>
+        </div>
+        <div class="card-desc">
+            <i class="fas fa-info-circle"></i> Ingresa tu número de ID de estudiante para registrar tu asistencia manualmente
+        </div>
+        <form id="manualForm">
+            <div class="form-group">
+                <label class="form-label" for="studentId">
+                    <i class="fas fa-id-card"></i>
+                    ID de Estudiante
+                </label>
+                <input
+                    type="number"
+                    id="studentId"
+                    class="form-input"
+                    placeholder="Ej: 12345678"
+                    required
+                    min="1"
+                    pattern="[0-9]*"
+                    inputmode="numeric">
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check-circle"></i>
+                <span>Registrar Asistencia</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Messages -->
+    <div id="messageArea"></div>
+</div>
+
+<!-- Camera Modal -->
+<div class="camera-modal" id="cameraModal">
+    <div class="camera-header">
+        <div class="camera-title">
+            <i class="fas fa-qrcode"></i>
+            Escanear QR
+        </div>
+        <button class="close-camera" id="closeCameraBtn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="camera-viewport">
+        <video id="videoElement" playsinline autoplay></video>
+        <div class="scan-overlay" id="scanOverlay"></div>
+        <div class="scan-hint">
+            <i class="fas fa-arrow-down"></i> Centra el código QR en el recuadro
         </div>
     </div>
 </div>
 
 @section Scripts {
-<script src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
-<script>
-    let currentNonce = "@ViewBag.Nonce";
-    const claseId = @ViewBag.ClaseId;
-    let qrScanner = null;
-    let isScanning = false;
-    let audioContext = null;
+    <script src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
+    <script>
+        const claseId = @ViewBag.ClaseId;
+        let currentNonce = "@ViewBag.Nonce";
+        let qrScanner = null;
 
-    async function initAudio() {
-        try {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.log('Audio no disponible');
-        }
-    }
-
-    function playSound(success = true) {
-        if (!audioContext) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.frequency.setValueAtTime(success ? 800 : 400, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.3);
-    }
-
-    function showScanStatus(message, isSuccess = true, isScanning = false) {
-        const statusDiv = document.getElementById('scanStatus');
-        statusDiv.className = `scan-feedback ${isSuccess ? 'success' : 'error'} ${isScanning ? 'scanning' : ''}`;
-        statusDiv.innerHTML = `
-            <i data-lucide="${isSuccess ? 'check-circle' : 'x-circle'}" class="status-icon"></i>
-            <span>${message}</span>
-        `;
-        if (window.lucide) lucide.createIcons();
-        if (!isScanning) {
-            setTimeout(() => {
-                statusDiv.innerHTML = '';
-                statusDiv.className = 'scan-feedback';
-            }, 5000);
-        }
-    }
-
-    async function renovarNonce() {
-        const r = await fetch(`/api/clases/${claseId}/qr`);
-        if (!r.ok) throw new Error('No se pudo renovar token');
-        const j = await r.json();
-        const parts = (j.url || '').split('nonce=');
-        if (parts.length < 2) throw new Error('URL sin nonce');
-        currentNonce = parts[1];
-        return j;
-    }
-
-    async function processQRCode(qrData) {
-        if (!qrData || qrData.trim() === '') return;
-        showScanStatus('Procesando código QR...', true, false);
-        playSound(true);
-
-        if (qrScanner) {
-            await qrScanner.stop();
-            isScanning = false;
-            toggleScannerUI(false);
-        }
-
-        try {
-            let extractedNonce = currentNonce;
-            if (qrData.includes('nonce=')) {
-                const parts = qrData.split('nonce=');
-                if (parts.length >= 2) {
-                    extractedNonce = parts[1].split('&')[0];
-                    currentNonce = extractedNonce;
-                }
-            }
-
-            const alumnoIdInput = document.getElementById('alumnoId');
-            const alumnoId = alumnoIdInput.value;
-
-            if (!alumnoId) {
-                showScanStatus('Por favor ingresa tu ID primero', false);
-                playSound(false);
-                return;
-            }
-
-            const response = await fetch('/api/asistencias/alumno-scan', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    alumnoId: parseInt(alumnoId),
-                    claseId: claseId,
-                    nonce: extractedNonce
-                })
-            });
-
-            let result;
+        // Cargar info clase
+        async function loadClassInfo() {
             try {
-                result = await response.json();
-            } catch (jsonError) {
-                throw new Error('Respuesta inválida del servidor');
+                const res = await fetch(`/api/clases/${claseId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const name = data.nombreCompleto || `${data.asignatura || ''} - ${data.curso || ''}`.trim() || `Clase ${claseId}`;
+                    document.getElementById('claseNombre').textContent = name;
+                }
+            } catch (e) {
+                document.getElementById('claseNombre').textContent = `Clase ${claseId}`;
             }
+        }
 
-            if (response.ok) {
-                showScanStatus(result.mensaje || '¡Asistencia registrada!', true);
-                playSound(true);
-                document.getElementById('asistenciaForm').reset();
-                const mensajeDiv = document.getElementById('mensaje');
-                mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Asistencia registrada'}</div>`;
-            } else {
-                throw new Error(result.message || result.mensaje || 'Error al registrar');
+        // Mostrar mensaje
+        function showMessage(text, type = 'error') {
+            const area = document.getElementById('messageArea');
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+            area.innerHTML = `
+                <div class="message message-${type}">
+                    <i class="fas fa-${icon}"></i>
+                    <div class="message-text">${text}</div>
+                </div>
+            `;
+            setTimeout(() => area.innerHTML = '', 6000);
+        }
+
+        // Registro manual
+        document.getElementById('manualForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const studentId = document.getElementById('studentId').value;
+
+            try {
+                const res = await fetch('/api/asistencias/alumno-scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        alumnoId: parseInt(studentId),
+                        claseId,
+                        nonce: currentNonce
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(`✅ ${data.mensaje || 'Asistencia registrada correctamente'}`, 'success');
+                    document.getElementById('manualForm').reset();
+                } else {
+                    throw new Error(data.mensaje || 'Error al registrar asistencia');
+                }
+            } catch (error) {
+                showMessage(`❌ ${error.message}`, 'error');
             }
-        } catch (error) {
-            showScanStatus(`Error: ${error.message}`, false);
-            playSound(false);
+        });
+
+        // Registro automático
+        document.getElementById('autoRegisterBtn')?.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/asistencias/alumno-scan-auto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ claseId, nonce: currentNonce })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    showMessage(`✅ ${data.mensaje || 'Asistencia registrada correctamente'}`, 'success');
+                } else {
+                    throw new Error(data.mensaje || 'Error al registrar');
+                }
+            } catch (error) {
+                showMessage(`❌ ${error.message}`, 'error');
+            }
+        });
+
+        // Cámara QR
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('videoElement');
+        const overlay = document.getElementById('scanOverlay');
+
+        document.getElementById('openCameraBtn').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = stream;
+                modal.classList.add('active');
+                startScanning();
+            } catch (error) {
+                showMessage('❌ No se pudo acceder a la cámara. Verifica los permisos.', 'error');
+            }
+        });
+
+        document.getElementById('closeCameraBtn').addEventListener('click', () => {
+            closeCamera();
+        });
+
+        function closeCamera() {
+            if (qrScanner) {
+                qrScanner.stop();
+                qrScanner = null;
+            }
+            if (video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            modal.classList.remove('active');
         }
-    }
 
-    function toggleScannerUI(scanning) {
-        const startBtn = document.getElementById('startScanBtn');
-        const stopBtn = document.getElementById('stopScanBtn');
-        const container = document.getElementById('scannerContainer');
-
-        if (scanning) {
-            startBtn.style.display = 'none';
-            stopBtn.style.display = 'inline-flex';
-            container.style.display = 'block';
-            showScanStatus('Escáner activo', true, true);
-        } else {
-            startBtn.style.display = 'inline-flex';
-            stopBtn.style.display = 'none';
-            container.style.display = 'none';
-        }
-    }
-
-    async function startScanner() {
-        if (isScanning) return;
-        try {
-            await initAudio();
-            const videoElement = document.getElementById('qrVideo');
+        function startScanning() {
+            overlay.classList.add('scanning');
             qrScanner = new QrScanner(
-                videoElement,
-                result => processQRCode(result.data),
+                video,
+                result => handleQRCode(result.data),
                 {
-                    onDecodeError: error => {},
-                    highlightScanRegion: true,
-                    highlightCodeOutline: true,
+                    onDecodeError: () => {},
+                    highlightScanRegion: false,
+                    highlightCodeOutline: false,
                     maxScansPerSecond: 5
                 }
             );
-            await qrScanner.start();
-            isScanning = true;
-            toggleScannerUI(true);
-        } catch (error) {
-            showScanStatus(`Error: ${error.message}`, false);
-            playSound(false);
-        }
-    }
-
-    async function stopScanner() {
-        if (!isScanning || !qrScanner) return;
-        try {
-            await qrScanner.stop();
-            isScanning = false;
-            toggleScannerUI(false);
-            showScanStatus('Escáner detenido', true);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    async function marcarAsistencia(reintentado = false) {
-        const alumnoId = document.getElementById('alumnoId').value;
-        const mensajeDiv = document.getElementById('mensaje');
-
-        if (!alumnoId) {
-            mensajeDiv.innerHTML = '<div class="status status-error">Ingresa tu ID</div>';
-            return;
+            qrScanner.start();
         }
 
-        try {
-            const response = await fetch('/api/asistencias/alumno-scan', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    alumnoId: parseInt(alumnoId),
-                    claseId: claseId,
-                    nonce: currentNonce
-                })
-            });
+        async function handleQRCode(data) {
+            overlay.classList.remove('scanning');
+            closeCamera();
 
-            let result;
+            const studentId = document.getElementById('studentId').value;
+            if (!studentId) {
+                showMessage('⚠️ Por favor ingresa tu ID de estudiante primero', 'error');
+                return;
+            }
+
             try {
-                result = await response.json();
-            } catch (jsonError) {
-                throw new Error('Respuesta inválida');
-            }
-
-            if (response.ok) {
-                mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Asistencia registrada'}</div>`;
-                document.getElementById('asistenciaForm').reset();
-                playSound(true);
-            } else {
-                throw new Error(result.message || result.mensaje || 'Error al registrar');
-            }
-        } catch (error) {
-            if (!reintentado && /nonce/i.test(error.message)) {
-                try {
-                    await renovarNonce();
-                    await marcarAsistencia(true);
-                    return;
-                } catch {
-                    mensajeDiv.innerHTML = '<div class="status status-error">QR expiró. Reintenta.</div>';
-                    return;
-                }
-            }
-            mensajeDiv.innerHTML = `<div class="status status-error">Error: ${error.message}</div>`;
-            playSound(false);
-        }
-    }
-
-    document.getElementById('startScanBtn').addEventListener('click', startScanner);
-    document.getElementById('stopScanBtn').addEventListener('click', stopScanner);
-    document.getElementById('asistenciaForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        marcarAsistencia(false);
-    });
-
-    window.addEventListener('beforeunload', () => {
-        if (qrScanner) qrScanner.destroy();
-    });
-
-    async function registrarAutomatico() {
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <text>
-            try {
-                showScanStatus('Procesando...', true, false);
-                const response = await fetch('/api/asistencias/alumno-scan-auto', {
+                const res = await fetch('/api/asistencias/alumno-scan', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({claseId: claseId, nonce: currentNonce})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        alumnoId: parseInt(studentId),
+                        claseId,
+                        nonce: currentNonce
+                    })
                 });
 
-                let result;
-                try {
-                    result = await response.json();
-                } catch (jsonError) {
-                    throw new Error('Respuesta inválida');
-                }
+                const result = await res.json();
 
-                if (response.ok) {
-                    showScanStatus(result.mensaje || '¡Registrado!', true);
-                    playSound(true);
-                    const mensajeDiv = document.getElementById('mensaje');
-                    mensajeDiv.innerHTML = `<div class="status status-success">${result.mensaje || 'Registrado'}</div>`;
-                    if (result.studentInfo) {
-                        const info = result.studentInfo;
-                        mensajeDiv.innerHTML += `<div class="student-details"><p><strong>Estudiante:</strong> ${info.nombre}</p><p><strong>ID:</strong> ${info.id}</p></div>`;
-                    }
+                if (res.ok) {
+                    showMessage(`✅ ${result.mensaje || 'Asistencia registrada'}`, 'success');
                 } else {
-                    throw new Error(result.message || result.mensaje || 'Error');
+                    throw new Error(result.mensaje || 'Error al registrar');
                 }
             } catch (error) {
-                showScanStatus(`Error: ${error.message}`, false);
-                playSound(false);
+                showMessage(`❌ ${error.message}`, 'error');
             }
-            </text>
         }
-        else
-        {
-            <text>
-            showScanStatus('Se requiere autenticación', false);
-            playSound(false);
-            </text>
-        }
-    }
 
-    (async () => {
-        try {
-            await renovarNonce();
-        } catch(_) {}
-    })();
-</script>
+        // Inicializar
+        loadClassInfo();
+    </script>
 }
-
-<style>
-    /* CRITICAL: Mobile viewport fix */
-    html, body {
-        width: 100%;
-        max-width: 100vw;
-        overflow-x: hidden !important;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    *, *::before, *::after {
-        box-sizing: border-box;
-    }
-
-    /* Container - Mobile First */
-    .scan-container {
-        width: 100%;
-        max-width: 100vw;
-        padding: 0.5rem;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        overflow-x: hidden;
-    }
-
-    /* Sections */
-    .scanner-section,
-    .manual-section {
-        width: 100%;
-        max-width: 100%;
-        background: white;
-        border-radius: 10px;
-        padding: 0.875rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        border: 1px solid #e5e7eb;
-        overflow: hidden;
-    }
-
-    .card {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* Headers */
-    .card-header {
-        margin-bottom: 0.875rem;
-        text-align: center;
-    }
-
-    .card-title {
-        font-size: 1.125rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0 0 0.375rem 0;
-    }
-
-    .card-description {
-        font-size: 0.8125rem;
-        color: #6b7280;
-        margin: 0;
-    }
-
-    /* Scanner Controls */
-    .scanner-controls {
-        display: flex;
-        flex-direction: column;
-        gap: 0.625rem;
-        margin: 0.75rem 0;
-        width: 100%;
-    }
-
-    /* Buttons */
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 11px 18px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        font-size: 0.9375rem;
-        width: 100%;
-        min-height: 44px;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-sizing: border-box;
-    }
-
-    .btn-icon {
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
-    }
-
-    .btn-secondary {
-        background: #6b7280;
-        color: white;
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        margin-top: 0.5rem;
-    }
-
-    .btn-full {
-        width: 100%;
-    }
-
-    /* Scanner Container - COMPACT FOR MOBILE */
-    #scannerContainer {
-        position: relative;
-        width: 100%;
-        max-width: 260px;
-        height: 260px;
-        margin: 0.75rem auto;
-        border-radius: 10px;
-        overflow: hidden;
-        background: #000;
-    }
-
-    #qrVideo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .scanner-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        pointer-events: none;
-    }
-
-    .scanner-frame {
-        width: 130px;
-        height: 130px;
-        border: 3px solid #22c55e;
-        border-radius: 10px;
-        animation: pulse 2s infinite;
-    }
-
-    @@keyframes pulse {
-        0%, 100% { border-color: #22c55e; opacity: 1; }
-        50% { border-color: #16a34a; opacity: 0.8; }
-    }
-
-    .scanner-help {
-        margin-top: 0.625rem;
-        color: white;
-        background: rgba(0, 0, 0, 0.85);
-        padding: 0.4rem 0.75rem;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        text-align: center;
-    }
-
-    /* Feedback */
-    .scan-feedback {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        margin: 0.75rem 0;
-        border-radius: 8px;
-        font-size: 0.8125rem;
-        font-weight: 500;
-    }
-
-    .scan-feedback.success {
-        background: #dcfce7;
-        color: #166534;
-        border: 2px solid #bbf7d0;
-    }
-
-    .scan-feedback.error {
-        background: #fee2e2;
-        color: #dc2626;
-        border: 2px solid #fecaca;
-    }
-
-    .scan-feedback.scanning {
-        background: #dbeafe;
-        color: #1e40af;
-        border: 2px solid #bfdbfe;
-    }
-
-    .status-icon {
-        width: 18px;
-        height: 18px;
-        flex-shrink: 0;
-    }
-
-    /* User Auth */
-    .user-authenticated {
-        background: #f0f9ff;
-        border: 2px solid #0ea5e9;
-        border-radius: 10px;
-        padding: 0.875rem;
-        margin-bottom: 1rem;
-    }
-
-    .auth-info {
-        display: flex;
-        align-items: center;
-        gap: 0.625rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .auth-icon {
-        width: 20px;
-        height: 20px;
-        color: #0ea5e9;
-        flex-shrink: 0;
-    }
-
-    .auth-name {
-        font-weight: 600;
-        color: #0c4a6e;
-        margin: 0;
-        font-size: 0.875rem;
-    }
-
-    .auth-note {
-        font-size: 0.75rem;
-        color: #0369a1;
-        margin: 0;
-    }
-
-    .auth-separator {
-        text-align: center;
-        margin: 0.75rem 0;
-        position: relative;
-        height: 1px;
-        background: #cbd5e1;
-    }
-
-    .auth-separator span {
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #f0f9ff;
-        padding: 0 10px;
-        font-size: 0.75rem;
-        color: #64748b;
-    }
-
-    /* Forms */
-    .form-group {
-        margin-bottom: 0.875rem;
-        width: 100%;
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: 0.375rem;
-        color: #374151;
-        font-weight: 600;
-        font-size: 0.875rem;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 10px 12px;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 16px;
-        min-height: 44px;
-        box-sizing: border-box;
-    }
-
-    .form-input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Info */
-    .qr-info {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 0.75rem;
-        text-align: center;
-        margin-top: 0.875rem;
-        font-size: 0.8125rem;
-        color: #6b7280;
-    }
-
-    .qr-info p {
-        margin: 0.25rem 0;
-    }
-
-    .small-text {
-        font-size: 0.75rem;
-    }
-
-    /* Status Messages */
-    #mensaje {
-        margin-top: 0.75rem;
-    }
-
-    .status {
-        padding: 0.75rem;
-        border-radius: 8px;
-        font-size: 0.8125rem;
-        font-weight: 500;
-        margin: 0.5rem 0;
-    }
-
-    .status-success {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
-
-    .status-error {
-        background: #fee2e2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-    }
-
-    .student-details {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 0.75rem;
-        margin-top: 0.5rem;
-        font-size: 0.8125rem;
-    }
-
-    .student-details p {
-        margin: 0.25rem 0;
-        color: #4b5563;
-    }
-
-    /* Tablet & Desktop */
-    @@media (min-width: 768px) {
-        .scan-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .scanner-section,
-        .manual-section {
-            padding: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-        }
-
-        .card-description {
-            font-size: 1rem;
-        }
-
-        .scanner-controls {
-            flex-direction: row;
-            justify-content: center;
-        }
-
-        .btn {
-            width: auto;
-            min-width: 150px;
-        }
-
-        #scannerContainer {
-            max-width: 320px;
-            height: 320px;
-        }
-
-        .scanner-frame {
-            width: 160px;
-            height: 160px;
-        }
-
-        .scanner-help {
-            font-size: 0.875rem;
-        }
-    }
-
-    @@media (min-width: 1024px) {
-        #scannerContainer {
-            max-width: 360px;
-            height: 360px;
-        }
-
-        .scanner-frame {
-            width: 180px;
-            height: 180px;
-        }
-    }
-</style>
