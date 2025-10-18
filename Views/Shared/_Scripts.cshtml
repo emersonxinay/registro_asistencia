@@ -1,4 +1,5 @@
 <!-- Scripts -->
+<script src="~/js/theme-manager.js?v=@DateTime.Now.Ticks"></script>
 <script src="~/js/app.js?v=@DateTime.Now.Ticks"></script>
 <script>
     // Initialize Lucide icons
@@ -6,7 +7,9 @@
 
     // Initialize theme and navigation
     document.addEventListener('DOMContentLoaded', function() {
-        initializeTheme();
+        // Actualizar iconos de lucide después de que el tema esté configurado
+        setTimeout(() => lucide.createIcons(), 100);
+
         initializeModernNavigation();
         // Load stats after a delay to avoid conflicts
         setTimeout(loadQuickStats, 500);
@@ -26,28 +29,51 @@
         // Update connection status
         updateConnectionStatus();
 
-        console.log('✅ Modern navigation initialized');
+        // Add scroll detection for header
+        initializeScrollDetection();
+
+        console.log('Modern navigation initialized');
+    }
+
+    // Scroll detection for header shadow
+    function initializeScrollDetection() {
+        const header = document.getElementById('mainHeader');
+        if (!header) return;
+
+        let lastScroll = 0;
+        window.addEventListener('scroll', function() {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            lastScroll = currentScroll;
+        }, { passive: true });
     }
 
     // Nueva Navegación Refactorizada
     function initializeResponsiveNavigation() {
         const header = document.getElementById('mainHeader');
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const bottomMenuBtn = document.getElementById('bottomMenuBtn');
         const mobileNav = document.getElementById('mobileNav');
         const mobileOverlay = document.getElementById('mobileOverlay');
 
         if (!header || !mobileMenuBtn || !mobileNav) {
-            console.log('❌ Elementos de navegación refactorizada no encontrados');
+            console.log('[Nav] Navigation elements not found');
             return;
         }
 
-        console.log('🔍 Inicializando navegación refactorizada...');
+        console.log('[Nav] Initializing responsive navigation...');
 
-        // Toggle navigation - FUNCIÓN PRINCIPAL
+        // Toggle navigation - FUNCIÓN PRINCIPAL (Header button)
         mobileMenuBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🍔 Mobile menu button clickeado');
+            console.log('[Nav] Mobile menu button clicked');
 
             const isOpen = document.body.classList.contains('mobile-nav-open');
 
@@ -58,10 +84,38 @@
             }
         });
 
+        // Bottom tab menu button
+        if (bottomMenuBtn) {
+            bottomMenuBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[Nav] Bottom menu button clicked');
+
+                const isOpen = document.body.classList.contains('mobile-nav-open');
+
+                if (isOpen) {
+                    closeMobileNavigation();
+                } else {
+                    openMobileNavigation();
+                }
+            });
+        }
+
+        // Close button in drawer header
+        const mobileNavClose = document.getElementById('mobileNavClose');
+        if (mobileNavClose) {
+            mobileNavClose.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[Nav] Close button clicked');
+                closeMobileNavigation();
+            });
+        }
+
         // Close navigation when clicking overlay
         if (mobileOverlay) {
             mobileOverlay.addEventListener('click', function() {
-                console.log('🔘 Mobile overlay clickeado - cerrando menú');
+                console.log('[Nav] Overlay clicked - closing menu');
                 closeMobileNavigation();
             });
         }
@@ -71,7 +125,7 @@
             if (!header.contains(e.target) &&
                 !mobileNav.contains(e.target) &&
                 document.body.classList.contains('mobile-nav-open')) {
-                console.log('🌐 Click fuera del menú móvil - cerrando');
+                console.log('[Nav] Click outside - closing menu');
                 closeMobileNavigation();
             }
         });
@@ -79,7 +133,7 @@
         // Close navigation on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
-                console.log('⌨️ Escape presionado - cerrando menú móvil');
+                console.log('[Nav] Escape pressed - closing menu');
                 closeMobileNavigation();
             }
         });
@@ -87,7 +141,7 @@
         // Close navigation on window resize to desktop
         window.addEventListener('resize', function() {
             if (window.innerWidth >= 1024 && document.body.classList.contains('mobile-nav-open')) {
-                console.log('📱➡️💻 Resize a desktop - cerrando menú móvil');
+                console.log('[Nav] Resize to desktop - closing menu');
                 closeMobileNavigation();
             }
         });
@@ -98,42 +152,51 @@
             item.addEventListener('click', function() {
                 // Close navigation on mobile when clicking a link
                 if (window.innerWidth < 1024) {
-                    console.log('🔗 Mobile nav item clickeado - cerrando menú');
+                    console.log('[Nav] Nav item clicked - closing menu');
                     setTimeout(closeMobileNavigation, 150);
                 }
             });
         });
 
         function openMobileNavigation() {
-            console.log('📂 Abriendo navegación móvil');
+            console.log('[Nav] Opening mobile navigation');
+
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.top = `-${scrollY}px`;
+
             document.body.classList.add('mobile-nav-open');
             mobileMenuBtn.setAttribute('aria-expanded', 'true');
             mobileNav.setAttribute('aria-hidden', 'false');
 
-            // Prevent body scroll
-            document.body.style.overflow = 'hidden';
-
             // Focus trap
             const firstFocusable = mobileNav.querySelector('a, button');
             if (firstFocusable) {
-                setTimeout(() => firstFocusable.focus(), 100);
+                setTimeout(() => firstFocusable.focus(), 150);
             }
         }
 
         function closeMobileNavigation() {
-            console.log('📁 Cerrando navegación móvil');
+            console.log('[Nav] Closing mobile navigation');
+
+            // Get saved scroll position
+            const scrollY = document.body.style.top;
+
             document.body.classList.remove('mobile-nav-open');
             mobileMenuBtn.setAttribute('aria-expanded', 'false');
             mobileNav.setAttribute('aria-hidden', 'true');
 
-            // Restore body scroll
-            document.body.style.overflow = '';
+            // Restore scroll position
+            document.body.style.top = '';
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
 
             // Return focus to button
             mobileMenuBtn.focus();
         }
 
-        console.log('✅ Navegación refactorizada inicializada correctamente');
+        console.log('[Nav] Responsive navigation initialized');
     }
 
     // Logout confirmation - Refactorizado
@@ -242,9 +305,9 @@
     function updateConnectionStatus() {
         // Simple online/offline status update
         if (navigator.onLine) {
-            console.log('✅ Online');
+            console.log('[Status] Online');
         } else {
-            console.log('⚠️ Offline');
+            console.log('[Status] Offline');
         }
     }
 
@@ -276,9 +339,9 @@
             updateStatElement('activeClasses', Array.isArray(classes) ? classes.filter(c => c && c.activa).length : 0);
             updateStatElement('todayAttendance', todayAttendance);
 
-            console.log('✅ Quick stats loaded successfully');
+            console.log('[Stats] Quick stats loaded successfully');
         } catch (error) {
-            console.error('❌ Error loading quick stats:', error);
+            console.error('[Stats] Error loading quick stats:', error);
             // Set safe default values
             updateStatElement('totalStudents', 0);
             updateStatElement('activeClasses', 0);

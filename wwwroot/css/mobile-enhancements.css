@@ -1,0 +1,551 @@
+/* ================================
+   📱 MEJORAS MOBILE-FIRST RESPONSIVE
+   Compatible con iOS, Android, Windows Mobile
+   ================================ */
+
+/* ================================
+   AJUSTES ESPECÍFICOS POR PLATAFORMA
+   ================================ */
+
+/* === iOS Safari Específico === */
+@supports (-webkit-touch-callout: none) {
+  /* Safe Area para iPhone X y superiores */
+  .main-header {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+
+  .mobile-nav {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+
+  /* Mejorar scroll en iOS */
+  .mobile-nav-content {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix para botones en iOS */
+  button,
+  .btn,
+  .theme-toggle {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  /* Prevenir zoom en inputs en iOS */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* === Android Chrome Específico === */
+@media (max-width: 768px) {
+  /* Mejorar área táctil en Android */
+  .mobile-nav-item,
+  .theme-toggle,
+  .mobile-menu-btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  /* Prevenir selección accidental de texto */
+  .header-actions,
+  .mobile-nav-content {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+
+  /* Pero permitir selección en textos específicos */
+  .user-name,
+  .mobile-nav-item span {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
+  }
+}
+
+/* ================================
+   BREAKPOINTS MEJORADOS
+   ================================ */
+
+/* === Teléfonos Pequeños: 0-374px === */
+@media (max-width: 374px) {
+  .header-container {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .brand-text {
+    font-size: 0.875rem;
+  }
+
+  .theme-toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  .mobile-menu-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .user-name {
+    max-width: 60px;
+    font-size: 0.75rem;
+  }
+
+  /* Ocultar elementos no esenciales en pantallas muy pequeñas */
+  .desktop-user-info {
+    display: none !important;
+  }
+}
+
+/* === Teléfonos: 375px - 639px === */
+@media (min-width: 375px) and (max-width: 639px) {
+  .header-container {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mobile-nav-content {
+    padding: var(--space-6) var(--space-4);
+  }
+}
+
+/* === Tablets Verticales: 640px - 767px === */
+@media (min-width: 640px) and (max-width: 767px) {
+  .header-container {
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .mobile-nav-content {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-6);
+  }
+}
+
+/* === Tablets Horizontales: 768px - 1023px === */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .header-container {
+    padding: var(--space-4) var(--space-8);
+  }
+
+  .mobile-nav-content {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: var(--space-10) var(--space-8);
+  }
+
+  .desktop-user-info {
+    display: flex !important;
+  }
+}
+
+/* === Desktop: 1024px+ === */
+@media (min-width: 1024px) {
+  .theme-toggle {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ================================
+   ORIENTACIÓN DE DISPOSITIVO
+   ================================ */
+
+/* Landscape en móviles */
+@media (max-width: 926px) and (orientation: landscape) {
+  .mobile-nav {
+    height: calc(100vh - var(--header-height, 60px));
+  }
+
+  .mobile-nav-content {
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .mobile-user-profile {
+    padding: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .mobile-menu-section {
+    margin-bottom: var(--space-4);
+  }
+
+  .mobile-menu-section h4 {
+    margin-bottom: var(--space-2);
+  }
+
+  .mobile-nav-item {
+    padding: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+}
+
+/* ================================
+   MEJORAS DE TÁCTIL
+   ================================ */
+
+/* Área táctil mínima de 44x44px (Apple HIG) */
+@media (pointer: coarse) {
+  button,
+  a,
+  .nav-item,
+  .mobile-nav-item,
+  .theme-toggle,
+  .mobile-menu-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Espaciado adicional entre elementos táctiles */
+  .header-actions {
+    gap: var(--space-3);
+  }
+
+  .mobile-nav-item {
+    margin-bottom: var(--space-3);
+  }
+}
+
+/* ================================
+   MEJORAS VISUALES MÓVILES
+   ================================ */
+
+/* Aumentar contraste en móviles bajo luz solar */
+@media (max-width: 768px) {
+  .main-header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .main-header {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Mejorar legibilidad de texto */
+  .mobile-nav-item {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .user-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}
+
+/* ================================
+   OPTIMIZACIONES DE PERFORMANCE
+   ================================ */
+
+/* Mejorar rendering en móviles */
+@media (max-width: 768px) {
+  .theme-toggle,
+  .mobile-menu-btn,
+  .mobile-nav-item {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Reducir animaciones complejas en móviles */
+  @media (prefers-reduced-motion: no-preference) {
+    .mobile-nav {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .burger-line {
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-icon {
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+  }
+}
+
+/* ================================
+   ACCESIBILIDAD MÓVIL
+   ================================ */
+
+/* Focus visible para navegación táctil y teclado */
+@media (max-width: 768px) {
+  *:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+  }
+
+  /* Mejorar área de focus en elementos pequeños */
+  .theme-toggle:focus-visible,
+  .mobile-menu-btn:focus-visible {
+    outline-width: 4px;
+  }
+}
+
+/* ================================
+   ESTADOS DE CARGA
+   ================================ */
+
+/* Skeleton screens para mejor UX en carga */
+@media (max-width: 768px) {
+  .loading .mobile-nav-item {
+    background: linear-gradient(
+      90deg,
+      var(--bg-secondary) 0%,
+      var(--bg-hover) 50%,
+      var(--bg-secondary) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* ================================
+   MEJORAS DE CONTRASTE
+   ================================ */
+
+/* Modo de alto contraste para Windows */
+@media (prefers-contrast: high) {
+  .theme-toggle,
+  .mobile-menu-btn {
+    border: 2px solid currentColor;
+  }
+
+  .mobile-nav-item {
+    border: 1px solid var(--border);
+  }
+
+  .mobile-nav-item:hover,
+  .mobile-nav-item:focus {
+    border-color: var(--primary);
+    border-width: 2px;
+  }
+}
+
+/* ================================
+   SOPORTE PARA NOTCHES Y BORDES CURVOS
+   ================================ */
+
+/* iPhone X y superiores */
+@supports (padding: max(0px)) {
+  .main-header {
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+  }
+
+  .mobile-nav {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* ================================
+   MEJORAS PARA PWA
+   ================================ */
+
+/* Cuando se ejecuta como PWA */
+@media (display-mode: standalone) {
+  .main-header {
+    /* Espacio adicional para la barra de estado */
+    padding-top: calc(var(--space-4) + env(safe-area-inset-top));
+  }
+
+  /* Prevenir pull-to-refresh en PWA */
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* ================================
+   MEJORAS PARA DARK MODE EN MÓVILES
+   ================================ */
+
+@media (max-width: 768px) {
+  /* Reducir brillo de fondos blancos en dark mode */
+  [data-theme="dark"] .mobile-nav-item.featured,
+  [data-theme="dark"] .mobile-nav-item.scanner,
+  [data-theme="dark"] .mobile-nav-item.admin {
+    opacity: 0.95;
+  }
+
+  /* Mejorar contraste de texto en dark mode */
+  [data-theme="dark"] .mobile-nav-item {
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .mobile-nav-item:hover {
+    background: var(--bg-hover);
+  }
+}
+
+/* ================================
+   TOOLTIP MÓVIL PARA THEME TOGGLE
+   ================================ */
+
+@media (max-width: 768px) {
+  .theme-toggle[title]::after {
+    content: attr(title);
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+  }
+
+  .theme-toggle:active::after {
+    opacity: 1;
+  }
+}
+
+/* ================================
+   MEJORAS DE TIPOGRAFÍA RESPONSIVE
+   ================================ */
+
+/* Escala de fuentes adaptativa */
+@media (max-width: 374px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 639px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* ================================
+   UTILIDADES RESPONSIVE
+   ================================ */
+
+/* Espaciado adaptativo */
+.container-mobile {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .container-mobile {
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-mobile {
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
+  }
+}
+
+/* Clases de visibilidad responsive */
+.show-mobile {
+  display: block !important;
+}
+
+.show-tablet {
+  display: none !important;
+}
+
+.show-desktop {
+  display: none !important;
+}
+
+@media (min-width: 640px) {
+  .show-mobile {
+    display: none !important;
+  }
+
+  .show-tablet {
+    display: block !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .show-tablet {
+    display: none !important;
+  }
+
+  .show-desktop {
+    display: block !important;
+  }
+}
+
+/* ================================
+   FIX PARA SCROLL EN MÓVILES
+   ================================ */
+
+/* Prevenir scroll del body cuando el menú móvil está abierto */
+.mobile-nav-open {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.mobile-nav-open .mobile-nav {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================================
+   MEJORAS DE ANIMACIÓN MÓVIL
+   ================================ */
+
+@media (max-width: 768px) {
+  /* Animaciones más rápidas en móviles */
+  * {
+    --transition-fast: all 0.15s ease;
+    --transition: all 0.2s ease;
+    --transition-slow: all 0.3s ease;
+  }
+
+  /* Reducir motion sickness en móviles */
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-nav,
+    .burger-line,
+    .theme-toggle-icon {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}

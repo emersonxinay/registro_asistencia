@@ -17,7 +17,7 @@
     </a>
 </div>
 
-<!-- Desktop Navigation -->
+<!-- Desktop Navigation - SIMPLIFIED -->
 <nav class="desktop-nav">
     <div class="nav-group nav-primary">
         <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
@@ -25,81 +25,34 @@
             <span>Dashboard</span>
         </a>
 
-        <!-- Dropdown Clases -->
-        <div class="nav-dropdown">
-            <div class="nav-dropdown-toggle">
-                <i data-lucide="graduation-cap"></i>
-                <span>Clases</span>
-            </div>
-            <div class="nav-dropdown-menu">
-                <a href="/workflow/cursos" class="nav-dropdown-item">
-                    <i data-lucide="plus-circle"></i>
-                    <span>Nueva Clase</span>
-                </a>
-                <a href="/workflow/mis-clases" class="nav-dropdown-item">
-                    <i data-lucide="calendar-days"></i>
-                    <span>Mis Clases</span>
-                </a>
-                <a href="/docente/scanner" class="nav-dropdown-item">
-                    <i data-lucide="qr-code"></i>
-                    <span>Escáner QR</span>
-                </a>
-                <div class="nav-dropdown-divider"></div>
-                <a href="/workflow/qr-students" class="nav-dropdown-item">
-                    <i data-lucide="smartphone"></i>
-                    <span>QR Estudiantes</span>
-                </a>
-            </div>
-        </div>
+        <a href="/workflow/mis-clases" class="nav-item">
+            <i data-lucide="calendar-days"></i>
+            <span>Mis Clases</span>
+        </a>
 
-        <!-- Dropdown Gestión -->
-        <div class="nav-dropdown">
-            <div class="nav-dropdown-toggle">
-                <i data-lucide="folder"></i>
-                <span>Gestión</span>
-            </div>
-            <div class="nav-dropdown-menu">
-                <a href="/docente/cursos" class="nav-dropdown-item">
-                    <i data-lucide="book-open"></i>
-                    <span>Mis Cursos</span>
-                </a>
-                <a href="/alumnos" class="nav-dropdown-item">
-                    <i data-lucide="users"></i>
-                    <span>Lista de Alumnos</span>
-                </a>
-                <a href="/asistencias" class="nav-dropdown-item">
-                    <i data-lucide="clipboard-check"></i>
-                    <span>Asistencias</span>
-                </a>
-                
-            </div>
-        </div>
+        <a href="/alumnos" class="nav-item">
+            <i data-lucide="users"></i>
+            <span>Estudiantes</span>
+        </a>
+
+        <a href="/asistencias" class="nav-item">
+            <i data-lucide="clipboard-check"></i>
+            <span>Asistencias</span>
+        </a>
+
+        <a href="/docente/scanner" class="nav-item scanner-highlight">
+            <i data-lucide="scan"></i>
+            <span>Escanear</span>
+        </a>
     </div>
 
     <div class="nav-group nav-secondary">
         @if (User.IsInRole("Administrador"))
         {
-            <div class="nav-dropdown">
-                <div class="nav-dropdown-toggle admin">
-                    <i data-lucide="shield-check"></i>
-                    <span>Admin</span>
-                </div>
-                <div class="nav-dropdown-menu">
-                    <a href="/dashboard" class="nav-dropdown-item">
-                        <i data-lucide="layout-dashboard"></i>
-                        <span>Panel Admin</span>
-                    </a>
-                    <a href="/usuarios" class="nav-dropdown-item">
-                        <i data-lucide="user-cog"></i>
-                        <span>Gestión Usuarios</span>
-                    </a>
-                    <div class="nav-dropdown-divider"></div>
-                    <a href="/swagger" target="_blank" class="nav-dropdown-item">
-                        <i data-lucide="code"></i>
-                        <span>API Docs</span>
-                    </a>
-                </div>
-            </div>
+            <a href="/usuarios" class="nav-item admin-highlight">
+                <i data-lucide="shield-check"></i>
+                <span>Admin</span>
+            </a>
         }
 
         <a href="/ayuda" class="nav-item">
@@ -111,6 +64,12 @@
 
 <!-- User Info & Actions -->
 <div class="header-actions">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" id="themeToggle" title="Cambiar modo de color" aria-label="Cambiar tema">
+        <i data-lucide="moon" class="theme-toggle-icon icon-moon"></i>
+        <i data-lucide="sun" class="theme-toggle-icon icon-sun"></i>
+    </button>
+
     <!-- Desktop User Info Simple -->
     <div class="desktop-user-info">
         <div class="user-avatar">
@@ -141,8 +100,21 @@
     </button>
 </div>
 
-<!-- Mobile Navigation -->
+<!-- Mobile Navigation - VENTANA FLOTANTE SIN SCROLL -->
 <nav class="mobile-nav" id="mobileNav">
+    <!-- Header del drawer con botón cerrar -->
+    <div class="mobile-nav-header">
+        <div class="mobile-nav-header-content">
+            <div class="brand-icon-mobile">
+                <i data-lucide="graduation-cap"></i>
+            </div>
+            <span class="mobile-nav-title">Menú</span>
+        </div>
+        <button class="mobile-nav-close" id="mobileNavClose" aria-label="Cerrar menú">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+
     <div class="mobile-nav-content">
         <!-- User Profile -->
         <div class="mobile-user-profile">
@@ -155,25 +127,9 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Items -->
+        <!-- Menu Items Compacto -->
         <div class="mobile-menu-section">
-            <h4>Principal</h4>
-            <a href="/dashboard" class="mobile-nav-item">
-                <i data-lucide="home"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="/workflow/cursos" class="mobile-nav-item featured">
-                <i data-lucide="plus-circle"></i>
-                <span>Nueva Clase</span>
-            </a>
-            <a href="/docente/scanner" class="mobile-nav-item scanner">
-                <i data-lucide="qr-code"></i>
-                <span>Escáner QR</span>
-            </a>
-        </div>
-
-        <div class="mobile-menu-section">
-            <h4>Gestión</h4>
+            <h4>Opciones</h4>
             <a href="/workflow/mis-clases" class="mobile-nav-item">
                 <i data-lucide="calendar-days"></i>
                 <span>Mis Clases</span>
@@ -181,10 +137,6 @@
             <a href="/docente/cursos" class="mobile-nav-item">
                 <i data-lucide="book-open"></i>
                 <span>Mis Cursos</span>
-            </a>
-            <a href="/asistencias" class="mobile-nav-item">
-                <i data-lucide="users-check"></i>
-                <span>Asistencias</span>
             </a>
             <a href="/workflow/qr-students" class="mobile-nav-item">
                 <i data-lucide="smartphone"></i>
@@ -195,25 +147,25 @@
         @if (User.IsInRole("Administrador"))
         {
             <div class="mobile-menu-section">
-                <h4>Administración</h4>
-                <a href="/dashboard" class="mobile-nav-item admin">
+                <h4>Admin</h4>
+                <a href="/usuarios" class="mobile-nav-item admin">
                     <i data-lucide="shield-check"></i>
-                    <span>Panel Admin</span>
+                    <span>Gestión Usuarios</span>
                 </a>
             </div>
         }
 
-        <div class="mobile-menu-section">
-            <h4>Mi Cuenta</h4>
-            <a href="/perfil" class="mobile-nav-item">
-                <i data-lucide="settings"></i>
-                <span>Mi Perfil</span>
-            </a>
+        <div class="mobile-menu-section" style="margin-top: auto;">
+            <button class="mobile-nav-item theme-toggle" id="mobileThemeToggle" title="Cambiar tema">
+                <i data-lucide="moon" class="icon-moon"></i>
+                <i data-lucide="sun" class="icon-sun"></i>
+                <span class="theme-toggle-text">Modo Oscuro</span>
+            </button>
             <a href="/ayuda" class="mobile-nav-item">
                 <i data-lucide="help-circle"></i>
                 <span>Ayuda</span>
             </a>
-            <form method="post" action="/logout" id="mobileLogoutForm">
+            <form method="post" action="/logout" id="mobileLogoutForm" style="margin: 0;">
                 @Html.AntiForgeryToken()
                 <button type="button" class="mobile-nav-item logout" onclick="confirmLogout('mobile')">
                     <i data-lucide="log-out"></i>
@@ -226,3 +178,27 @@
 
 <!-- Mobile Overlay -->
 <div class="mobile-overlay" id="mobileOverlay"></div>
+
+<!-- BOTTOM TAB NAVIGATION (Mobile Only) -->
+<nav class="bottom-tab-nav">
+    <a href="/dashboard" class="bottom-tab-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+        <i data-lucide="home"></i>
+        <span>Inicio</span>
+    </a>
+    <a href="/workflow/mis-clases" class="bottom-tab-item">
+        <i data-lucide="calendar-days"></i>
+        <span>Clases</span>
+    </a>
+    <a href="/docente/scanner" class="bottom-tab-item scanner-tab">
+        <i data-lucide="scan"></i>
+        <span>Escanear</span>
+    </a>
+    <a href="/asistencias" class="bottom-tab-item">
+        <i data-lucide="clipboard-check"></i>
+        <span>Asistencias</span>
+    </a>
+    <button type="button" class="bottom-tab-item menu-tab" id="bottomMenuBtn">
+        <i data-lucide="menu"></i>
+        <span>Menú</span>
+    </button>
+</nav>
