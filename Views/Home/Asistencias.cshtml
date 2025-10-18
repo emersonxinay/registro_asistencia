@@ -3,85 +3,628 @@
     ViewData["Subtitle"] = "Control detallado de asistencia por clase específica";
 }
 
-<div class="container">
-    <h1>Asistencias por Clase</h1>
-    
-    <!-- Selectores de Clase -->
-    <div style="background: #f0f0f0; padding: 20px; margin-bottom: 20px;">
-        <!-- Tabs para elegir tipo de clase -->
-        <div style="margin-bottom: 20px;">
-            <button id="tabClasesLibres" onclick="cambiarTipoClase('libres')" style="background: #007bff; color: white; padding: 10px 20px; border: none; margin-right: 5px; cursor: pointer;">
+<style>
+    .asistencias-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .page-header {
+        margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+        color: #1a202c;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .filters-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+    }
+
+    .tabs-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .tab-btn.active {
+        background: white;
+        color: #667eea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-btn:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .panel {
+        display: none;
+    }
+
+    .panel.active {
+        display: block;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        color: white;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-select {
+        width: 100%;
+        max-width: 500px;
+        padding: 12px 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        font-size: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #2d3748;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: white;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    .form-select:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .actions-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: white;
+        color: #667eea;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .summary-card {
+        background: linear-gradient(135deg, #f6f8fb 0%, #ffffff 100%);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        display: none;
+    }
+
+    .summary-card.show {
+        display: block;
+    }
+
+    .summary-card h3 {
+        color: #1a202c;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .class-info-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        line-height: 1.6;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+    .stat-item {
+        background: white;
+        padding: 16px;
+        border-radius: 12px;
+        border-left: 4px solid;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-item.total { border-left-color: #667eea; }
+    .stat-item.presente { border-left-color: #10b981; }
+    .stat-item.tardanza { border-left-color: #f59e0b; }
+    .stat-item.ausente { border-left-color: #ef4444; }
+    .stat-item.excusado { border-left-color: #3b82f6; }
+    .stat-item.registraron { border-left-color: #8b5cf6; }
+
+    .stat-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a202c;
+    }
+
+    .results-container {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .alert {
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+        font-weight: 500;
+    }
+
+    .alert-info {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #92400e;
+    }
+
+    .alert-loading {
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    .alert-error {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        background: white;
+    }
+
+    .attendance-table thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .attendance-table th {
+        padding: 14px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .attendance-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: background-color 0.2s ease;
+    }
+
+    .attendance-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    .attendance-table tbody tr.presente-row {
+        background: linear-gradient(to right, #ecfdf5 0%, #ffffff 50%);
+        border-left: 4px solid #10b981;
+    }
+
+    .attendance-table tbody tr.tardanza-row {
+        background: linear-gradient(to right, #fffbeb 0%, #ffffff 50%);
+        border-left: 4px solid #f59e0b;
+    }
+
+    .attendance-table tbody tr.ausente-row {
+        background: linear-gradient(to right, #fef2f2 0%, #ffffff 50%);
+        border-left: 4px solid #ef4444;
+    }
+
+    .attendance-table tbody tr.excusado-row {
+        background: linear-gradient(to right, #eff6ff 0%, #ffffff 50%);
+        border-left: 4px solid #3b82f6;
+    }
+
+    .attendance-table td {
+        padding: 12px;
+        color: #374151;
+    }
+
+    .code-cell {
+        font-weight: 700;
+        color: #667eea;
+        font-family: 'Courier New', monospace;
+    }
+
+    .name-cell {
+        font-weight: 600;
+        color: #1a202c;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.presente {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-badge.tardanza {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-badge.ausente {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .status-badge.excusado {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .btn-qr {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-qr:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .qr-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+    }
+
+    .qr-modal-content {
+        background: white;
+        padding: 32px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 500px;
+        position: relative;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .qr-modal-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        font-size: 20px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+    .qr-modal-close:hover {
+        background: #dc2626;
+        transform: rotate(90deg);
+    }
+
+    .qr-modal h2 {
+        margin-top: 0;
+        color: #1a202c;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .qr-student-info {
+        background: linear-gradient(135deg, #f6f8fb 0%, #e5e7eb 100%);
+        padding: 16px;
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+
+    .qr-student-name {
+        font-weight: 700;
+        font-size: 18px;
+        color: #10b981;
+        margin-bottom: 4px;
+    }
+
+    .qr-student-code {
+        color: #6b7280;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+    }
+
+    .qr-code-box {
+        background: white;
+        padding: 20px;
+        border: 3px solid #10b981;
+        border-radius: 12px;
+        display: inline-block;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .qr-code-box img {
+        width: 250px;
+        height: 250px;
+        display: block;
+    }
+
+    .qr-modal-footer {
+        color: #6b7280;
+        font-size: 14px;
+        margin-top: 20px;
+        line-height: 1.5;
+    }
+
+    @@media (max-width: 768px) {
+        .asistencias-container {
+            padding: 16px;
+        }
+
+        .filters-card {
+            padding: 20px;
+        }
+
+        .tabs-container {
+            flex-direction: column;
+        }
+
+        .form-select {
+            max-width: 100%;
+        }
+
+        .actions-row {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .attendance-table {
+            font-size: 12px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 8px 6px;
+        }
+
+        .qr-modal-content {
+            margin: 16px;
+            padding: 24px;
+        }
+    }
+</style>
+
+<div class="asistencias-container">
+    <div class="page-header">
+        <h1>Asistencias por Clase</h1>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-card">
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <button id="tabClasesLibres" class="tab-btn active" onclick="cambiarTipoClase('libres')">
                 📚 Clases Libres
             </button>
-            <button id="tabClasesCurso" onclick="cambiarTipoClase('curso')" style="background: #6c757d; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+            <button id="tabClasesCurso" class="tab-btn" onclick="cambiarTipoClase('curso')">
                 🎓 Clases con Curso
             </button>
         </div>
 
-        <!-- Panel para Clases Libres -->
-        <div id="panelClasesLibres" style="display: block;">
-            <div style="margin-bottom: 15px;">
-                <label for="selectorClaseLibre" style="font-weight: bold;">Seleccionar Clase Libre:</label>
-                <select id="selectorClaseLibre" style="margin: 10px; padding: 10px; font-size: 16px; width: 400px;">
+        <!-- Panel Clases Libres -->
+        <div id="panelClasesLibres" class="panel active">
+            <div class="form-group">
+                <label for="selectorClaseLibre">Seleccionar Clase Libre:</label>
+                <select id="selectorClaseLibre" class="form-select">
                     <option value="">-- Cargando clases libres... --</option>
                 </select>
             </div>
         </div>
 
-        <!-- Panel para Clases con Curso (existente) -->
-        <div id="panelClasesCurso" style="display: none;">
-            <div style="margin-bottom: 15px;">
-                <label for="selectorCurso" style="font-weight: bold;">1. Seleccionar Curso:</label>
-                <select id="selectorCurso" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarRamosPorCurso()">
+        <!-- Panel Clases con Curso -->
+        <div id="panelClasesCurso" class="panel">
+            <div class="form-group">
+                <label for="selectorCurso">1. Seleccionar Curso:</label>
+                <select id="selectorCurso" class="form-select" onchange="cargarRamosPorCurso()">
                     <option value="">-- Seleccionar Curso --</option>
                 </select>
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="selectorRamo" style="font-weight: bold;">2. Seleccionar Ramo/Asignatura:</label>
-                <select id="selectorRamo" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarClasesPorRamo()" disabled>
+            <div class="form-group">
+                <label for="selectorRamo">2. Seleccionar Ramo/Asignatura:</label>
+                <select id="selectorRamo" class="form-select" onchange="cargarClasesPorRamo()" disabled>
                     <option value="">-- Primero selecciona un curso --</option>
                 </select>
             </div>
 
-            <div style="margin-bottom: 15px;">
-                <label for="selectorClase" style="font-weight: bold;">3. Seleccionar Clase:</label>
-                <select id="selectorClase" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" disabled>
+            <div class="form-group">
+                <label for="selectorClase">3. Seleccionar Clase:</label>
+                <select id="selectorClase" class="form-select" disabled>
                     <option value="">-- Primero selecciona un ramo --</option>
                 </select>
             </div>
         </div>
 
-        <div>
-            <button onclick="cargarAsistenciasPorClase()" style="background: blue; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
-                CARGAR ASISTENCIAS
+        <!-- Botones de Acción -->
+        <div class="actions-row">
+            <button onclick="cargarAsistenciasPorClase()" class="btn btn-primary">
+                📊 CARGAR ASISTENCIAS
             </button>
-            <button onclick="refrescarDatos()" style="background: green; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
-                REFRESCAR
+            <button onclick="refrescarDatos()" class="btn btn-success">
+                🔄 REFRESCAR
             </button>
-            <button onclick="exportarCSV()" style="background: orange; color: white; padding: 10px 20px; font-size: 16px;">
-                EXPORTAR CSV COMPLETO
+            <button onclick="exportarCSV()" class="btn btn-warning">
+                📥 EXPORTAR CSV
             </button>
         </div>
     </div>
-    
+
     <!-- Resumen -->
-    <div id="resumen" style="display: none; background: #e8f5e8; padding: 15px; margin-bottom: 20px;">
+    <div id="resumen" class="summary-card">
         <h3>Resumen de la Clase</h3>
-        <div id="claseInfo" style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-weight: bold;"></div>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div>📊 Total Estudiantes: <span id="totalEstudiantes">0</span></div>
-            <div style="color: green;">✅ Presentes: <span id="totalPresentes">0</span></div>
-            <div style="color: orange;">⏰ Tardanzas: <span id="totalTardanzas">0</span></div>
-            <div style="color: red;">❌ Ausentes: <span id="totalAusentes">0</span></div>
-            <div style="color: blue;">📝 Excusados: <span id="totalExcusados">0</span></div>
-            <div style="color: purple;">📈 Registraron: <span id="totalConAsistencia">0</span></div>
+        <div id="claseInfo" class="class-info-box"></div>
+        <div class="stats-grid">
+            <div class="stat-item total">
+                <div class="stat-label">📊 Total Estudiantes</div>
+                <div class="stat-value" id="totalEstudiantes">0</div>
+            </div>
+            <div class="stat-item presente">
+                <div class="stat-label">✅ Presentes</div>
+                <div class="stat-value" id="totalPresentes">0</div>
+            </div>
+            <div class="stat-item tardanza">
+                <div class="stat-label">⏰ Tardanzas</div>
+                <div class="stat-value" id="totalTardanzas">0</div>
+            </div>
+            <div class="stat-item ausente">
+                <div class="stat-label">❌ Ausentes</div>
+                <div class="stat-value" id="totalAusentes">0</div>
+            </div>
+            <div class="stat-item excusado">
+                <div class="stat-label">📝 Excusados</div>
+                <div class="stat-value" id="totalExcusados">0</div>
+            </div>
+            <div class="stat-item registraron">
+                <div class="stat-label">📈 Registraron</div>
+                <div class="stat-value" id="totalConAsistencia">0</div>
+            </div>
         </div>
     </div>
-    
-    <div id="asistenciasList">
-        <div style="background: yellow; padding: 20px; margin: 20px 0;">
-            <h3>Selecciona un curso, ramo y clase para ver las asistencias</h3>
+
+    <!-- Resultados -->
+    <div id="asistenciasList" class="results-container">
+        <div class="alert alert-info">
+            <h3>Selecciona una clase para ver las asistencias</h3>
         </div>
     </div>
 </div>
@@ -102,26 +645,26 @@ function cambiarTipoClase(tipo) {
     const panelCurso = document.getElementById('panelClasesCurso');
 
     if (tipo === 'libres') {
-        tabLibres.style.background = '#007bff';
-        tabCurso.style.background = '#6c757d';
-        panelLibres.style.display = 'block';
-        panelCurso.style.display = 'none';
+        tabLibres.classList.add('active');
+        tabCurso.classList.remove('active');
+        panelLibres.classList.add('active');
+        panelCurso.classList.remove('active');
         cargarClasesLibres();
     } else {
-        tabLibres.style.background = '#6c757d';
-        tabCurso.style.background = '#007bff';
-        panelLibres.style.display = 'none';
-        panelCurso.style.display = 'block';
+        tabLibres.classList.remove('active');
+        tabCurso.classList.add('active');
+        panelLibres.classList.remove('active');
+        panelCurso.classList.add('active');
         cargarCursos();
     }
 
     // Limpiar vista de asistencias
     document.getElementById('asistenciasList').innerHTML = `
-        <div style="background: yellow; padding: 20px; margin: 20px 0;">
+        <div class="alert alert-info">
             <h3>Selecciona una clase para ver las asistencias</h3>
         </div>
     `;
-    document.getElementById('resumen').style.display = 'none';
+    document.getElementById('resumen').classList.remove('show');
 }
 
 // Cargar clases libres (sin curso/ramo)
@@ -271,9 +814,9 @@ async function cargarAsistenciasPorClase() {
             return;
         }
     }
-    
+
     const container = document.getElementById('asistenciasList');
-    container.innerHTML = '<div style="background: blue; color: white; padding: 20px;">CARGANDO ASISTENCIAS DE LA CLASE...</div>';
+    container.innerHTML = '<div class="alert alert-loading">⏳ CARGANDO ASISTENCIAS DE LA CLASE...</div>';
 
     try {
         console.log('📡 Fetching data for clase:', claseId);
@@ -494,50 +1037,48 @@ async function cargarAsistenciasPorClase() {
         document.getElementById('totalPresentes').textContent = totalPresentes;
         document.getElementById('totalTardanzas').textContent = totalTardanzas;
         document.getElementById('totalAusentes').textContent = totalAusentes;
-        // Verificar si existe el elemento antes de actualizar
-        const totalExcusadosEl = document.getElementById('totalExcusados');
-        if (totalExcusadosEl) totalExcusadosEl.textContent = totalExcusados;
+        document.getElementById('totalExcusados').textContent = totalExcusados;
         document.getElementById('totalConAsistencia').textContent = totalConAsistencia;
-        document.getElementById('resumen').style.display = 'block';
-        
-        // Generar tabla
+        document.getElementById('resumen').classList.add('show');
+
+        // Función para convertir método enum a texto
+        function metodoToString(metodo) {
+            if (typeof metodo === 'number') {
+                switch(metodo) {
+                    case 1: return 'QR Estudiante';
+                    case 2: return 'QR Docente';
+                    case 3: return 'Manual';
+                    case 4: return 'Auto Ausente';
+                    default: return 'Desconocido';
+                }
+            }
+            return metodo || 'N/A';
+        }
+
+        // Generar tabla moderna
         let html = `
-            <div style="background: green; color: white; padding: 20px; margin-bottom: 10px;">
+            <div class="alert alert-success">
                 ✅ LISTA COMPLETA DE LA CLASE: ${totalEstudiantes} estudiantes
             </div>
-            <table border="3" style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <tr style="background: #f0f0f0;">
-                    <th style="padding: 10px; border: 2px solid black;">Código</th>
-                    <th style="padding: 10px; border: 2px solid black;">Nombre Completo</th>
-                    <th style="padding: 10px; border: 2px solid black;">Estado</th>
-                    <th style="padding: 10px; border: 2px solid black;">Fecha Registro</th>
-                    <th style="padding: 10px; border: 2px solid black;">Hora Registro</th>
-                    <th style="padding: 10px; border: 2px solid black;">Min. Retraso</th>
-                    <th style="padding: 10px; border: 2px solid black;">Método</th>
-                    <th style="padding: 10px; border: 2px solid black;">Email</th>
-                </tr>
+            <div class="table-wrapper">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre Completo</th>
+                            <th>Estado</th>
+                            <th>Fecha Registro</th>
+                            <th>Hora Registro</th>
+                            <th>Min. Retraso</th>
+                            <th>Método</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
         `;
-        
+
         listaCompleta.forEach(estudiante => {
-            const estadoColor = estudiante.estado === 'PRESENTE' ? 'green' :
-                               estudiante.estado === 'TARDANZA' ? 'orange' :
-                               estudiante.estado === 'EXCUSADO' ? 'blue' : 'red';
-
-            // Función para convertir método enum a texto
-            function metodoToString(metodo) {
-                if (typeof metodo === 'number') {
-                    switch(metodo) {
-                        case 1: return 'QR Estudiante';
-                        case 2: return 'QR Docente';
-                        case 3: return 'Manual';
-                        case 4: return 'Auto Ausente';
-                        default: return 'Desconocido';
-                    }
-                }
-                return metodo || 'N/A';
-            }
-
-            // Datos seguros para mostrar
+            const estadoClass = estudiante.estado.toLowerCase();
             const codigoDisplay = estudiante.codigo && estudiante.codigo !== 'N/A' ? estudiante.codigo : 'SIN-CÓDIGO';
             const nombreDisplay = estudiante.nombre && estudiante.nombre !== 'N/A' ? estudiante.nombre : 'SIN-NOMBRE';
             const emailDisplay = estudiante.email ? estudiante.email : 'No registrado';
@@ -545,34 +1086,42 @@ async function cargarAsistenciasPorClase() {
             const horaDisplay = estudiante.horaRegistro && estudiante.horaRegistro !== 'N/A' ? estudiante.horaRegistro : 'N/A';
 
             html += `
-                <tr style="border: 2px solid black; background: ${estudiante.color};">
-                    <td style="padding: 8px; border: 1px solid black; font-weight: bold;">${codigoDisplay}</td>
-                    <td style="padding: 8px; border: 1px solid black;">
-                        ${nombreDisplay}
-                        <button onclick="mostrarQREstudiante(${estudiante.id}, '${nombreDisplay.replace(/'/g, "\\'")}', '${codigoDisplay}')"
-                                style="margin-left: 10px; padding: 4px 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
-                                title="Ver QR para escanear">
-                            📱 QR
-                        </button>
+                <tr class="${estadoClass}-row">
+                    <td class="code-cell">${codigoDisplay}</td>
+                    <td>
+                        <div class="name-cell">
+                            <span>${nombreDisplay}</span>
+                            <button onclick="mostrarQREstudiante(${estudiante.id}, '${nombreDisplay.replace(/'/g, "\\'")}', '${codigoDisplay}')"
+                                    class="btn-qr"
+                                    title="Ver QR para escanear">
+                                📱 QR
+                            </button>
+                        </div>
                     </td>
-                    <td style="padding: 8px; border: 1px solid black; color: ${estadoColor}; font-weight: bold; text-align: center;">${estudiante.estadoDisplay}</td>
-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${fechaDisplay}</td>
-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${horaDisplay}</td>
-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${estudiante.minutosRetraso} min</td>
-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${metodoToString(estudiante.metodoRegistro)}</td>
-                    <td style="padding: 8px; border: 1px solid black;">${emailDisplay}</td>
+                    <td style="text-align: center;">
+                        <span class="status-badge ${estadoClass}">${estudiante.estadoDisplay}</span>
+                    </td>
+                    <td style="text-align: center;">${fechaDisplay}</td>
+                    <td style="text-align: center;">${horaDisplay}</td>
+                    <td style="text-align: center;">${estudiante.minutosRetraso} min</td>
+                    <td style="text-align: center;">${metodoToString(estudiante.metodoRegistro)}</td>
+                    <td>${emailDisplay}</td>
                 </tr>
             `;
         });
-        
-        html += '</table>';
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
         container.innerHTML = html;
         
         console.log('✅ LISTA COMPLETA RENDERIZADA');
         
     } catch (error) {
         console.error('❌ ERROR:', error);
-        container.innerHTML = '<div style="background: red; color: white; padding: 20px;">ERROR: ' + error.message + '</div>';
+        container.innerHTML = '<div class="alert alert-error">❌ ERROR: ' + error.message + '</div>';
     }
 }
 
@@ -643,31 +1192,20 @@ async function mostrarQREstudiante(estudianteId, nombre, codigo) {
         // Crear modal
         const modal = document.createElement('div');
         modal.id = 'qrModal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        `;
+        modal.className = 'qr-modal';
 
         modal.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; position: relative;">
-                <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px;">✕</button>
-                <h2 style="margin-top: 0; color: #333;">QR para Escanear</h2>
-                <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
-                    <div style="font-weight: bold; font-size: 18px; color: #4CAF50; margin-bottom: 5px;">${nombre}</div>
-                    <div style="color: #666; font-family: monospace;">${codigo}</div>
+            <div class="qr-modal-content">
+                <button onclick="cerrarModalQR()" class="qr-modal-close">✕</button>
+                <h2>QR para Escanear</h2>
+                <div class="qr-student-info">
+                    <div class="qr-student-name">${nombre}</div>
+                    <div class="qr-student-code">${codigo}</div>
                 </div>
-                <div style="background: white; padding: 20px; border: 3px solid #4CAF50; border-radius: 10px; display: inline-block;">
-                    <img src="data:image/png;base64,${data.qrCode}" style="width: 250px; height: 250px;" alt="QR ${nombre}">
+                <div class="qr-code-box">
+                    <img src="data:image/png;base64,${data.qrCode}" alt="QR ${nombre}">
                 </div>
-                <p style="color: #666; font-size: 14px; margin-top: 20px;">
+                <p class="qr-modal-footer">
                     Escanea este QR con tu dispositivo para registrar al estudiante
                 </p>
             </div>

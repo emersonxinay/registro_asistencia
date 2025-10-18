@@ -575,10 +575,10 @@
                     }
                     else
                     {
-                        <a href="/api/clases/@Model.Clase.Id/reabrir" class="btn-action btn-success" onclick="return confirm('¿Reabrir esta clase?')">
+                        <button class="btn-action btn-success" onclick="reabrirClase(@Model.Clase.Id)">
                             <i data-lucide="play-circle"></i>
                             Reabrir Clase
-                        </a>
+                        </button>
                     }
                     <button class="btn-action" onclick="duplicarClase(@Model.Clase.Id)">
                         <i data-lucide="copy"></i>
@@ -690,6 +690,41 @@
                         Error al cargar la actividad reciente
                     </p>
                 `;
+            }
+        }
+
+        // Reabrir clase function
+        async function reabrirClase(claseId) {
+            if (!await showConfirmModal('Reabrir Clase', '¿Reabrir esta clase para registrar justificaciones?', 'Reabrir', 'Cancelar')) return;
+
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+
+            try {
+                button.disabled = true;
+                button.innerHTML = '<i data-lucide="loader" class="animate-spin"></i> Reabriendo...';
+
+                const response = await fetch(`/api/clases/${claseId}/reabrir`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al reabrir clase');
+                }
+
+                await showSuccessModal('¡Éxito!', 'Clase reabierta exitosamente');
+                location.reload(); // Refresh to show updated status
+            } catch (error) {
+                console.error('Error reabriendo clase:', error);
+                await showErrorModal('Error', 'Error al reabrir la clase: ' + error.message);
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalText;
+                lucide.createIcons();
             }
         }
 

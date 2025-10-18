@@ -1,0 +1,2178 @@
+diff --git a/Views/Home/Asistencias.cshtml b/Views/Home/Asistencias.cshtml
+index f75d5c0..46d64d1 100644
+--- a/Views/Home/Asistencias.cshtml
++++ b/Views/Home/Asistencias.cshtml
+@@ -1,706 +1,1536 @@
+ @{
+     ViewData["Title"] = "Asistencias por Clase";
+-    ViewData["Subtitle"] = "Control detallado de asistencia por clase específica";
+ }
+ 
+-<div class="container">
+-    <h1>Asistencias por Clase</h1>
+-    
+-    <!-- Selectores de Clase -->
+-    <div style="background: #f0f0f0; padding: 20px; margin-bottom: 20px;">
+-        <!-- Tabs para elegir tipo de clase -->
+-        <div style="margin-bottom: 20px;">
+-            <button id="tabClasesLibres" onclick="cambiarTipoClase('libres')" style="background: #007bff; color: white; padding: 10px 20px; border: none; margin-right: 5px; cursor: pointer;">
+-                📚 Clases Libres
+-            </button>
+-            <button id="tabClasesCurso" onclick="cambiarTipoClase('curso')" style="background: #6c757d; color: white; padding: 10px 20px; border: none; cursor: pointer;">
+-                🎓 Clases con Curso
+-            </button>
+-        </div>
++<!DOCTYPE html>
++<html lang="es">
++<head>
++    <meta charset="utf-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>@ViewData["Title"]</title>
++    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
++    <style>
++        :root {
++            --primary: #667eea;
++            --primary-dark: #5a67d8;
++            --secondary: #764ba2;
++            --success: #10b981;
++            --success-dark: #059669;
++            --warning: #f59e0b;
++            --danger: #ef4444;
++            --info: #3b82f6;
++
++            --bg-primary: #ffffff;
++            --bg-secondary: #f8fafc;
++            --bg-tertiary: #f1f5f9;
++            --surface: #ffffff;
++            --surface-hover: #f8fafc;
++
++            --text-primary: #1e293b;
++            --text-secondary: #64748b;
++            --text-tertiary: #94a3b8;
++
++            --border: #e2e8f0;
++            --border-hover: #cbd5e1;
++
++            --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
++            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
++            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
++            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
++            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
++
++            --radius-sm: 0.375rem;
++            --radius: 0.5rem;
++            --radius-md: 0.75rem;
++            --radius-lg: 1rem;
++            --radius-xl: 1.5rem;
++            --radius-2xl: 2rem;
++        }
+ 
+-        <!-- Panel para Clases Libres -->
+-        <div id="panelClasesLibres" style="display: block;">
+-            <div style="margin-bottom: 15px;">
+-                <label for="selectorClaseLibre" style="font-weight: bold;">Seleccionar Clase Libre:</label>
+-                <select id="selectorClaseLibre" style="margin: 10px; padding: 10px; font-size: 16px; width: 400px;">
+-                    <option value="">-- Cargando clases libres... --</option>
+-                </select>
+-            </div>
+-        </div>
++        * {
++            box-sizing: border-box;
++            margin: 0;
++            padding: 0;
++        }
++
++        body {
++            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
++            background: var(--bg-secondary);
++            color: var(--text-primary);
++            line-height: 1.6;
++        }
++
++        .container {
++            max-width: 1400px;
++            margin: 0 auto;
++            padding: 2rem;
++        }
++
++        /* Page Header */
++        .page-header {
++            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
++            color: white;
++            padding: 3rem 2rem;
++            border-radius: var(--radius-2xl);
++            margin-bottom: 2rem;
++            position: relative;
++            overflow: hidden;
++        }
++
++        .page-header::before {
++            content: '';
++            position: absolute;
++            top: 0;
++            left: 0;
++            right: 0;
++            bottom: 0;
++            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
++            opacity: 0.3;
++        }
++
++        .page-header-content {
++            position: relative;
++            z-index: 1;
++        }
++
++        .page-title {
++            font-size: 2.5rem;
++            font-weight: 800;
++            margin-bottom: 0.5rem;
++        }
++
++        .page-subtitle {
++            font-size: 1.125rem;
++            opacity: 0.9;
++            font-weight: 400;
++        }
++
++        /* Tab Navigation */
++        .tabs-container {
++            background: var(--surface);
++            border-radius: var(--radius-xl);
++            box-shadow: var(--shadow-md);
++            margin-bottom: 2rem;
++            overflow: hidden;
++        }
++
++        .tabs-header {
++            display: flex;
++            border-bottom: 1px solid var(--border);
++        }
++
++        .tab-button {
++            flex: 1;
++            padding: 1.25rem 2rem;
++            background: none;
++            border: none;
++            border-bottom: 3px solid transparent;
++            cursor: pointer;
++            font-weight: 600;
++            font-size: 1rem;
++            color: var(--text-secondary);
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            gap: 0.75rem;
++            transition: all 0.3s ease;
++        }
++
++        .tab-button:hover {
++            background: var(--surface-hover);
++            color: var(--text-primary);
++        }
++
++        .tab-button.active {
++            color: var(--primary);
++            border-bottom-color: var(--primary);
++            background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), transparent);
++        }
++
++        .tab-content {
++            display: none;
++            padding: 2rem;
++            animation: fadeIn 0.3s ease;
++        }
++
++        .tab-content.active {
++            display: block;
++        }
++
++        /* Form Section */
++        .form-section {
++            background: var(--surface);
++            border-radius: var(--radius-xl);
++            padding: 2rem;
++            box-shadow: var(--shadow-md);
++            margin-bottom: 2rem;
++        }
++
++        .form-grid {
++            display: grid;
++            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
++            gap: 1.5rem;
++            margin-bottom: 2rem;
++        }
++
++        .form-group {
++            display: flex;
++            flex-direction: column;
++            gap: 0.5rem;
++        }
++
++        .form-label {
++            font-weight: 600;
++            font-size: 0.875rem;
++            color: var(--text-primary);
++            display: flex;
++            align-items: center;
++            gap: 0.5rem;
++        }
++
++        .form-select {
++            padding: 0.875rem 1rem;
++            border: 2px solid var(--border);
++            border-radius: var(--radius-md);
++            font-size: 0.9375rem;
++            background: var(--bg-primary);
++            color: var(--text-primary);
++            transition: all 0.2s ease;
++            cursor: pointer;
++        }
++
++        .form-select:hover {
++            border-color: var(--border-hover);
++        }
++
++        .form-select:focus {
++            outline: none;
++            border-color: var(--primary);
++            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
++        }
++
++        .form-select:disabled {
++            opacity: 0.5;
++            cursor: not-allowed;
++            background: var(--bg-tertiary);
++        }
++
++        /* Action Buttons */
++        .action-buttons {
++            display: flex;
++            gap: 1rem;
++            flex-wrap: wrap;
++        }
++
++        .btn {
++            display: inline-flex;
++            align-items: center;
++            gap: 0.5rem;
++            padding: 0.875rem 1.5rem;
++            border: none;
++            border-radius: var(--radius-lg);
++            font-size: 0.9375rem;
++            font-weight: 600;
++            cursor: pointer;
++            transition: all 0.2s ease;
++            text-decoration: none;
++        }
++
++        .btn:hover {
++            transform: translateY(-2px);
++            box-shadow: var(--shadow-md);
++        }
++
++        .btn:active {
++            transform: translateY(0);
++        }
++
++        .btn-primary {
++            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
++            color: white;
++        }
++
++        .btn-success {
++            background: linear-gradient(135deg, var(--success), var(--success-dark));
++            color: white;
++        }
++
++        .btn-warning {
++            background: linear-gradient(135deg, var(--warning), #d97706);
++            color: white;
++        }
++
++        .btn-secondary {
++            background: var(--bg-tertiary);
++            color: var(--text-secondary);
++            border: 1px solid var(--border);
++        }
++
++        /* Stats Cards */
++        .stats-grid {
++            display: grid;
++            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
++            gap: 1.25rem;
++            margin-bottom: 2rem;
++        }
++
++        .stat-card {
++            background: var(--surface);
++            border: 1px solid var(--border);
++            border-radius: var(--radius-xl);
++            padding: 1.5rem;
++            box-shadow: var(--shadow-sm);
++            transition: all 0.3s ease;
++        }
++
++        .stat-card:hover {
++            transform: translateY(-2px);
++            box-shadow: var(--shadow-md);
++        }
++
++        .stat-header {
++            display: flex;
++            align-items: center;
++            justify-content: space-between;
++            margin-bottom: 1rem;
++        }
++
++        .stat-icon {
++            width: 3rem;
++            height: 3rem;
++            border-radius: var(--radius-lg);
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            font-size: 1.5rem;
++        }
++
++        .stat-icon.primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; }
++        .stat-icon.success { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; }
++        .stat-icon.warning { background: linear-gradient(135deg, var(--warning), #d97706); color: white; }
++        .stat-icon.danger { background: linear-gradient(135deg, var(--danger), #dc2626); color: white; }
++        .stat-icon.info { background: linear-gradient(135deg, var(--info), #2563eb); color: white; }
++
++        .stat-value {
++            font-size: 2rem;
++            font-weight: 800;
++            color: var(--text-primary);
++            line-height: 1;
++            margin-bottom: 0.25rem;
++        }
++
++        .stat-label {
++            font-size: 0.875rem;
++            color: var(--text-secondary);
++            font-weight: 500;
++        }
++
++        /* Class Info Banner */
++        .class-info-banner {
++            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
++            border: 2px solid var(--primary);
++            border-radius: var(--radius-xl);
++            padding: 1.5rem;
++            margin-bottom: 2rem;
++            display: flex;
++            align-items: center;
++            gap: 1rem;
++        }
++
++        .class-info-icon {
++            width: 4rem;
++            height: 4rem;
++            background: linear-gradient(135deg, var(--primary), var(--secondary));
++            border-radius: var(--radius-lg);
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            color: white;
++            font-size: 1.75rem;
++            flex-shrink: 0;
++        }
++
++        .class-info-content {
++            flex: 1;
++        }
++
++        .class-info-title {
++            font-size: 1.25rem;
++            font-weight: 700;
++            color: var(--text-primary);
++            margin-bottom: 0.5rem;
++        }
++
++        .class-info-details {
++            display: flex;
++            gap: 1.5rem;
++            flex-wrap: wrap;
++            font-size: 0.875rem;
++            color: var(--text-secondary);
++        }
++
++        .class-info-item {
++            display: flex;
++            align-items: center;
++            gap: 0.5rem;
++        }
++
++        /* Students Grid */
++        .students-grid {
++            display: grid;
++            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
++            gap: 1.25rem;
++        }
++
++        .student-card {
++            background: var(--surface);
++            border: 2px solid var(--border);
++            border-radius: var(--radius-xl);
++            padding: 1.25rem;
++            box-shadow: var(--shadow-sm);
++            transition: all 0.3s ease;
++            position: relative;
++            overflow: hidden;
++        }
++
++        .student-card::before {
++            content: '';
++            position: absolute;
++            top: 0;
++            left: 0;
++            width: 4px;
++            height: 100%;
++            background: var(--student-color, var(--border));
++        }
++
++        .student-card:hover {
++            transform: translateY(-2px);
++            box-shadow: var(--shadow-md);
++            border-color: var(--border-hover);
++        }
++
++        .student-card.present::before { background: var(--success); }
++        .student-card.late::before { background: var(--warning); }
++        .student-card.absent::before { background: var(--danger); }
++        .student-card.excused::before { background: var(--info); }
++
++        .student-header {
++            display: flex;
++            align-items: center;
++            gap: 1rem;
++            margin-bottom: 1rem;
++        }
++
++        .student-avatar {
++            width: 3.5rem;
++            height: 3.5rem;
++            border-radius: var(--radius-lg);
++            background: linear-gradient(135deg, var(--primary), var(--secondary));
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            color: white;
++            font-size: 1.25rem;
++            font-weight: 700;
++            flex-shrink: 0;
++        }
++
++        .student-info {
++            flex: 1;
++            min-width: 0;
++        }
++
++        .student-name {
++            font-size: 1rem;
++            font-weight: 700;
++            color: var(--text-primary);
++            margin-bottom: 0.25rem;
++            white-space: nowrap;
++            overflow: hidden;
++            text-overflow: ellipsis;
++        }
++
++        .student-code {
++            font-size: 0.8125rem;
++            color: var(--text-secondary);
++            font-family: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
++            font-weight: 500;
++        }
++
++        .student-status {
++            display: inline-flex;
++            align-items: center;
++            gap: 0.375rem;
++            padding: 0.375rem 0.75rem;
++            border-radius: var(--radius);
++            font-size: 0.8125rem;
++            font-weight: 600;
++            margin-bottom: 0.75rem;
++        }
++
++        .student-status.present { background: rgba(16, 185, 129, 0.1); color: var(--success); }
++        .student-status.late { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
++        .student-status.absent { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
++        .student-status.excused { background: rgba(59, 130, 246, 0.1); color: var(--info); }
++
++        .student-meta {
++            display: grid;
++            grid-template-columns: repeat(2, 1fr);
++            gap: 0.75rem;
++            font-size: 0.8125rem;
++        }
++
++        .meta-item {
++            display: flex;
++            flex-direction: column;
++            gap: 0.25rem;
++        }
++
++        .meta-label {
++            color: var(--text-tertiary);
++            font-size: 0.75rem;
++            text-transform: uppercase;
++            letter-spacing: 0.05em;
++            font-weight: 600;
++        }
++
++        .meta-value {
++            color: var(--text-primary);
++            font-weight: 600;
++        }
++
++        .student-actions {
++            margin-top: 1rem;
++            display: flex;
++            gap: 0.5rem;
++        }
++
++        .action-btn-small {
++            flex: 1;
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            gap: 0.375rem;
++            padding: 0.625rem;
++            border: 1px solid var(--border);
++            border-radius: var(--radius-md);
++            background: var(--surface);
++            color: var(--text-secondary);
++            font-size: 0.8125rem;
++            font-weight: 600;
++            cursor: pointer;
++            transition: all 0.2s ease;
++        }
++
++        .action-btn-small:hover {
++            border-color: var(--primary);
++            color: var(--primary);
++            background: rgba(102, 126, 234, 0.05);
++        }
++
++        /* Empty State */
++        .empty-state {
++            text-align: center;
++            padding: 4rem 2rem;
++            background: var(--surface);
++            border-radius: var(--radius-xl);
++            border: 2px dashed var(--border);
++        }
++
++        .empty-icon {
++            width: 4rem;
++            height: 4rem;
++            margin: 0 auto 1.5rem;
++            color: var(--text-tertiary);
++        }
++
++        .empty-title {
++            font-size: 1.5rem;
++            font-weight: 700;
++            color: var(--text-primary);
++            margin-bottom: 0.5rem;
++        }
++
++        .empty-description {
++            color: var(--text-secondary);
++            margin-bottom: 2rem;
++        }
++
++        /* Loading State */
++        .loading-container {
++            display: flex;
++            flex-direction: column;
++            align-items: center;
++            justify-content: center;
++            padding: 4rem 2rem;
++            gap: 1rem;
++        }
++
++        .loading-spinner {
++            width: 3rem;
++            height: 3rem;
++            border: 4px solid var(--border);
++            border-top: 4px solid var(--primary);
++            border-radius: 50%;
++            animation: spin 1s linear infinite;
++        }
++
++        .loading-text {
++            color: var(--text-secondary);
++            font-weight: 500;
++        }
++
++        /* Animations */
++        @@keyframes spin {
++            to { transform: rotate(360deg); }
++        }
++
++        @@keyframes fadeIn {
++            from { opacity: 0; transform: translateY(10px); }
++            to { opacity: 1; transform: translateY(0); }
++        }
++
++        /* Responsive */
++        @@media (max-width: 768px) {
++            .container {
++                padding: 1rem;
++            }
++
++            .page-header {
++                padding: 2rem 1.5rem;
++            }
++
++            .page-title {
++                font-size: 2rem;
++            }
+ 
+-        <!-- Panel para Clases con Curso (existente) -->
+-        <div id="panelClasesCurso" style="display: none;">
+-            <div style="margin-bottom: 15px;">
+-                <label for="selectorCurso" style="font-weight: bold;">1. Seleccionar Curso:</label>
+-                <select id="selectorCurso" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarRamosPorCurso()">
+-                    <option value="">-- Seleccionar Curso --</option>
+-                </select>
++            .tabs-header {
++                flex-direction: column;
++            }
++
++            .tab-button {
++                border-bottom: none;
++                border-left: 3px solid transparent;
++            }
++
++            .tab-button.active {
++                border-left-color: var(--primary);
++                border-bottom-color: transparent;
++            }
++
++            .form-grid {
++                grid-template-columns: 1fr;
++            }
++
++            .action-buttons {
++                flex-direction: column;
++            }
++
++            .btn {
++                width: 100%;
++                justify-content: center;
++            }
++
++            .stats-grid {
++                grid-template-columns: repeat(2, 1fr);
++            }
++
++            .students-grid {
++                grid-template-columns: 1fr;
++            }
++
++            .class-info-banner {
++                flex-direction: column;
++                text-align: center;
++            }
++
++            .class-info-details {
++                justify-content: center;
++            }
++        }
++
++        @@media (max-width: 480px) {
++            .stats-grid {
++                grid-template-columns: 1fr;
++            }
++
++            .student-meta {
++                grid-template-columns: 1fr;
++            }
++        }
++
++        /* Modal Styles */
++        .modal-overlay {
++            position: fixed;
++            top: 0;
++            left: 0;
++            right: 0;
++            bottom: 0;
++            background: rgba(0, 0, 0, 0.7);
++            backdrop-filter: blur(8px);
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            z-index: 1000;
++            padding: 1rem;
++            animation: fadeIn 0.2s ease;
++        }
++
++        .modal-content {
++            background: var(--surface);
++            border-radius: var(--radius-2xl);
++            max-width: 500px;
++            width: 100%;
++            padding: 2rem;
++            position: relative;
++            box-shadow: var(--shadow-xl);
++            animation: slideUp 0.3s ease;
++        }
++
++        @@keyframes slideUp {
++            from { opacity: 0; transform: translateY(20px); }
++            to { opacity: 1; transform: translateY(0); }
++        }
++
++        .modal-close {
++            position: absolute;
++            top: 1rem;
++            right: 1rem;
++            width: 2.5rem;
++            height: 2.5rem;
++            border-radius: var(--radius-md);
++            background: var(--danger);
++            color: white;
++            border: none;
++            cursor: pointer;
++            display: flex;
++            align-items: center;
++            justify-content: center;
++            font-size: 1.25rem;
++            transition: all 0.2s ease;
++        }
++
++        .modal-close:hover {
++            transform: scale(1.1);
++        }
++
++        .modal-title {
++            font-size: 1.5rem;
++            font-weight: 700;
++            color: var(--text-primary);
++            margin-bottom: 1.5rem;
++            text-align: center;
++        }
++
++        .modal-student-info {
++            background: var(--bg-secondary);
++            padding: 1.25rem;
++            border-radius: var(--radius-lg);
++            margin-bottom: 1.5rem;
++            text-align: center;
++        }
++
++        .modal-student-name {
++            font-weight: 700;
++            font-size: 1.125rem;
++            color: var(--success);
++            margin-bottom: 0.5rem;
++        }
++
++        .modal-student-code {
++            color: var(--text-secondary);
++            font-family: 'JetBrains Mono', monospace;
++        }
++
++        .modal-qr-container {
++            background: white;
++            padding: 1.5rem;
++            border: 3px solid var(--success);
++            border-radius: var(--radius-lg);
++            display: inline-block;
++            width: 100%;
++            text-align: center;
++        }
++
++        .modal-qr-image {
++            width: 100%;
++            max-width: 280px;
++            height: auto;
++        }
++
++        .modal-footer {
++            margin-top: 1.5rem;
++            text-align: center;
++            color: var(--text-secondary);
++            font-size: 0.875rem;
++        }
++    </style>
++</head>
++<body>
++    <div class="container">
++        <!-- Page Header -->
++        <header class="page-header">
++            <div class="page-header-content">
++                <h1 class="page-title">Control de Asistencias</h1>
++                <p class="page-subtitle">Gestiona y visualiza asistencias por clase de manera eficiente</p>
++            </div>
++        </header>
++
++        <!-- Tab Navigation -->
++        <div class="tabs-container">
++            <div class="tabs-header">
++                <button class="tab-button active" data-tab="libres" onclick="cambiarTipoClase('libres')">
++                    <i data-lucide="book-open"></i>
++                    <span>Clases Libres</span>
++                </button>
++                <button class="tab-button" data-tab="curso" onclick="cambiarTipoClase('curso')">
++                    <i data-lucide="graduation-cap"></i>
++                    <span>Clases con Curso</span>
++                </button>
+             </div>
+ 
+-            <div style="margin-bottom: 15px;">
+-                <label for="selectorRamo" style="font-weight: bold;">2. Seleccionar Ramo/Asignatura:</label>
+-                <select id="selectorRamo" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" onchange="cargarClasesPorRamo()" disabled>
+-                    <option value="">-- Primero selecciona un curso --</option>
+-                </select>
++            <!-- Tab Content: Clases Libres -->
++            <div class="tab-content active" id="panelClasesLibres">
++                <div class="form-grid">
++                    <div class="form-group">
++                        <label class="form-label" for="selectorClaseLibre">
++                            <i data-lucide="calendar"></i>
++                            Seleccionar Clase Libre
++                        </label>
++                        <select id="selectorClaseLibre" class="form-select">
++                            <option value="">Cargando clases libres...</option>
++                        </select>
++                    </div>
++                </div>
++
++                <div class="action-buttons">
++                    <button class="btn btn-primary" onclick="cargarAsistenciasPorClase()">
++                        <i data-lucide="download"></i>
++                        Cargar Asistencias
++                    </button>
++                    <button class="btn btn-success" onclick="refrescarDatos()">
++                        <i data-lucide="refresh-cw"></i>
++                        Refrescar
++                    </button>
++                    <button class="btn btn-warning" onclick="exportarCSV()">
++                        <i data-lucide="file-spreadsheet"></i>
++                        Exportar CSV
++                    </button>
++                </div>
+             </div>
+ 
+-            <div style="margin-bottom: 15px;">
+-                <label for="selectorClase" style="font-weight: bold;">3. Seleccionar Clase:</label>
+-                <select id="selectorClase" style="margin: 10px; padding: 10px; font-size: 16px; width: 300px;" disabled>
+-                    <option value="">-- Primero selecciona un ramo --</option>
+-                </select>
++            <!-- Tab Content: Clases con Curso -->
++            <div class="tab-content" id="panelClasesCurso">
++                <div class="form-grid">
++                    <div class="form-group">
++                        <label class="form-label" for="selectorCurso">
++                            <i data-lucide="folder"></i>
++                            1. Seleccionar Curso
++                        </label>
++                        <select id="selectorCurso" class="form-select" onchange="cargarRamosPorCurso()">
++                            <option value="">-- Seleccionar Curso --</option>
++                        </select>
++                    </div>
++
++                    <div class="form-group">
++                        <label class="form-label" for="selectorRamo">
++                            <i data-lucide="book"></i>
++                            2. Seleccionar Ramo/Asignatura
++                        </label>
++                        <select id="selectorRamo" class="form-select" onchange="cargarClasesPorRamo()" disabled>
++                            <option value="">-- Primero selecciona un curso --</option>
++                        </select>
++                    </div>
++
++                    <div class="form-group">
++                        <label class="form-label" for="selectorClase">
++                            <i data-lucide="clipboard-list"></i>
++                            3. Seleccionar Clase
++                        </label>
++                        <select id="selectorClase" class="form-select" disabled>
++                            <option value="">-- Primero selecciona un ramo --</option>
++                        </select>
++                    </div>
++                </div>
++
++                <div class="action-buttons">
++                    <button class="btn btn-primary" onclick="cargarAsistenciasPorClase()">
++                        <i data-lucide="download"></i>
++                        Cargar Asistencias
++                    </button>
++                    <button class="btn btn-success" onclick="refrescarDatos()">
++                        <i data-lucide="refresh-cw"></i>
++                        Refrescar
++                    </button>
++                    <button class="btn btn-warning" onclick="exportarCSV()">
++                        <i data-lucide="file-spreadsheet"></i>
++                        Exportar CSV
++                    </button>
++                </div>
+             </div>
+         </div>
+ 
+-        <div>
+-            <button onclick="cargarAsistenciasPorClase()" style="background: blue; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
+-                CARGAR ASISTENCIAS
+-            </button>
+-            <button onclick="refrescarDatos()" style="background: green; color: white; padding: 10px 20px; font-size: 16px; margin-right: 10px;">
+-                REFRESCAR
+-            </button>
+-            <button onclick="exportarCSV()" style="background: orange; color: white; padding: 10px 20px; font-size: 16px;">
+-                EXPORTAR CSV COMPLETO
+-            </button>
++        <!-- Class Info Banner -->
++        <div id="classInfoBanner" style="display: none;">
++            <!-- Will be populated dynamically -->
+         </div>
+-    </div>
+-    
+-    <!-- Resumen -->
+-    <div id="resumen" style="display: none; background: #e8f5e8; padding: 15px; margin-bottom: 20px;">
+-        <h3>Resumen de la Clase</h3>
+-        <div id="claseInfo" style="background: #f5f5f5; padding: 10px; margin-bottom: 10px; font-weight: bold;"></div>
+-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+-            <div>📊 Total Estudiantes: <span id="totalEstudiantes">0</span></div>
+-            <div style="color: green;">✅ Presentes: <span id="totalPresentes">0</span></div>
+-            <div style="color: orange;">⏰ Tardanzas: <span id="totalTardanzas">0</span></div>
+-            <div style="color: red;">❌ Ausentes: <span id="totalAusentes">0</span></div>
+-            <div style="color: blue;">📝 Excusados: <span id="totalExcusados">0</span></div>
+-            <div style="color: purple;">📈 Registraron: <span id="totalConAsistencia">0</span></div>
++
++        <!-- Stats Cards -->
++        <div id="statsSection" style="display: none;">
++            <div class="stats-grid">
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon primary">
++                            <i data-lucide="users"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalEstudiantes">0</div>
++                    <div class="stat-label">Total Estudiantes</div>
++                </div>
++
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon success">
++                            <i data-lucide="check-circle"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalPresentes">0</div>
++                    <div class="stat-label">Presentes</div>
++                </div>
++
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon warning">
++                            <i data-lucide="clock"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalTardanzas">0</div>
++                    <div class="stat-label">Tardanzas</div>
++                </div>
++
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon danger">
++                            <i data-lucide="x-circle"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalAusentes">0</div>
++                    <div class="stat-label">Ausentes</div>
++                </div>
++
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon info">
++                            <i data-lucide="file-text"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalExcusados">0</div>
++                    <div class="stat-label">Excusados</div>
++                </div>
++
++                <div class="stat-card">
++                    <div class="stat-header">
++                        <div class="stat-icon primary">
++                            <i data-lucide="clipboard-check"></i>
++                        </div>
++                    </div>
++                    <div class="stat-value" id="totalConAsistencia">0</div>
++                    <div class="stat-label">Registrados</div>
++                </div>
++            </div>
+         </div>
+-    </div>
+-    
+-    <div id="asistenciasList">
+-        <div style="background: yellow; padding: 20px; margin: 20px 0;">
+-            <h3>Selecciona un curso, ramo y clase para ver las asistencias</h3>
++
++        <!-- Students Grid -->
++        <div id="asistenciasList">
++            <div class="empty-state">
++                <i data-lucide="clipboard-list" class="empty-icon"></i>
++                <h3 class="empty-title">Selecciona una clase</h3>
++                <p class="empty-description">Elige una clase desde las pestañas superiores para visualizar las asistencias</p>
++            </div>
+         </div>
+     </div>
+-</div>
+-
+-@section Scripts {
+-<script>
+-console.log('🔥 ASISTENCIAS POR CLASE SCRIPT LOADED');
+-
+-let tipoClaseActual = 'libres';
+-
+-// Función para cambiar entre tipos de clase
+-function cambiarTipoClase(tipo) {
+-    tipoClaseActual = tipo;
+-
+-    const tabLibres = document.getElementById('tabClasesLibres');
+-    const tabCurso = document.getElementById('tabClasesCurso');
+-    const panelLibres = document.getElementById('panelClasesLibres');
+-    const panelCurso = document.getElementById('panelClasesCurso');
+-
+-    if (tipo === 'libres') {
+-        tabLibres.style.background = '#007bff';
+-        tabCurso.style.background = '#6c757d';
+-        panelLibres.style.display = 'block';
+-        panelCurso.style.display = 'none';
+-        cargarClasesLibres();
+-    } else {
+-        tabLibres.style.background = '#6c757d';
+-        tabCurso.style.background = '#007bff';
+-        panelLibres.style.display = 'none';
+-        panelCurso.style.display = 'block';
+-        cargarCursos();
+-    }
+-
+-    // Limpiar vista de asistencias
+-    document.getElementById('asistenciasList').innerHTML = `
+-        <div style="background: yellow; padding: 20px; margin: 20px 0;">
+-            <h3>Selecciona una clase para ver las asistencias</h3>
+-        </div>
+-    `;
+-    document.getElementById('resumen').style.display = 'none';
+-}
+ 
+-// Cargar clases libres (sin curso/ramo)
+-async function cargarClasesLibres() {
+-    const selector = document.getElementById('selectorClaseLibre');
+-    selector.innerHTML = '<option value="">-- Cargando clases libres... --</option>';
++    <script>
++        console.log('🔥 ASISTENCIAS MODERNAS LOADED');
+ 
+-    try {
+-        const response = await fetch('/api/clases/mis-clases');
+-        const todasClases = await response.json();
++        let tipoClaseActual = 'libres';
+ 
+-        // Filtrar solo clases libres (sin ramoId)
+-        const clasesLibres = todasClases.filter(clase => !clase.ramoId);
++        // Initialize Lucide icons
++        if (window.lucide) {
++            lucide.createIcons();
++        }
+ 
+-        selector.innerHTML = '<option value="">-- Seleccionar Clase Libre --</option>';
++        // Tab switching
++        function cambiarTipoClase(tipo) {
++            tipoClaseActual = tipo;
+ 
+-        clasesLibres.forEach(clase => {
+-            const option = document.createElement('option');
+-            option.value = clase.id;
+-            const fecha = new Date(clase.inicioUtc).toLocaleDateString();
+-            const hora = new Date(clase.inicioUtc).toLocaleTimeString();
+-            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
+-            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+-            selector.appendChild(option);
+-        });
++            // Update tab buttons
++            document.querySelectorAll('.tab-button').forEach(btn => {
++                btn.classList.remove('active');
++                if (btn.dataset.tab === tipo) {
++                    btn.classList.add('active');
++                }
++            });
+ 
+-        console.log('✅ Clases libres cargadas:', clasesLibres.length);
+-    } catch (error) {
+-        console.error('❌ Error cargando clases libres:', error);
+-        selector.innerHTML = '<option value="">-- Error cargando clases --</option>';
+-    }
+-}
++            // Update tab content
++            document.querySelectorAll('.tab-content').forEach(content => {
++                content.classList.remove('active');
++            });
+ 
+-// Cargar cursos al iniciar
+-async function cargarCursos() {
+-    try {
+-        const response = await fetch('/api/cursos/mis-cursos');
+-        const cursos = await response.json();
++            if (tipo === 'libres') {
++                document.getElementById('panelClasesLibres').classList.add('active');
++                cargarClasesLibres();
++            } else {
++                document.getElementById('panelClasesCurso').classList.add('active');
++                cargarCursos();
++            }
+ 
+-        const selector = document.getElementById('selectorCurso');
+-        selector.innerHTML = '<option value="">-- Seleccionar Curso --</option>';
++            // Clear content
++            resetView();
+ 
+-        cursos.forEach(curso => {
+-            const option = document.createElement('option');
+-            option.value = curso.id;
+-            option.textContent = `${curso.nombre} (${curso.codigo})`;
+-            selector.appendChild(option);
+-        });
++            // Recreate icons
++            if (window.lucide) {
++                lucide.createIcons();
++            }
++        }
+ 
+-        console.log('✅ Cursos cargados:', cursos.length);
+-    } catch (error) {
+-        console.error('❌ Error cargando cursos:', error);
+-    }
+-}
++        function resetView() {
++            document.getElementById('classInfoBanner').style.display = 'none';
++            document.getElementById('statsSection').style.display = 'none';
++            document.getElementById('asistenciasList').innerHTML = `
++                <div class="empty-state">
++                    <i data-lucide="clipboard-list" class="empty-icon"></i>
++                    <h3 class="empty-title">Selecciona una clase</h3>
++                    <p class="empty-description">Elige una clase para visualizar las asistencias</p>
++                </div>
++            `;
++            if (window.lucide) lucide.createIcons();
++        }
+ 
+-// Cargar ramos cuando se selecciona un curso
+-async function cargarRamosPorCurso() {
+-    const cursoId = document.getElementById('selectorCurso').value;
+-    const selectorRamo = document.getElementById('selectorRamo');
+-    const selectorClase = document.getElementById('selectorClase');
+-
+-    // Limpiar selectores dependientes
+-    selectorRamo.innerHTML = '<option value="">-- Cargando ramos... --</option>';
+-    selectorRamo.disabled = true;
+-    selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
+-    selectorClase.disabled = true;
+-
+-    if (!cursoId) {
+-        selectorRamo.innerHTML = '<option value="">-- Primero selecciona un curso --</option>';
+-        return;
+-    }
+-
+-    try {
+-        const response = await fetch(`/api/ramos/curso/${cursoId}`);
+-        const ramos = await response.json();
+-
+-        selectorRamo.innerHTML = '<option value="">-- Seleccionar Ramo/Asignatura --</option>';
+-
+-        ramos.forEach(ramo => {
+-            const option = document.createElement('option');
+-            option.value = ramo.id;
+-            option.textContent = `${ramo.nombre} (${ramo.codigo})`;
+-            selectorRamo.appendChild(option);
+-        });
++        // Load free classes
++        async function cargarClasesLibres() {
++            const selector = document.getElementById('selectorClaseLibre');
++            selector.innerHTML = '<option value="">Cargando clases libres...</option>';
++
++            try {
++                const response = await fetch('/api/clases/mis-clases');
++                const todasClases = await response.json();
++                const clasesLibres = todasClases.filter(clase => !clase.ramoId);
++
++                selector.innerHTML = '<option value="">-- Seleccionar Clase Libre --</option>';
++
++                clasesLibres.forEach(clase => {
++                    const option = document.createElement('option');
++                    option.value = clase.id;
++                    const fecha = new Date(clase.inicioUtc).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
++                    const hora = new Date(clase.inicioUtc).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
++                    const estado = clase.activa ? '🟢' : '🔴';
++                    option.textContent = `${estado} ${fecha} ${hora} - ${clase.asignatura}`;
++                    selector.appendChild(option);
++                });
++
++                console.log('✅ Clases libres cargadas:', clasesLibres.length);
++            } catch (error) {
++                console.error('❌ Error cargando clases libres:', error);
++                selector.innerHTML = '<option value="">Error cargando clases</option>';
++            }
++        }
+ 
+-        selectorRamo.disabled = false;
+-        console.log('✅ Ramos cargados:', ramos.length);
+-    } catch (error) {
+-        console.error('❌ Error cargando ramos:', error);
+-        selectorRamo.innerHTML = '<option value="">-- Error cargando ramos --</option>';
+-    }
+-}
++        // Load courses
++        async function cargarCursos() {
++            try {
++                const response = await fetch('/api/cursos/mis-cursos');
++                const cursos = await response.json();
++
++                const selector = document.getElementById('selectorCurso');
++                selector.innerHTML = '<option value="">-- Seleccionar Curso --</option>';
++
++                cursos.forEach(curso => {
++                    const option = document.createElement('option');
++                    option.value = curso.id;
++                    option.textContent = `${curso.nombre} (${curso.codigo})`;
++                    selector.appendChild(option);
++                });
++
++                console.log('✅ Cursos cargados:', cursos.length);
++            } catch (error) {
++                console.error('❌ Error cargando cursos:', error);
++            }
++        }
+ 
+-// Cargar clases cuando se selecciona un ramo
+-async function cargarClasesPorRamo() {
+-    const ramoId = document.getElementById('selectorRamo').value;
+-    const selectorClase = document.getElementById('selectorClase');
+-
+-    selectorClase.innerHTML = '<option value="">-- Cargando clases... --</option>';
+-    selectorClase.disabled = true;
+-
+-    if (!ramoId) {
+-        selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
+-        return;
+-    }
+-
+-    try {
+-        // Obtener mis clases (del docente logueado) y filtrar por ramoId
+-        const response = await fetch('/api/clases/mis-clases');
+-        const todasClases = await response.json();
+-        const clases = todasClases.filter(clase => clase.ramoId == ramoId);
+-
+-        selectorClase.innerHTML = '<option value="">-- Seleccionar Clase --</option>';
+-
+-        clases.forEach(clase => {
+-            const option = document.createElement('option');
+-            option.value = clase.id;
+-            const fecha = new Date(clase.inicioUtc).toLocaleDateString();
+-            const hora = new Date(clase.inicioUtc).toLocaleTimeString();
+-            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
+-            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+-            selectorClase.appendChild(option);
+-        });
++        // Load subjects by course
++        async function cargarRamosPorCurso() {
++            const cursoId = document.getElementById('selectorCurso').value;
++            const selectorRamo = document.getElementById('selectorRamo');
++            const selectorClase = document.getElementById('selectorClase');
+ 
+-        selectorClase.disabled = false;
+-        console.log('✅ Clases cargadas:', clases.length);
+-    } catch (error) {
+-        console.error('❌ Error cargando clases:', error);
+-        selectorClase.innerHTML = '<option value="">-- Error cargando clases --</option>';
+-    }
+-}
++            selectorRamo.innerHTML = '<option value="">Cargando ramos...</option>';
++            selectorRamo.disabled = true;
++            selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
++            selectorClase.disabled = true;
+ 
+-async function cargarAsistenciasPorClase() {
+-    let claseId = null;
+-
+-    // Obtener el ID de la clase según el tipo actual
+-    if (tipoClaseActual === 'libres') {
+-        claseId = document.getElementById('selectorClaseLibre').value;
+-        if (!claseId) {
+-            alert('Por favor selecciona una clase libre específica');
+-            return;
+-        }
+-    } else {
+-        claseId = document.getElementById('selectorClase').value;
+-        if (!claseId) {
+-            alert('Por favor selecciona una clase específica');
+-            return;
+-        }
+-    }
+-    
+-    const container = document.getElementById('asistenciasList');
+-    container.innerHTML = '<div style="background: blue; color: white; padding: 20px;">CARGANDO ASISTENCIAS DE LA CLASE...</div>';
+-
+-    try {
+-        console.log('📡 Fetching data for clase:', claseId);
+-
+-        // Obtener datos de la clase, estudiantes del curso y asistencias de la clase
+-        const [claseResponse, asistenciasResponse] = await Promise.all([
+-            fetch(`/api/clases/${claseId}`),
+-            fetch(`/api/clases/${claseId}/asistencias`)
+-        ]);
+-
+-        if (!claseResponse.ok) {
+-            const errorDetail = await claseResponse.text();
+-            console.error('❌ Error response from /api/clases/' + claseId + ':', errorDetail);
+-            throw new Error(`Error al cargar clase: ${claseResponse.status} ${claseResponse.statusText}\nDetalle: ${errorDetail}`);
+-        }
+-
+-        if (!asistenciasResponse.ok) {
+-            const errorDetail = await asistenciasResponse.text();
+-            console.error('❌ Error response from /api/clases/' + claseId + '/asistencias:', errorDetail);
+-            throw new Error(`Error al cargar asistencias: ${asistenciasResponse.status} ${asistenciasResponse.statusText}\nDetalle: ${errorDetail}`);
+-        }
+-
+-        const clase = await claseResponse.json();
+-        const asistenciasClase = await asistenciasResponse.json();
+-
+-        let estudiantes = [];
+-        let esClaseLibre = !clase.ramoId;
+-
+-        if (esClaseLibre) {
+-            // Para clases libres, no hay estudiantes "matriculados" específicos
+-            // Los estudiantes son los que han registrado asistencia
+-            estudiantes = asistenciasClase.map(asistencia => ({
+-                id: asistencia.alumnoId,
+-                codigo: asistencia.codigo,
+-                nombre: asistencia.nombre
+-            }));
+-        } else {
+-            // Obtener estudiantes del curso (lógica existente)
+-            const ramoResponse = await fetch(`/api/ramos/${clase.ramoId}`);
+-            const ramo = await ramoResponse.json();
+-            const estudiantesResponse = await fetch(`/api/cursos/${ramo.cursoId}/alumnos`);
+-            const alumnoCursoData = await estudiantesResponse.json();
+-
+-            // Obtener datos completos de cada alumno
+-            const estudiantesCompletos = await Promise.all(
+-                alumnoCursoData.map(async (ac) => {
+-                    try {
+-                        const alumnoResponse = await fetch(`/api/alumnos/${ac.alumnoId}`);
+-                        const alumnoCompleto = await alumnoResponse.json();
+-                        return {
+-                            ...alumnoCompleto,
+-                            id: ac.alumnoId,
+-                            inscripcionId: ac.id,
+-                            fechaInscripcion: ac.fechaInscripcion
+-                        };
+-                    } catch (error) {
+-                        console.error(`Error obteniendo datos del alumno ${ac.alumnoId}:`, error);
+-                        return {
+-                            id: ac.alumnoId,
+-                            nombre: ac.alumnoNombre,
+-                            codigo: `ALU-${ac.alumnoId}`,
+-                            email: 'No disponible',
+-                            inscripcionId: ac.id,
+-                            fechaInscripcion: ac.fechaInscripcion
+-                        };
+-                    }
+-                })
+-            );
+-            estudiantes = estudiantesCompletos;
+-        }
++            if (!cursoId) {
++                selectorRamo.innerHTML = '<option value="">-- Primero selecciona un curso --</option>';
++                return;
++            }
+ 
+-        console.log('📊 Datos recibidos:', {
+-            clase: clase,
+-            estudiantes: estudiantes,
+-            asistencias: asistenciasClase
+-        });
++            try {
++                const response = await fetch(`/api/ramos/curso/${cursoId}`);
++                const ramos = await response.json();
++
++                selectorRamo.innerHTML = '<option value="">-- Seleccionar Ramo/Asignatura --</option>';
+ 
+-        console.log('📚 Estudiantes del curso:', estudiantes.length);
+-        console.log('📋 Asistencias de la clase:', asistenciasClase.length);
++                ramos.forEach(ramo => {
++                    const option = document.createElement('option');
++                    option.value = ramo.id;
++                    option.textContent = `${ramo.nombre} (${ramo.codigo})`;
++                    selectorRamo.appendChild(option);
++                });
+ 
+-        // LOG DETALLADO: Ver estructura exacta de los primeros estudiantes
+-        if (estudiantes.length > 0) {
+-            console.log('🔍 Estructura del primer estudiante:', estudiantes[0]);
+-            console.log('🔍 Todas las propiedades del primer estudiante:', Object.keys(estudiantes[0]));
++                selectorRamo.disabled = false;
++                console.log('✅ Ramos cargados:', ramos.length);
++            } catch (error) {
++                console.error('❌ Error cargando ramos:', error);
++                selectorRamo.innerHTML = '<option value="">Error cargando ramos</option>';
++            }
+         }
+ 
+-        if (asistenciasClase.length > 0) {
+-            console.log('🔍 Estructura de la primera asistencia:', asistenciasClase[0]);
+-            console.log('🔍 Todas las propiedades de la primera asistencia:', Object.keys(asistenciasClase[0]));
++        // Load classes by subject
++        async function cargarClasesPorRamo() {
++            const ramoId = document.getElementById('selectorRamo').value;
++            const selectorClase = document.getElementById('selectorClase');
++
++            selectorClase.innerHTML = '<option value="">Cargando clases...</option>';
++            selectorClase.disabled = true;
++
++            if (!ramoId) {
++                selectorClase.innerHTML = '<option value="">-- Primero selecciona un ramo --</option>';
++                return;
++            }
++
++            try {
++                const response = await fetch('/api/clases/mis-clases');
++                const todasClases = await response.json();
++                const clases = todasClases.filter(clase => clase.ramoId == ramoId);
++
++                selectorClase.innerHTML = '<option value="">-- Seleccionar Clase --</option>';
++
++                clases.forEach(clase => {
++                    const option = document.createElement('option');
++                    option.value = clase.id;
++                    const fecha = new Date(clase.inicioUtc).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
++                    const hora = new Date(clase.inicioUtc).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
++                    const estado = clase.activa ? '🟢' : '🔴';
++                    option.textContent = `${estado} ${fecha} ${hora} - ${clase.asignatura}`;
++                    selectorClase.appendChild(option);
++                });
++
++                selectorClase.disabled = false;
++                console.log('✅ Clases cargadas:', clases.length);
++            } catch (error) {
++                console.error('❌ Error cargando clases:', error);
++                selectorClase.innerHTML = '<option value="">Error cargando clases</option>';
++            }
+         }
+ 
+-        // Función para convertir estado a string para mostrar
+-        function estadoToString(estado) {
+-            if (typeof estado === 'number') {
+-                switch(estado) {
+-                    case 1: return 'PRESENTE';
+-                    case 2: return 'TARDANZA';
+-                    case 3: return 'AUSENTE';
+-                    case 4: return 'EXCUSADO';
+-                    case 5: return 'PENDIENTE';
+-                    default: return 'DESCONOCIDO';
++        // Load attendance by class
++        async function cargarAsistenciasPorClase() {
++            let claseId = null;
++
++            if (tipoClaseActual === 'libres') {
++                claseId = document.getElementById('selectorClaseLibre').value;
++                if (!claseId) {
++                    alert('Por favor selecciona una clase libre específica');
++                    return;
++                }
++            } else {
++                claseId = document.getElementById('selectorClase').value;
++                if (!claseId) {
++                    alert('Por favor selecciona una clase específica');
++                    return;
++                }
++            }
++
++            const container = document.getElementById('asistenciasList');
++            container.innerHTML = `
++                <div class="loading-container">
++                    <div class="loading-spinner"></div>
++                    <p class="loading-text">Cargando asistencias...</p>
++                </div>
++            `;
++
++            try {
++                console.log('📡 Fetching data for clase:', claseId);
++
++                const [claseResponse, asistenciasResponse] = await Promise.all([
++                    fetch(`/api/clases/${claseId}`),
++                    fetch(`/api/clases/${claseId}/asistencias`)
++                ]);
++
++                if (!claseResponse.ok || !asistenciasResponse.ok) {
++                    throw new Error('Error al cargar datos');
++                }
++
++                const clase = await claseResponse.json();
++                const asistenciasClase = await asistenciasResponse.json();
++
++                let estudiantes = [];
++                let esClaseLibre = !clase.ramoId;
++
++                if (esClaseLibre) {
++                    estudiantes = asistenciasClase.map(asistencia => ({
++                        id: asistencia.alumnoId,
++                        codigo: asistencia.codigo,
++                        nombre: asistencia.nombre
++                    }));
++                } else {
++                    const ramoResponse = await fetch(`/api/ramos/${clase.ramoId}`);
++                    const ramo = await ramoResponse.json();
++                    const estudiantesResponse = await fetch(`/api/cursos/${ramo.cursoId}/alumnos`);
++                    const alumnoCursoData = await estudiantesResponse.json();
++
++                    const estudiantesCompletos = await Promise.all(
++                        alumnoCursoData.map(async (ac) => {
++                            try {
++                                const alumnoResponse = await fetch(`/api/alumnos/${ac.alumnoId}`);
++                                const alumnoCompleto = await alumnoResponse.json();
++                                return {
++                                    ...alumnoCompleto,
++                                    id: ac.alumnoId
++                                };
++                            } catch (error) {
++                                return {
++                                    id: ac.alumnoId,
++                                    nombre: `Estudiante ${ac.alumnoId}`,
++                                    codigo: `EST-${ac.alumnoId}`
++                                };
++                            }
++                        })
++                    );
++                    estudiantes = estudiantesCompletos;
+                 }
++
++                console.log('📊 Datos recibidos:', { clase, estudiantes, asistencias: asistenciasClase });
++
++                renderAttendance(clase, estudiantes, asistenciasClase, esClaseLibre);
++
++            } catch (error) {
++                console.error('❌ ERROR:', error);
++                container.innerHTML = `
++                    <div class="empty-state">
++                        <i data-lucide="alert-circle" class="empty-icon"></i>
++                        <h3 class="empty-title">Error al cargar datos</h3>
++                        <p class="empty-description">${error.message}</p>
++                    </div>
++                `;
++                if (window.lucide) lucide.createIcons();
+             }
+-            return estado || 'DESCONOCIDO';
+         }
+ 
+-        // Función para obtener valor de campo con múltiples posibilidades
+-        function obtenerCampo(obj, ...campos) {
+-            for (const campo of campos) {
+-                if (obj && obj[campo] !== undefined && obj[campo] !== null) {
+-                    return obj[campo];
++        function renderAttendance(clase, estudiantes, asistenciasClase, esClaseLibre) {
++            // Helper functions
++            function obtenerCampo(obj, ...campos) {
++                for (const campo of campos) {
++                    if (obj && obj[campo] !== undefined && obj[campo] !== null) {
++                        return obj[campo];
++                    }
+                 }
++                return null;
+             }
+-            return null;
+-        }
+-
+-        // Crear lista completa de estudiantes para esta clase específica
+-        const listaCompleta = estudiantes.map(estudiante => {
+-            // Buscar si el estudiante tiene asistencia en esta clase específica
+-            const estudianteId = obtenerCampo(estudiante, 'id', 'Id', 'alumnoId', 'AlumnoId');
+-            const asistenciaEstudiante = asistenciasClase.find(a =>
+-                obtenerCampo(a, 'alumnoId', 'AlumnoId') === estudianteId
+-            );
+-
+-            // Obtener datos del estudiante con múltiples opciones de nombres de campo
+-            const codigoEstudiante = obtenerCampo(estudiante, 'codigo', 'Codigo', 'codigoAlumno', 'CodigoAlumno') || 'SIN-CÓDIGO';
+-            const nombreEstudiante = obtenerCampo(estudiante, 'nombre', 'Nombre', 'nombreCompleto', 'NombreCompleto') || 'SIN-NOMBRE';
+-            const emailEstudiante = obtenerCampo(estudiante, 'email', 'Email', 'correo', 'Correo');
+-
+-            console.log(`🎯 Estudiante procesado:`, {
+-                original: estudiante,
+-                id: estudianteId,
+-                codigo: codigoEstudiante,
+-                nombre: nombreEstudiante,
+-                email: emailEstudiante,
+-                asistencia: asistenciaEstudiante
+-            });
+ 
+-            if (!asistenciaEstudiante) {
+-                // El estudiante NO registró asistencia en esta clase
++            function estadoToString(estado) {
++                if (typeof estado === 'number') {
++                    const estados = { 1: 'PRESENTE', 2: 'TARDANZA', 3: 'AUSENTE', 4: 'EXCUSADO', 5: 'PENDIENTE' };
++                    return estados[estado] || 'DESCONOCIDO';
++                }
++                return estado || 'DESCONOCIDO';
++            }
++
++            // Process students
++            const listaCompleta = estudiantes.map(estudiante => {
++                const estudianteId = obtenerCampo(estudiante, 'id', 'Id');
++                const asistenciaEstudiante = asistenciasClase.find(a => obtenerCampo(a, 'alumnoId', 'AlumnoId') === estudianteId);
++
++                const codigo = obtenerCampo(estudiante, 'codigo', 'Codigo') || 'SIN-CÓDIGO';
++                const nombre = obtenerCampo(estudiante, 'nombre', 'Nombre') || 'SIN-NOMBRE';
++
++                if (!asistenciaEstudiante) {
++                    return {
++                        id: estudianteId,
++                        codigo,
++                        nombre,
++                        estado: 'AUSENTE',
++                        tieneAsistencia: false,
++                        fechaRegistro: null,
++                        horaRegistro: null,
++                        minutosRetraso: 0,
++                        metodoRegistro: null,
++                        cssClass: 'absent'
++                    };
++                }
++
++                const estado = estadoToString(obtenerCampo(asistenciaEstudiante, 'estado', 'Estado'));
++                const cssClass = estado === 'PRESENTE' ? 'present' : estado === 'TARDANZA' ? 'late' : estado === 'EXCUSADO' ? 'excused' : 'absent';
++
++                const marcadaUtc = obtenerCampo(asistenciaEstudiante, 'marcadaUtc', 'MarcadaUtc');
++                const fechaRegistro = marcadaUtc ? new Date(marcadaUtc) : null;
++
+                 return {
+                     id: estudianteId,
+-                    codigo: codigoEstudiante,
+-                    nombre: nombreEstudiante,
+-                    email: emailEstudiante,
+-                    estado: 'AUSENTE',
+-                    estadoDisplay: 'AUSENTE',
+-                    tieneAsistencia: false,
+-                    fechaRegistro: null,
+-                    horaRegistro: null,
+-                    minutosRetraso: 0,
+-                    metodoRegistro: null,
+-                    color: '#ffebee' // rojo claro
++                    codigo,
++                    nombre,
++                    estado,
++                    tieneAsistencia: true,
++                    fechaRegistro: fechaRegistro ? fechaRegistro.toLocaleDateString('es-ES') : 'N/A',
++                    horaRegistro: fechaRegistro ? fechaRegistro.toLocaleTimeString('es-ES') : 'N/A',
++                    minutosRetraso: obtenerCampo(asistenciaEstudiante, 'minutosRetraso', 'MinutosRetraso') || 0,
++                    metodoRegistro: obtenerCampo(asistenciaEstudiante, 'metodo', 'Metodo') || 'No especificado',
++                    cssClass
+                 };
+-            }
++            });
+ 
+-            // El estudiante SÍ registró asistencia
+-            const estado = obtenerCampo(asistenciaEstudiante, 'estado', 'Estado');
+-            let estadoTexto = estadoToString(estado);
+-            let color = '#e8f5e8'; // verde claro por defecto
+-
+-            // Asignar colores según estado
+-            if (estado === 2 || estadoTexto === 'TARDANZA') {
+-                color = '#fff3e0'; // naranja claro
+-            } else if (estado === 3 || estadoTexto === 'AUSENTE') {
+-                color = '#ffebee'; // rojo claro
+-            } else if (estado === 4 || estadoTexto === 'EXCUSADO') {
+-                color = '#e1f5fe'; // azul claro
+-            }
+-
+-            const marcadaUtc = obtenerCampo(asistenciaEstudiante, 'marcadaUtc', 'MarcadaUtc', 'fechaHoraRegistro', 'FechaHoraRegistro');
+-            const fechaRegistro = marcadaUtc ? new Date(marcadaUtc) : null;
+-
+-            return {
+-                id: estudianteId,
+-                codigo: codigoEstudiante,
+-                nombre: nombreEstudiante,
+-                email: emailEstudiante,
+-                estado: estadoTexto,
+-                estadoDisplay: estadoTexto,
+-                tieneAsistencia: true,
+-                fechaRegistro: fechaRegistro ? fechaRegistro.toLocaleDateString() : 'N/A',
+-                horaRegistro: fechaRegistro ? fechaRegistro.toLocaleTimeString() : 'N/A',
+-                minutosRetraso: obtenerCampo(asistenciaEstudiante, 'minutosRetraso', 'MinutosRetraso') || 0,
+-                metodoRegistro: obtenerCampo(asistenciaEstudiante, 'metodo', 'Metodo', 'metodoRegistro', 'MetodoRegistro') || 'No especificado',
+-                asistenciaCompleta: asistenciaEstudiante,
+-                color: color
++            // Calculate stats
++            const stats = {
++                total: listaCompleta.length,
++                presentes: listaCompleta.filter(e => e.estado === 'PRESENTE').length,
++                tardanzas: listaCompleta.filter(e => e.estado === 'TARDANZA').length,
++                ausentes: listaCompleta.filter(e => e.estado === 'AUSENTE').length,
++                excusados: listaCompleta.filter(e => e.estado === 'EXCUSADO').length,
++                registrados: listaCompleta.filter(e => e.tieneAsistencia).length
+             };
+-        });
+ 
+-        // LOG: Ver la lista completa procesada
+-        console.log('📝 Lista completa procesada:', listaCompleta);
+-        if (listaCompleta.length > 0) {
+-            console.log('📝 Primer estudiante procesado:', listaCompleta[0]);
+-        }
+-
+-        // Calcular estadísticas
+-        const totalEstudiantes = listaCompleta.length;
+-        const totalPresentes = listaCompleta.filter(e => e.estado === 'PRESENTE').length;
+-        const totalTardanzas = listaCompleta.filter(e => e.estado === 'TARDANZA').length;
+-        const totalAusentes = listaCompleta.filter(e => e.estado === 'AUSENTE').length;
+-        const totalExcusados = listaCompleta.filter(e => e.estado === 'EXCUSADO').length;
+-        const totalConAsistencia = listaCompleta.filter(e => e.tieneAsistencia).length;
+-        
+-        // Mostrar información de la clase
+-        const fechaClase = new Date(clase.inicioUtc);
+-        const tipoClaseTexto = esClaseLibre ? '📚 CLASE LIBRE' : '🎓 CLASE CON CURSO';
+-        document.getElementById('claseInfo').innerHTML = `
+-            ${tipoClaseTexto} | 🏫 ${clase.asignatura || clase.nombreCompleto} |
+-            📅 ${fechaClase.toLocaleDateString()} |
+-            🕐 ${fechaClase.toLocaleTimeString()} |
+-            ${clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA'}
+-            ${esClaseLibre ? ' | ⚠️ Los estudiantes se registran escaneando QR' : ''}
+-        `;
+-
+-        // Mostrar resumen
+-        document.getElementById('totalEstudiantes').textContent = totalEstudiantes;
+-        document.getElementById('totalPresentes').textContent = totalPresentes;
+-        document.getElementById('totalTardanzas').textContent = totalTardanzas;
+-        document.getElementById('totalAusentes').textContent = totalAusentes;
+-        // Verificar si existe el elemento antes de actualizar
+-        const totalExcusadosEl = document.getElementById('totalExcusados');
+-        if (totalExcusadosEl) totalExcusadosEl.textContent = totalExcusados;
+-        document.getElementById('totalConAsistencia').textContent = totalConAsistencia;
+-        document.getElementById('resumen').style.display = 'block';
+-        
+-        // Generar tabla
+-        let html = `
+-            <div style="background: green; color: white; padding: 20px; margin-bottom: 10px;">
+-                ✅ LISTA COMPLETA DE LA CLASE: ${totalEstudiantes} estudiantes
+-            </div>
+-            <table border="3" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+-                <tr style="background: #f0f0f0;">
+-                    <th style="padding: 10px; border: 2px solid black;">Código</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Nombre Completo</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Estado</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Fecha Registro</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Hora Registro</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Min. Retraso</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Método</th>
+-                    <th style="padding: 10px; border: 2px solid black;">Email</th>
+-                </tr>
+-        `;
+-        
+-        listaCompleta.forEach(estudiante => {
+-            const estadoColor = estudiante.estado === 'PRESENTE' ? 'green' :
+-                               estudiante.estado === 'TARDANZA' ? 'orange' :
+-                               estudiante.estado === 'EXCUSADO' ? 'blue' : 'red';
+-
+-            // Función para convertir método enum a texto
+-            function metodoToString(metodo) {
+-                if (typeof metodo === 'number') {
+-                    switch(metodo) {
+-                        case 1: return 'QR Estudiante';
+-                        case 2: return 'QR Docente';
+-                        case 3: return 'Manual';
+-                        case 4: return 'Auto Ausente';
+-                        default: return 'Desconocido';
+-                    }
+-                }
+-                return metodo || 'N/A';
+-            }
+-
+-            // Datos seguros para mostrar
+-            const codigoDisplay = estudiante.codigo && estudiante.codigo !== 'N/A' ? estudiante.codigo : 'SIN-CÓDIGO';
+-            const nombreDisplay = estudiante.nombre && estudiante.nombre !== 'N/A' ? estudiante.nombre : 'SIN-NOMBRE';
+-            const emailDisplay = estudiante.email ? estudiante.email : 'No registrado';
+-            const fechaDisplay = estudiante.fechaRegistro && estudiante.fechaRegistro !== 'N/A' ? estudiante.fechaRegistro : 'No registró';
+-            const horaDisplay = estudiante.horaRegistro && estudiante.horaRegistro !== 'N/A' ? estudiante.horaRegistro : 'N/A';
+-
+-            html += `
+-                <tr style="border: 2px solid black; background: ${estudiante.color};">
+-                    <td style="padding: 8px; border: 1px solid black; font-weight: bold;">${codigoDisplay}</td>
+-                    <td style="padding: 8px; border: 1px solid black;">
+-                        ${nombreDisplay}
+-                        <button onclick="mostrarQREstudiante(${estudiante.id}, '${nombreDisplay.replace(/'/g, "\\'")}', '${codigoDisplay}')"
+-                                style="margin-left: 10px; padding: 4px 8px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;"
+-                                title="Ver QR para escanear">
+-                            📱 QR
+-                        </button>
+-                    </td>
+-                    <td style="padding: 8px; border: 1px solid black; color: ${estadoColor}; font-weight: bold; text-align: center;">${estudiante.estadoDisplay}</td>
+-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${fechaDisplay}</td>
+-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${horaDisplay}</td>
+-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${estudiante.minutosRetraso} min</td>
+-                    <td style="padding: 8px; border: 1px solid black; text-align: center;">${metodoToString(estudiante.metodoRegistro)}</td>
+-                    <td style="padding: 8px; border: 1px solid black;">${emailDisplay}</td>
+-                </tr>
++            // Update class info banner
++            const fechaClase = new Date(clase.inicioUtc);
++            const tipoTexto = esClaseLibre ? 'Clase Libre' : 'Clase con Curso';
++            const estadoClase = clase.activa ? 'Activa' : 'Cerrada';
++
++            document.getElementById('classInfoBanner').innerHTML = `
++                <div class="class-info-banner">
++                    <div class="class-info-icon">
++                        <i data-lucide="${esClaseLibre ? 'book-open' : 'graduation-cap'}"></i>
++                    </div>
++                    <div class="class-info-content">
++                        <div class="class-info-title">${clase.asignatura || clase.nombreCompleto}</div>
++                        <div class="class-info-details">
++                            <div class="class-info-item">
++                                <i data-lucide="tag"></i>
++                                <span>${tipoTexto}</span>
++                            </div>
++                            <div class="class-info-item">
++                                <i data-lucide="calendar"></i>
++                                <span>${fechaClase.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
++                            </div>
++                            <div class="class-info-item">
++                                <i data-lucide="clock"></i>
++                                <span>${fechaClase.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
++                            </div>
++                            <div class="class-info-item">
++                                <i data-lucide="${clase.activa ? 'circle-dot' : 'circle-dashed'}"></i>
++                                <span>${estadoClase}</span>
++                            </div>
++                        </div>
++                    </div>
++                </div>
+             `;
+-        });
+-        
+-        html += '</table>';
+-        container.innerHTML = html;
+-        
+-        console.log('✅ LISTA COMPLETA RENDERIZADA');
+-        
+-    } catch (error) {
+-        console.error('❌ ERROR:', error);
+-        container.innerHTML = '<div style="background: red; color: white; padding: 20px;">ERROR: ' + error.message + '</div>';
+-    }
+-}
++            document.getElementById('classInfoBanner').style.display = 'block';
++
++            // Update stats
++            document.getElementById('totalEstudiantes').textContent = stats.total;
++            document.getElementById('totalPresentes').textContent = stats.presentes;
++            document.getElementById('totalTardanzas').textContent = stats.tardanzas;
++            document.getElementById('totalAusentes').textContent = stats.ausentes;
++            document.getElementById('totalExcusados').textContent = stats.excusados;
++            document.getElementById('totalConAsistencia').textContent = stats.registrados;
++            document.getElementById('statsSection').style.display = 'block';
++
++            // Render students grid
++            const container = document.getElementById('asistenciasList');
++
++            if (listaCompleta.length === 0) {
++                container.innerHTML = `
++                    <div class="empty-state">
++                        <i data-lucide="users" class="empty-icon"></i>
++                        <h3 class="empty-title">No hay estudiantes</h3>
++                        <p class="empty-description">Esta clase no tiene estudiantes registrados</p>
++                    </div>
++                `;
++            } else {
++                const studentsHTML = listaCompleta.map(estudiante => {
++                    const initials = estudiante.nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
++                    const statusIcon = estudiante.estado === 'PRESENTE' ? 'check-circle' :
++                                     estudiante.estado === 'TARDANZA' ? 'clock' :
++                                     estudiante.estado === 'EXCUSADO' ? 'file-text' : 'x-circle';
++
++                    return `
++                        <div class="student-card ${estudiante.cssClass}">
++                            <div class="student-header">
++                                <div class="student-avatar">${initials}</div>
++                                <div class="student-info">
++                                    <div class="student-name">${estudiante.nombre}</div>
++                                    <div class="student-code">${estudiante.codigo}</div>
++                                </div>
++                            </div>
++                            <div class="student-status ${estudiante.cssClass}">
++                                <i data-lucide="${statusIcon}"></i>
++                                <span>${estudiante.estado}</span>
++                            </div>
++                            <div class="student-meta">
++                                <div class="meta-item">
++                                    <div class="meta-label">Fecha</div>
++                                    <div class="meta-value">${estudiante.fechaRegistro}</div>
++                                </div>
++                                <div class="meta-item">
++                                    <div class="meta-label">Hora</div>
++                                    <div class="meta-value">${estudiante.horaRegistro}</div>
++                                </div>
++                                <div class="meta-item">
++                                    <div class="meta-label">Retraso</div>
++                                    <div class="meta-value">${estudiante.minutosRetraso} min</div>
++                                </div>
++                                <div class="meta-item">
++                                    <div class="meta-label">Método</div>
++                                    <div class="meta-value">${metodoToString(estudiante.metodoRegistro)}</div>
++                                </div>
++                            </div>
++                            <div class="student-actions">
++                                <button class="action-btn-small" onclick="mostrarQREstudiante(${estudiante.id}, '${estudiante.nombre.replace(/'/g, "\\'")}', '${estudiante.codigo}')">
++                                    <i data-lucide="qr-code"></i>
++                                    Ver QR
++                                </button>
++                            </div>
++                        </div>
++                    `;
++                }).join('');
++
++                container.innerHTML = `<div class="students-grid">${studentsHTML}</div>`;
++            }
+ 
+-// Funciones de utilidad adicionales
+-function refrescarDatos() {
+-    let claseId = null;
++            // Recreate icons
++            if (window.lucide) {
++                lucide.createIcons();
++            }
+ 
+-    if (tipoClaseActual === 'libres') {
+-        claseId = document.getElementById('selectorClaseLibre').value;
+-    } else {
+-        claseId = document.getElementById('selectorClase').value;
+-    }
++            console.log('✅ ASISTENCIAS RENDERIZADAS');
++        }
+ 
+-    if (claseId) {
+-        cargarAsistenciasPorClase();
+-    }
+-}
++        function metodoToString(metodo) {
++            if (typeof metodo === 'number') {
++                const metodos = { 1: 'QR Estudiante', 2: 'QR Docente', 3: 'Manual', 4: 'Auto Ausente' };
++                return metodos[metodo] || 'Desconocido';
++            }
++            return metodo || 'N/A';
++        }
+ 
+-function exportarCSV() {
+-    let claseId = null;
++        function refrescarDatos() {
++            let claseId = null;
+ 
+-    if (tipoClaseActual === 'libres') {
+-        claseId = document.getElementById('selectorClaseLibre').value;
+-    } else {
+-        claseId = document.getElementById('selectorClase').value;
+-    }
++            if (tipoClaseActual === 'libres') {
++                claseId = document.getElementById('selectorClaseLibre').value;
++            } else {
++                claseId = document.getElementById('selectorClase').value;
++            }
+ 
+-    if (!claseId) {
+-        alert('Por favor selecciona una clase específica primero');
+-        return;
+-    }
++            if (claseId) {
++                cargarAsistenciasPorClase();
++            }
++        }
+ 
+-    // Abrir CSV COMPLETO de asistencias de la clase
+-    window.open(`/api/asistencias/clase/${claseId}/csv-completo`, '_blank');
+-}
++        function exportarCSV() {
++            let claseId = null;
+ 
+-// Inicializar la vista
+-setTimeout(() => {
+-    // Por defecto, cargar clases libres primero
+-    cargarClasesLibres();
+-}, 500);
+-
+-// Auto-refrescar cada 30 segundos si hay una clase seleccionada
+-setInterval(() => {
+-    let claseId = null;
+-
+-    if (tipoClaseActual === 'libres') {
+-        claseId = document.getElementById('selectorClaseLibre').value;
+-    } else {
+-        claseId = document.getElementById('selectorClase').value;
+-    }
+-
+-    if (claseId) {
+-        console.log('🔄 Auto-refrescando datos...');
+-        refrescarDatos();
+-    }
+-}, 30000);
+-
+-// Función para mostrar el QR del estudiante en un modal
+-async function mostrarQREstudiante(estudianteId, nombre, codigo) {
+-    try {
+-        // Obtener el QR del estudiante
+-        const response = await fetch(`/api/alumnos/${estudianteId}/qr`);
+-        if (!response.ok) throw new Error('Error al cargar QR');
+-
+-        const data = await response.json();
+-
+-        // Crear modal
+-        const modal = document.createElement('div');
+-        modal.id = 'qrModal';
+-        modal.style.cssText = `
+-            position: fixed;
+-            top: 0;
+-            left: 0;
+-            width: 100%;
+-            height: 100%;
+-            background: rgba(0, 0, 0, 0.8);
+-            display: flex;
+-            align-items: center;
+-            justify-content: center;
+-            z-index: 10000;
+-        `;
+-
+-        modal.innerHTML = `
+-            <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; position: relative;">
+-                <button onclick="cerrarModalQR()" style="position: absolute; top: 10px; right: 10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px;">✕</button>
+-                <h2 style="margin-top: 0; color: #333;">QR para Escanear</h2>
+-                <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+-                    <div style="font-weight: bold; font-size: 18px; color: #4CAF50; margin-bottom: 5px;">${nombre}</div>
+-                    <div style="color: #666; font-family: monospace;">${codigo}</div>
+-                </div>
+-                <div style="background: white; padding: 20px; border: 3px solid #4CAF50; border-radius: 10px; display: inline-block;">
+-                    <img src="data:image/png;base64,${data.qrCode}" style="width: 250px; height: 250px;" alt="QR ${nombre}">
+-                </div>
+-                <p style="color: #666; font-size: 14px; margin-top: 20px;">
+-                    Escanea este QR con tu dispositivo para registrar al estudiante
+-                </p>
+-            </div>
+-        `;
++            if (tipoClaseActual === 'libres') {
++                claseId = document.getElementById('selectorClaseLibre').value;
++            } else {
++                claseId = document.getElementById('selectorClase').value;
++            }
++
++            if (!claseId) {
++                alert('Por favor selecciona una clase específica primero');
++                return;
++            }
++
++            window.open(`/api/asistencias/clase/${claseId}/csv-completo`, '_blank');
++        }
++
++        async function mostrarQREstudiante(estudianteId, nombre, codigo) {
++            try {
++                const response = await fetch(`/api/alumnos/${estudianteId}/qr`);
++                if (!response.ok) throw new Error('Error al cargar QR');
++
++                const data = await response.json();
++
++                const modal = document.createElement('div');
++                modal.className = 'modal-overlay';
++                modal.id = 'qrModal';
++                modal.innerHTML = `
++                    <div class="modal-content">
++                        <button class="modal-close" onclick="cerrarModalQR()">✕</button>
++                        <h2 class="modal-title">Código QR del Estudiante</h2>
++                        <div class="modal-student-info">
++                            <div class="modal-student-name">${nombre}</div>
++                            <div class="modal-student-code">${codigo}</div>
++                        </div>
++                        <div class="modal-qr-container">
++                            <img src="data:image/png;base64,${data.qrCode}" class="modal-qr-image" alt="QR ${nombre}">
++                        </div>
++                        <div class="modal-footer">
++                            <i data-lucide="scan"></i>
++                            Escanea este código para registrar asistencia
++                        </div>
++                    </div>
++                `;
++
++                document.body.appendChild(modal);
++
++                modal.addEventListener('click', function(e) {
++                    if (e.target === modal) {
++                        cerrarModalQR();
++                    }
++                });
++
++                if (window.lucide) {
++                    lucide.createIcons();
++                }
++
++            } catch (error) {
++                console.error('❌ Error mostrando QR:', error);
++                alert('Error al cargar el código QR del estudiante');
++            }
++        }
+ 
+-        document.body.appendChild(modal);
++        function cerrarModalQR() {
++            const modal = document.getElementById('qrModal');
++            if (modal) {
++                modal.remove();
++            }
++        }
+ 
+-        // Cerrar al hacer clic fuera del contenido
+-        modal.addEventListener('click', function(e) {
+-            if (e.target === modal) {
++        document.addEventListener('keydown', function(e) {
++            if (e.key === 'Escape') {
+                 cerrarModalQR();
+             }
+         });
+ 
+-    } catch (error) {
+-        console.error('❌ Error mostrando QR:', error);
+-        alert('Error al cargar el código QR del estudiante');
+-    }
+-}
++        // Initialize
++        setTimeout(() => {
++            cargarClasesLibres();
++        }, 500);
+ 
+-function cerrarModalQR() {
+-    const modal = document.getElementById('qrModal');
+-    if (modal) {
+-        modal.remove();
+-    }
+-}
++        // Auto-refresh every 30 seconds
++        setInterval(() => {
++            let claseId = null;
+ 
+-// Cerrar modal con tecla ESC
+-document.addEventListener('keydown', function(e) {
+-    if (e.key === 'Escape') {
+-        cerrarModalQR();
+-    }
+-});
+-</script>
++            if (tipoClaseActual === 'libres') {
++                claseId = document.getElementById('selectorClaseLibre').value;
++            } else {
++                claseId = document.getElementById('selectorClase').value;
++            }
+ 
+-}
+\ No newline at end of file
++            if (claseId) {
++                console.log('🔄 Auto-refrescando datos...');
++                refrescarDatos();
++            }
++        }, 30000);
++    </script>
++</body>
++</html>

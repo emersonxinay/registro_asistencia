@@ -355,10 +355,10 @@
                                     <i data-lucide="users-check"></i>
                                     Ver Asistencias
                                 </a>
-                                <a href="/api/clases/@clase.Id/reabrir" class="btn-action" onclick="return confirm('¿Reabrir esta clase?')">
+                                <button class="btn-action" onclick="reabrirClase(@clase.Id)">
                                     <i data-lucide="play-circle"></i>
                                     Reabrir
-                                </a>
+                                </button>
                             }
                             <button class="btn-action" onclick="duplicarClase(@clase.Id)">
                                 <i data-lucide="copy"></i>
@@ -423,6 +423,31 @@
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
         });
+
+        // Reabrir clase function
+        async function reabrirClase(claseId) {
+            if (!confirm('¿Reabrir esta clase para registrar justificaciones?')) return;
+
+            try {
+                const response = await fetch(`/api/clases/${claseId}/reabrir`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Error al reabrir clase');
+                }
+
+                alert('Clase reabierta exitosamente');
+                location.reload(); // Refresh page to show updated status
+            } catch (error) {
+                console.error('Error reabriendo clase:', error);
+                alert('Error al reabrir la clase: ' + error.message);
+            }
+        }
 
         // Duplicar clase function
         async function duplicarClase(claseId) {

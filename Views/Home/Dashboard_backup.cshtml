@@ -1,0 +1,1449 @@
+@{
+    ViewData["Title"] = "Dashboard - Registro Asistencia por QR";
+    ViewData["Subtitle"] = "Centro de Control Inteligente";
+}
+
+@section Styles {
+    <style>
+        /* Dashboard Expert-Level Design System */
+        :root {
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 2.5rem;
+            --space-8: 3rem;
+            --primary-color: #667eea;
+            --primary-light: #764ba2;
+            --secondary-color: #10b981;
+            --accent-color: #0ea5e9;
+            --warning-color: #f59e0b;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        .expert-dashboard {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .dashboard-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%),
+                linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 100%);
+            pointer-events: none;
+        }
+
+        .dashboard-container {
+            position: relative;
+            z-index: 1;
+            padding: var(--space-6);
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Hero Header with Glassmorphism - RESPONSIVE FIXED */
+        .dashboard-hero {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            animation: slideInFromTop 0.8s ease-out;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-6);
+            width: 100%;
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
+            max-width: 100%;
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            color: white;
+            margin: 0 0 var(--space-3) 0;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.125rem);
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+            font-weight: 400;
+            max-width: 100%;
+            line-height: 1.6;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .stat-bubble {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: var(--space-4);
+            text-align: center;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            flex: 1;
+            min-width: 120px;
+            max-width: 200px;
+            box-sizing: border-box;
+        }
+
+        .stat-bubble:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-value {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            margin: 0;
+            animation: countUp 2s ease-out;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin: var(--space-1) 0 0 0;
+        }
+
+        /* Enhanced Grid Layout - RESPONSIVE FIXED */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr));
+            gap: var(--space-5);
+            margin-bottom: var(--space-6);
+            width: 100%;
+        }
+
+        .control-panel {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+            gap: var(--space-5);
+            margin-bottom: var(--space-5);
+            width: 100%;
+        }
+
+        /* Expert Cards with Better Spacing - RESPONSIVE FIXED */
+        .expert-card {
+            background: rgba(34, 34, 117, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: var(--space-5);
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            height: fit-content;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .expert-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .expert-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .expert-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-4);
+            margin-bottom: var(--space-5);
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .expert-card:hover .card-icon::before {
+            left: 100%;
+        }
+
+        .card-title {
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+            font-weight: 700;
+            color: white;
+            margin: 0;
+            line-height: 1.3;
+            word-wrap: break-word;
+        }
+
+        .card-subtitle {
+            font-size: 0.875rem;
+            color: #E6E6F5;
+            margin: var(--space-2) 0 0 0;
+            line-height: 1.5;
+        }
+
+        /* Improved Action Grid - RESPONSIVE FIXED */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-3);
+            width: 100%;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-4);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            min-height: 80px;
+            box-sizing: border-box;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .action-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+        }
+
+        .action-btn.accent {
+            background: linear-gradient(135deg, var(--accent-color), #0891b2);
+        }
+
+        .action-btn.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-btn span {
+            position: relative;
+            z-index: 1;
+            font-size: 0.875rem;
+        }
+
+        /* Enhanced Forms with Better Spacing */
+        .smart-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+            width: 100%;
+        }
+
+        .form-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #07E8E8;
+            margin-bottom: var(--space-3);
+            font-size: 0.875rem;
+        }
+
+        .smart-input {
+            width: 100%;
+            padding: var(--space-4);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .smart-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .smart-input:focus + .input-effect {
+            width: 100%;
+        }
+
+        .input-effect {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .smart-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            padding: var(--space-4) var(--space-6);
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .smart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        }
+
+        .smart-btn:active {
+            transform: translateY(0);
+        }
+
+        .smart-btn.loading {
+            pointer-events: none;
+        }
+
+        .smart-btn .btn-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Live Metrics with Better Layout - RESPONSIVE FIXED */
+        .metrics-panel {
+            background: linear-gradient(135deg, #222275 0%, #222275 100%);
+            color: white;
+            border-radius: 1em;
+            padding: var(--space-5);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .metrics-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 30% 20%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .metrics-header {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-5);
+            flex-wrap: wrap;
+            gap: var(--space-3);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .metrics-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+            gap: var(--space-4);
+            width: 100%;
+        }
+
+        .metric-card {
+            background: rgba(85, 85, 250, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1em;
+            padding: var(--space-4);
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .metric-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .metric-value {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 800;
+            margin: 0 0 var(--space-1) 0;
+            animation: countUp 2s ease-out;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .metric-trend {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+            margin-top: var(--space-2);
+            font-size: 0.875rem;
+        }
+
+        .metric-trend.positive { color: #10b981; }
+        .metric-trend.negative { color: #ef4444; }
+        .metric-trend.neutral { color: #6b7280; }
+
+        /* Quick Actions Floating Panel - RESPONSIVE FIXED */
+        .floating-actions {
+            position: fixed;
+            bottom: var(--space-4);
+            right: var(--space-4);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .floating-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .floating-btn.primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        }
+
+        .floating-btn.secondary {
+            background: linear-gradient(135deg, var(--secondary-color), #059669);
+        }
+
+        /* Animations */
+        @@keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ENHANCED RESPONSIVE DESIGN - COMPLETELY FIXED */
+        @@media (max-width: 1200px) {
+            .dashboard-container {
+                padding: var(--space-5);
+            }
+            
+            .hero-content {
+                gap: var(--space-5);
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-container {
+                padding: var(--space-4);
+            }
+
+            .dashboard-hero {
+                padding: var(--space-5);
+                margin-bottom: var(--space-5);
+            }
+
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-4);
+            }
+
+            .hero-text {
+                text-align: center;
+                min-width: auto;
+            }
+
+            .hero-stats {
+                justify-content: space-around;
+                gap: var(--space-2);
+            }
+
+            .stat-bubble {
+                min-width: 100px;
+                padding: var(--space-3);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+
+            .control-panel {
+                grid-template-columns: 1fr;
+                gap: var(--space-4);
+            }
+
+            .expert-card {
+                padding: var(--space-4);
+            }
+
+            .card-header {
+                gap: var(--space-3);
+                margin-bottom: var(--space-4);
+            }
+
+            .card-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+
+            .action-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-2);
+            }
+
+            .action-btn {
+                min-height: 70px;
+                padding: var(--space-3);
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: var(--space-3);
+            }
+
+            .metric-card {
+                padding: var(--space-3);
+            }
+
+            .floating-actions {
+                bottom: var(--space-3);
+                right: var(--space-3);
+            }
+
+            .floating-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.125rem;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .dashboard-container {
+                padding: var(--space-3);
+            }
+
+            .dashboard-hero {
+                padding: var(--space-4);
+                border-radius: 20px;
+            }
+
+            .hero-title {
+                font-size: 1.75rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.875rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: var(--space-2);
+            }
+
+            .stat-bubble {
+                min-width: 100%;
+                max-width: 200px;
+            }
+
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--space-2);
+            }
+
+            .card-icon {
+                align-self: center;
+            }
+
+            .floating-actions {
+                bottom: var(--space-2);
+                right: var(--space-2);
+            }
+
+            .floating-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+        }
+
+        @@media (max-width: 360px) {
+            .dashboard-container {
+                padding: var(--space-2);
+            }
+
+            .dashboard-hero {
+                padding: var(--space-3);
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            .expert-card {
+                padding: var(--space-3);
+                border-radius: 16px;
+            }
+
+            .action-btn {
+                min-height: 60px;
+                padding: var(--space-2);
+            }
+
+            .action-btn i {
+                font-size: 1.25rem;
+            }
+
+            .action-btn span {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* Success/Error States */
+        .status-message {
+            padding: var(--space-3);
+            border-radius: 12px;
+            margin-top: var(--space-3);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-weight: 500;
+            animation: slideInFromBottom 0.5s ease-out;
+            font-size: 0.875rem;
+        }
+
+        .status-message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @@keyframes slideInFromBottom {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* QR Generator Specific Styles - RESPONSIVE FIXED */
+        .qr-generator-form {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: var(--space-3);
+            align-items: end;
+            width: 100%;
+        }
+
+        @@media (max-width: 640px) {
+            .qr-generator-form {
+                grid-template-columns: 1fr;
+                gap: var(--space-3);
+            }
+            
+            .qr-generator-form .smart-btn {
+                margin-top: var(--space-2);
+            }
+        }
+    </style>
+}
+
+<!-- El HTML permanece igual que en tu código original, solo se corrigió el CSS -->
+<!-- Expert-Level Dashboard -->
+<div class="expert-dashboard">
+    <div class="dashboard-overlay"></div>
+
+    <div class="dashboard-container">
+        <!-- Hero Section with Glassmorphism -->
+        <div class="dashboard-hero">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">Centro de Control</h1>
+                    <p class="hero-subtitle">
+                        Gestiona tu ecosistema educativo con inteligencia artificial y tecnología QR avanzada
+                    </p>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-bubble" onclick="navigateToSection('students')">
+                        <div class="stat-value" id="heroStudentCount">0</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                    <div class="stat-bubble" onclick="navigateToSection('classes')">
+                        <div class="stat-value" id="heroClassCount">0</div>
+                        <div class="stat-label">Clases Activas</div>
+                    </div>
+                    <div class="stat-bubble" onclick="navigateToSection('attendance')">
+                        <div class="stat-value" id="heroAttendanceCount">0</div>
+                        <div class="stat-label">Asistencias Hoy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Primary Control Panel -->
+        <div class="control-panel">
+            <!-- Quick Actions -->
+            <div class="expert-card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light));">
+                        <i data-lucide="zap"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Acciones Rápidas</h3>
+                        <p class="card-subtitle">Ejecuta tareas comunes con un clic</p>
+                    </div>
+                </div>
+
+                <div class="action-grid">
+                    <a href="/alumnos" class="action-btn" data-action="students">
+                        <i data-lucide="users"></i>
+                        <span>Estudiantes</span>
+                    </a>
+                    <a href="/workflow/cursos" class="action-btn secondary" data-action="new-class">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Nueva Clase</span>
+                    </a>
+                    <a href="/clases" class="action-btn accent" data-action="qr-generator">
+                        <i data-lucide="qr-code"></i>
+                        <span>Generar QR</span>
+                    </a>
+                    <a href="/docente/scanner" class="action-btn warning" data-action="scanner">
+                        <i data-lucide="scan"></i>
+                        <span>Escáner</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Live Metrics -->
+            <div class="expert-card metrics-panel">
+                <div class="metrics-header">
+                    <h3 class="card-title">Métricas en Tiempo Real</h3>
+                    <div class="live-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>En vivo</span>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--primary-color), #4f46e5);">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div class="metric-trend positive">
+                                <i data-lucide="trending-up"></i>
+                                <span id="studentTrend">+12%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveStudentCount">0</div>
+                        <div class="metric-label">Total Estudiantes</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                                <i data-lucide="check-circle"></i>
+                            </div>
+                            <div class="metric-trend positive">
+                                <i data-lucide="trending-up"></i>
+                                <span id="attendanceTrend">+8%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveAttendanceCount">0</div>
+                        <div class="metric-label">Asistencias Hoy</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon" style="background: linear-gradient(135deg, var(--accent-color), #0891b2);">
+                                <i data-lucide="activity"></i>
+                            </div>
+                            <div class="metric-trend neutral">
+                                <i data-lucide="minus"></i>
+                                <span id="activeTrend">0%</span>
+                            </div>
+                        </div>
+                        <div class="metric-value" id="liveActiveCount">0</div>
+                        <div class="metric-label">Clases Activas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Section -->
+        <div class="dashboard-grid">
+            <!-- Student Management -->
+            <div class="expert-card" id="students-section">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+                        <i data-lucide="graduation-cap"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestión Inteligente de Estudiantes</h3>
+                        <p class="card-subtitle">Registro automático con generación de QR</p>
+                    </div>
+                </div>
+
+                <form id="studentForm" class="smart-form">
+                    <div class="form-group">
+                        <label class="form-label" for="studentCode">Código del Estudiante</label>
+                        <input type="text" id="studentCode" name="codigo" class="smart-input" required
+                               placeholder="EST001" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="studentName">Nombre Completo</label>
+                        <input type="text" id="studentName" name="nombre" class="smart-input" required
+                               placeholder="Juan Pérez García" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="submit" class="smart-btn" id="studentSubmitBtn">
+                        <i data-lucide="user-plus"></i>
+                        <span>Crear Estudiante</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <div id="studentStatus"></div>
+            </div>
+
+            <!-- Class Management -->
+            <div class="expert-card" id="classes-section">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                        <i data-lucide="book-open"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Gestión Avanzada de Clases</h3>
+                        <p class="card-subtitle">Crea y administra clases con IA</p>
+                    </div>
+                </div>
+
+                <form id="classForm" class="smart-form">
+                    <div class="form-group">
+                        <label class="form-label" for="className">Nombre de la Asignatura</label>
+                        <input type="text" id="className" name="asignatura" class="smart-input" required
+                               placeholder="Matemáticas Avanzadas" autocomplete="off">
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="submit" class="smart-btn" id="classSubmitBtn" style="background: linear-gradient(135deg, var(--secondary-color), #059669);">
+                        <i data-lucide="plus-circle"></i>
+                        <span>Crear Clase</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+
+                <div id="classStatus"></div>
+            </div>
+        </div>
+
+        <!-- QR Generator Section -->
+        <div class="dashboard-grid">
+            <div class="expert-card" id="qr-section" style="grid-column: 1 / -1;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, var(--accent-color), #0891b2);">
+                        <i data-lucide="qr-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Generador QR Inteligente</h3>
+                        <p class="card-subtitle">Códigos QR dinámicos con seguridad avanzada y auto-renovación</p>
+                    </div>
+                </div>
+
+                <div class="qr-generator-form">
+                    <div class="form-group">
+                        <label class="form-label" for="qrClassSelect">Seleccionar Clase Activa</label>
+                        <select id="qrClassSelect" class="smart-input">
+                            <option value="">🎯 Elige una clase para generar QR...</option>
+                        </select>
+                        <div class="input-effect"></div>
+                    </div>
+                    <button type="button" class="smart-btn" id="generateQRBtn" disabled
+                            style="background: linear-gradient(135deg, var(--accent-color), #0891b2); height: fit-content;">
+                        <i data-lucide="zap"></i>
+                        <span>Generar QR</span>
+                        <div class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </div>
+
+                <div id="qrStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Actions -->
+    <div class="floating-actions">
+        <button class="floating-btn primary" onclick="navigateToSection('students')" title="Gestión de Estudiantes">
+            <i data-lucide="users"></i>
+        </button>
+        <button class="floating-btn secondary" onclick="navigateToSection('classes')" title="Nueva Clase">
+            <i data-lucide="plus"></i>
+        </button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // El JavaScript permanece igual
+        // Expert-Level Dashboard Controller
+        class ExpertDashboard {
+            constructor() {
+                this.metrics = {
+                    students: 0,
+                    classes: 0,
+                    attendance: 0
+                };
+                this.initialize();
+            }
+
+            async initialize() {
+                await this.loadInitialData();
+                this.bindEvents();
+                this.startRealTimeUpdates();
+                this.initializeAnimations();
+
+                // Initialize Lucide icons
+                lucide.createIcons();
+
+                console.log('🚀 Expert Dashboard initialized');
+            }
+
+            async loadInitialData() {
+                try {
+                    const [students, classes, attendances] = await Promise.all([
+                        this.fetchData('/api/alumnos'),
+                        this.fetchData('/api/clases'),
+                        this.fetchData('/api/asistencias')
+                    ]);
+
+                    this.metrics.students = students?.length || 0;
+                    this.metrics.classes = classes?.filter(c => c.activa).length || 0;
+
+                    // Calculate today's attendance
+                    const today = new Date().toDateString();
+                    this.metrics.attendance = attendances?.filter(a => {
+                        try {
+                            return new Date(a.marcadaUtc).toDateString() === today;
+                        } catch {
+                            return false;
+                        }
+                    }).length || 0;
+
+                    this.updateMetrics();
+                    await this.loadActiveClasses();
+                } catch (error) {
+                    console.error('Error loading initial data:', error);
+                    this.showError('Error al cargar datos iniciales');
+                }
+            }
+
+            async fetchData(url) {
+                const response = await fetch(url);
+                return response.ok ? await response.json() : [];
+            }
+
+            updateMetrics() {
+                // Update hero stats with animation
+                this.animateValue('heroStudentCount', this.metrics.students);
+                this.animateValue('heroClassCount', this.metrics.classes);
+                this.animateValue('heroAttendanceCount', this.metrics.attendance);
+
+                // Update live metrics
+                this.animateValue('liveStudentCount', this.metrics.students);
+                this.animateValue('liveAttendanceCount', this.metrics.attendance);
+                this.animateValue('liveActiveCount', this.metrics.classes);
+            }
+
+            animateValue(elementId, endValue, duration = 2000) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                const startValue = 0;
+                const startTime = performance.now();
+
+                const updateValue = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing function for smooth animation
+                    const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+                    const currentValue = Math.round(startValue + (endValue - startValue) * easeOutCubic);
+
+                    element.textContent = currentValue;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateValue);
+                    }
+                };
+
+                requestAnimationFrame(updateValue);
+            }
+
+            async loadActiveClasses() {
+                try {
+                    const classes = await this.fetchData('/api/clases');
+                    const activeClasses = classes.filter(c => c.activa);
+
+                    const select = document.getElementById('qrClassSelect');
+                    select.innerHTML = '<option value="">🎯 Elige una clase para generar QR...</option>';
+
+                    activeClasses.forEach(clase => {
+                        const option = document.createElement('option');
+                        option.value = clase.id;
+                        option.textContent = clase.nombreCompleto || clase.asignatura;
+                        select.appendChild(option);
+                    });
+
+                    // Enable/disable QR button
+                    document.getElementById('generateQRBtn').disabled = activeClasses.length === 0;
+                } catch (error) {
+                    console.error('Error loading active classes:', error);
+                }
+            }
+
+            bindEvents() {
+                // Student form
+                document.getElementById('studentForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createStudent();
+                });
+
+                // Class form
+                document.getElementById('classForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.createClass();
+                });
+
+                // QR generation
+                document.getElementById('generateQRBtn').addEventListener('click', () => {
+                    this.generateQR();
+                });
+
+                // QR class selection
+                document.getElementById('qrClassSelect').addEventListener('change', (e) => {
+                    document.getElementById('generateQRBtn').disabled = !e.target.value;
+                });
+            }
+
+            async createStudent() {
+                const form = document.getElementById('studentForm');
+                const submitBtn = document.getElementById('studentSubmitBtn');
+                const statusDiv = document.getElementById('studentStatus');
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    const formData = new FormData(form);
+                    const data = {
+                        codigo: formData.get('codigo'),
+                        nombre: formData.get('nombre')
+                    };
+
+                    const response = await fetch('/api/alumnos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showSuccess(statusDiv, `✅ Estudiante "${result.nombre}" creado exitosamente`);
+                        form.reset();
+                        this.metrics.students++;
+                        this.updateMetrics();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al crear estudiante');
+                    }
+                } catch (error) {
+                    this.showError(statusDiv, '❌ ' + error.message);
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            async createClass() {
+                const form = document.getElementById('classForm');
+                const submitBtn = document.getElementById('classSubmitBtn');
+                const statusDiv = document.getElementById('classStatus');
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    const formData = new FormData(form);
+                    const data = {
+                        asignatura: formData.get('asignatura')
+                    };
+
+                    const response = await fetch('/api/clases', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        this.showSuccess(statusDiv, `✅ Clase "${result.asignatura}" creada exitosamente`);
+                        form.reset();
+                        this.metrics.classes++;
+                        this.updateMetrics();
+                        await this.loadActiveClasses();
+                    } else {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Error al crear clase');
+                    }
+                } catch (error) {
+                    this.showError(statusDiv, '❌ ' + error.message);
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            async generateQR() {
+                const select = document.getElementById('qrClassSelect');
+                const submitBtn = document.getElementById('generateQRBtn');
+                const statusDiv = document.getElementById('qrStatus');
+
+                if (!select.value) {
+                    this.showError(statusDiv, '❌ Selecciona una clase primero');
+                    return;
+                }
+
+                try {
+                    this.setLoading(submitBtn, true);
+                    statusDiv.innerHTML = '';
+
+                    // Open QR in new window
+                    const qrUrl = `/clases/${select.value}/qr`;
+                    window.open(qrUrl, '_blank', 'width=600,height=700');
+
+                    this.showSuccess(statusDiv, '✅ QR generado y abierto en nueva ventana');
+                } catch (error) {
+                    this.showError(statusDiv, '❌ Error al generar QR');
+                } finally {
+                    this.setLoading(submitBtn, false);
+                }
+            }
+
+            setLoading(button, loading) {
+                const loader = button.querySelector('.btn-loader');
+                const span = button.querySelector('span');
+
+                if (loading) {
+                    button.classList.add('loading');
+                    loader.style.display = 'block';
+                    span.style.opacity = '0';
+                } else {
+                    button.classList.remove('loading');
+                    loader.style.display = 'none';
+                    span.style.opacity = '1';
+                }
+            }
+
+            showSuccess(container, message) {
+                if (typeof container === 'string') {
+                    console.log(message);
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="status-message success">
+                        <i data-lucide="check-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            showError(container, message) {
+                if (typeof container === 'string') {
+                    console.error(message);
+                    return;
+                }
+                container.innerHTML = `
+                    <div class="status-message error">
+                        <i data-lucide="x-circle"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                lucide.createIcons();
+                setTimeout(() => container.innerHTML = '', 5000);
+            }
+
+            startRealTimeUpdates() {
+                // Update metrics every 30 seconds
+                setInterval(() => {
+                    this.loadInitialData();
+                }, 30000);
+            }
+
+            initializeAnimations() {
+                // Stagger animations for cards
+                const cards = document.querySelectorAll('.expert-card');
+                cards.forEach((card, index) => {
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.style.animation = 'slideInFromTop 0.8s ease-out forwards';
+                });
+            }
+        }
+
+        // Global functions
+        function navigateToSection(section) {
+            const element = document.getElementById(`${section}-section`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+
+        // Initialize dashboard when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.expertDashboard = new ExpertDashboard();
+        });
+    </script>
+}
