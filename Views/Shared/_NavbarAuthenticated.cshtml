@@ -20,8 +20,13 @@
 <!-- Desktop Navigation - SIMPLIFIED -->
 <nav class="desktop-nav">
     <div class="nav-group nav-primary">
-        <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+        <a href="/" class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
             <i data-lucide="home"></i>
+            <span>Inicio</span>
+        </a>
+
+        <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i data-lucide="layout-dashboard"></i>
             <span>Dashboard</span>
         </a>
 
@@ -129,7 +134,15 @@
 
         <!-- Menu Items Compacto -->
         <div class="mobile-menu-section">
-            <h4>Opciones</h4>
+            <h4>Navegación</h4>
+            <a href="/" class="mobile-nav-item">
+                <i data-lucide="home"></i>
+                <span>Inicio</span>
+            </a>
+            <a href="/dashboard" class="mobile-nav-item">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
             <a href="/workflow/mis-clases" class="mobile-nav-item">
                 <i data-lucide="calendar-days"></i>
                 <span>Mis Clases</span>
@@ -137,6 +150,10 @@
             <a href="/docente/cursos" class="mobile-nav-item">
                 <i data-lucide="book-open"></i>
                 <span>Mis Cursos</span>
+            </a>
+            <a href="/alumnos" class="mobile-nav-item">
+                <i data-lucide="users"></i>
+                <span>Estudiantes</span>
             </a>
             <a href="/workflow/qr-students" class="mobile-nav-item">
                 <i data-lucide="smartphone"></i>
@@ -181,13 +198,13 @@
 
 <!-- BOTTOM TAB NAVIGATION (Mobile Only) -->
 <nav class="bottom-tab-nav">
-    <a href="/dashboard" class="bottom-tab-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+    <a href="/" class="bottom-tab-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
         <i data-lucide="home"></i>
         <span>Inicio</span>
     </a>
-    <a href="/workflow/mis-clases" class="bottom-tab-item">
-        <i data-lucide="calendar-days"></i>
-        <span>Clases</span>
+    <a href="/dashboard" class="bottom-tab-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
+        <i data-lucide="layout-dashboard"></i>
+        <span>Panel</span>
     </a>
     <a href="/docente/scanner" class="bottom-tab-item scanner-tab">
         <i data-lucide="scan"></i>

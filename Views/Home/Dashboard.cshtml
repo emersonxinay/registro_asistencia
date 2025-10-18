@@ -58,15 +58,16 @@
 
         /* Hero Header - SIMPLIFIED */
         .dashboard-hero {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(10, 20, 40, 0.6);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 24px;
             padding: var(--space-6);
             margin-bottom: var(--space-6);
             box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             animation: slideInFromTop 0.8s ease-out;
         }
 
@@ -102,9 +103,10 @@
         }
 
         .stat-bubble {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 60, 100, 0.5);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 16px;
             padding: var(--space-4);
             text-align: center;
@@ -116,8 +118,8 @@
 
         .stat-bubble:hover {
             transform: translateY(-4px) scale(1.05);
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+            background: rgba(40, 80, 120, 0.6);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
         }
 
         .stat-value {
@@ -136,9 +138,10 @@
            TAB SYSTEM - NEW
            ======================================================================== */
         .dashboard-tabs {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(10, 30, 60, 0.5);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 16px;
             padding: 0.5rem;
             display: flex;
@@ -177,14 +180,14 @@
         }
 
         .tab-button:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(30, 60, 100, 0.4);
             color: white;
         }
 
         .tab-button.active {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(40, 80, 120, 0.6);
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .tab-content {
@@ -442,6 +445,7 @@
 
             .dashboard-hero {
                 padding: var(--space-5);
+                background: rgba(10, 20, 40, 0.75);
             }
 
             .hero-content {
@@ -452,6 +456,14 @@
             .hero-stats {
                 justify-content: center;
                 width: 100%;
+            }
+
+            .stat-bubble {
+                background: rgba(30, 60, 100, 0.6);
+            }
+
+            .dashboard-tabs {
+                background: rgba(10, 30, 60, 0.6);
             }
 
             .dashboard-grid {
@@ -474,6 +486,26 @@
         @@media (max-width: 480px) {
             .quick-actions-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .stat-bubble {
+                min-width: 100px;
+                padding: var(--space-3);
+            }
+        }
+
+        /* Soporte específico para iOS y Safari */
+        @@supports (-webkit-touch-callout: none) {
+            .dashboard-hero,
+            .stat-bubble,
+            .dashboard-tabs,
+            .tab-button.active {
+                background: rgba(10, 20, 40, 0.85) !important;
+            }
+
+            .stat-bubble:hover,
+            .tab-button:hover {
+                background: rgba(20, 40, 80, 0.9) !important;
             }
         }
     </style>
