@@ -14,7 +14,7 @@
         .classes-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: var(--space-8);
             padding-bottom: var(--space-4);
             border-bottom: 2px solid var(--border);
@@ -127,7 +127,7 @@
             gap: var(--space-2);
             margin-top: var(--space-4);
             padding-top: var(--space-4);
-            border-top: 1px solid var(--gray-200);
+            border-top: 1px solid var(--border);
         }
 
         .btn-action {
@@ -227,6 +227,14 @@
                 align-items: stretch;
             }
 
+            .classes-header > div:last-child {
+                flex-direction: column;
+            }
+
+            .classes-stats {
+                flex-wrap: wrap;
+            }
+
             .filters {
                 flex-wrap: wrap;
             }
@@ -240,20 +248,28 @@
 
 <div class="classes-container">
     <div class="classes-header">
-        <h1 class="classes-title">Mis Clases</h1>
-        <div class="classes-stats">
-            <div class="stat-item">
-                <i data-lucide="calendar"></i>
-                <span>Total: @Model.Count</span>
+        <div>
+            <h1 class="classes-title">Mis Clases</h1>
+            <div class="classes-stats">
+                <div class="stat-item">
+                    <i data-lucide="calendar"></i>
+                    <span>Total: @Model.Count</span>
+                </div>
+                <div class="stat-item">
+                    <i data-lucide="play-circle"></i>
+                    <span>Activas: @Model.Count(c => c.Activa)</span>
+                </div>
+                <div class="stat-item">
+                    <i data-lucide="pause-circle"></i>
+                    <span>Finalizadas: @Model.Count(c => !c.Activa)</span>
+                </div>
             </div>
-            <div class="stat-item">
-                <i data-lucide="play-circle"></i>
-                <span>Activas: @Model.Count(c => c.Activa)</span>
-            </div>
-            <div class="stat-item">
-                <i data-lucide="pause-circle"></i>
-                <span>Finalizadas: @Model.Count(c => !c.Activa)</span>
-            </div>
+        </div>
+        <div style="display: flex; gap: var(--space-3);">
+            <a href="/workflow/cursos" class="btn-action btn-primary" style="white-space: nowrap;">
+                <i data-lucide="plus-circle"></i>
+                Nueva Clase
+            </a>
         </div>
     </div>
 
@@ -377,7 +393,7 @@
             <h3>No tienes clases creadas</h3>
             <p>Comienza creando tu primera clase para gestionar la asistencia</p>
             <a href="/workflow/cursos" class="btn-action btn-primary" style="display: inline-flex; margin-top: var(--space-4);">
-                <i data-lucide="plus"></i>
+                <i data-lucide="plus-circle"></i>
                 Crear Primera Clase
             </a>
         </div>

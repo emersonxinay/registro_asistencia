@@ -20,10 +20,7 @@
 <!-- Desktop Navigation - SIMPLIFIED -->
 <nav class="desktop-nav">
     <div class="nav-group nav-primary">
-        <a href="/" class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-            <i data-lucide="home"></i>
-            <span>Inicio</span>
-        </a>
+        
 
         <a href="/dashboard" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")">
             <i data-lucide="layout-dashboard"></i>
@@ -38,6 +35,11 @@
         <a href="/docente/scanner" class="nav-item scanner-highlight">
             <i data-lucide="scan"></i>
             <span>Escanear</span>
+        </a>
+
+        <a href="/workflow/cursos" class="nav-item" style="background: var(--primary); color: var(--text-on-primary); border-radius: var(--radius-lg);">
+            <i data-lucide="plus-circle"></i>
+            <span>Nueva Clase</span>
         </a>
 
         <!-- Dropdown "Más" -->
@@ -192,6 +194,10 @@
             <a href="/workflow/mis-clases" class="mobile-nav-item">
                 <i data-lucide="calendar-days"></i>
                 <span>Mis Clases</span>
+            </a>
+            <a href="/workflow/cursos" class="mobile-nav-item" style="background: var(--primary); color: var(--text-on-primary); font-weight: 600;">
+                <i data-lucide="plus-circle"></i>
+                <span>Nueva Clase</span>
             </a>
             <a href="/docente/cursos" class="mobile-nav-item">
                 <i data-lucide="book-open"></i>

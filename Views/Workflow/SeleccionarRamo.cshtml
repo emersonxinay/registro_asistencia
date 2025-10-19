@@ -208,13 +208,13 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .workflow-header h1 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 10px;
     font-size: 2.5em;
 }
 
 .workflow-header p {
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-size: 1.2em;
     margin: 0 0 20px 0;
 }
@@ -224,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .explanation-card {
-    background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
-    border: 2px solid #27ae60;
+    background: var(--bg-secondary);
+    border: 2px solid var(--success);
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -233,13 +233,13 @@ document.addEventListener('DOMContentLoaded', function() {
     gap: 15px;
     max-width: 800px;
     margin: 0 auto;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.1);
+    box-shadow: var(--shadow);
 }
 
 .explanation-icon {
     font-size: 2em;
-    background: #27ae60;
-    color: white;
+    background: var(--success);
+    color: var(--text-on-primary);
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -250,21 +250,22 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .explanation-text {
-    color: #2c3e50;
+    color: var(--text-primary);
     font-size: 1em;
     line-height: 1.5;
 }
 
 .explanation-text strong {
-    color: #27ae60;
+    color: var(--success);
 }
 
 .progress-indicator {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .progress-steps {
@@ -294,22 +295,22 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .progress-step.completed .step-circle {
-    background: #27ae60;
-    color: white;
+    background: var(--success);
+    color: var(--text-on-primary);
     box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .progress-step.active .step-circle {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
+    box-shadow: var(--shadow-lg);
     transform: scale(1.1);
 }
 
 .progress-step.pending .step-circle {
-    background: #f8f9fa;
-    color: #6c757d;
-    border: 2px solid #e9ecef;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border: 2px solid var(--border);
 }
 
 .step-label {
@@ -320,29 +321,30 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .progress-step.completed .step-label {
-    color: #27ae60;
+    color: var(--success);
 }
 
 .progress-step.active .step-label {
-    color: #667eea;
+    color: var(--primary);
 }
 
 .progress-step.pending .step-label {
-    color: #6c757d;
+    color: var(--text-muted);
 }
 
 .progress-arrow {
     font-size: 1.5em;
-    color: #3498db;
+    color: var(--primary);
     font-weight: bold;
 }
 
 .selected-course-info {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: var(--bg-secondary);
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 40px;
-    border-left: 5px solid #3498db;
+    border-left: 5px solid var(--primary);
+    border: 1px solid var(--border);
 }
 
 .course-summary {
@@ -353,25 +355,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .course-icon {
     font-size: 3em;
-    background: white;
+    background: var(--bg-primary);
     border-radius: 50%;
     width: 80px;
     height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow);
 }
 
 .course-details h3 {
     margin: 0 0 8px 0;
-    color: #2c3e50;
+    color: var(--text-primary);
     font-size: 1.8em;
 }
 
 .course-code {
-    background: #3498db;
-    color: white;
+    background: var(--primary);
+    color: var(--text-on-primary);
     padding: 4px 12px;
     border-radius: 6px;
     font-size: 0.9em;
@@ -381,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .course-description {
-    color: #5a6c7d;
+    color: var(--text-secondary);
     font-size: 1.1em;
     margin: 0;
     line-height: 1.5;
@@ -401,9 +403,10 @@ document.addEventListener('DOMContentLoaded', function() {
 .empty-state {
     text-align: center;
     padding: 40px;
-    background: white;
+    background: var(--bg-primary);
     border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .empty-icon {
@@ -413,13 +416,13 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .empty-state h3 {
-    color: #2c3e50;
+    color: var(--text-primary);
     margin-bottom: 15px;
     font-size: 1.6em;
 }
 
 .empty-state p {
-    color: #7f8c8d;
+    color: var(--text-secondary);
     margin-bottom: 25px;
     font-size: 1.1em;
     line-height: 1.6;
@@ -438,20 +441,20 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .ramo-card {
-    background: white;
-    border: 2px solid #e1e8ed;
+    background: var(--bg-primary);
+    border: 2px solid var(--border);
     border-radius: 15px;
     padding: 25px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
 
 .ramo-card:hover {
-    border-color: #3498db;
+    border-color: var(--primary);
     transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(52, 152, 219, 0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .ramo-card.fade-in {
@@ -475,8 +478,8 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .ramo-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
     font-size: 1.8em;
     width: 50px;
     height: 50px;
@@ -484,7 +487,7 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: var(--shadow);
 }
 
 .ramo-title {
@@ -493,14 +496,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .ramo-title h3 {
     margin: 0 0 8px 0;
-    color: #2c3e50;
+    color: var(--text-primary);
     font-size: 1.4em;
     line-height: 1.3;
 }
 
 .ramo-code {
-    background: #ecf0f1;
-    color: #2c3e50;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.85em;
@@ -510,14 +513,14 @@ document.addEventListener('DOMContentLoaded', function() {
 .ramo-description {
     margin-bottom: 20px;
     padding: 15px;
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     border-radius: 8px;
-    border-left: 4px solid #3498db;
+    border-left: 4px solid var(--primary);
 }
 
 .ramo-description p {
     margin: 0;
-    color: #5a6c7d;
+    color: var(--text-secondary);
     font-size: 0.95em;
     line-height: 1.6;
 }
@@ -538,11 +541,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .stat-icon {
     font-size: 1.1em;
-    color: #3498db;
+    color: var(--primary);
 }
 
 .stat-text {
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-size: 0.9em;
 }
 
@@ -552,24 +555,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .btn-select {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
     border: none;
     padding: 15px 25px;
     border-radius: 10px;
     font-size: 1em;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    box-shadow: var(--shadow);
 }
 
 .btn-select:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-select .arrow {
@@ -587,8 +590,8 @@ document.addEventListener('DOMContentLoaded', function() {
     align-items: center;
     justify-content: center;
     padding: 40px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
     border-radius: 15px;
 }
 
@@ -624,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
     justify-content: space-between;
     align-items: center;
     padding-top: 30px;
-    border-top: 1px solid #e1e8ed;
+    border-top: 1px solid var(--border);
 }
 
 .action-right {
@@ -637,44 +640,44 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: var(--transition);
     display: inline-flex;
     align-items: center;
     gap: 8px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
     border: none;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    box-shadow: var(--shadow);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: var(--shadow-lg);
 }
 
 .btn-secondary {
-    background: #6c757d;
-    color: white;
+    background: var(--text-muted);
+    color: var(--text-on-primary);
     border: none;
 }
 
 .btn-secondary:hover {
-    background: #5a6268;
+    background: var(--text-secondary);
     transform: translateY(-1px);
 }
 
 .btn-outline {
     background: transparent;
-    color: #3498db;
-    border: 2px solid #3498db;
+    color: var(--primary);
+    border: 2px solid var(--primary);
 }
 
 .btn-outline:hover {
-    background: #3498db;
-    color: white;
+    background: var(--primary);
+    color: var(--text-on-primary);
 }
 
 /* Responsive */
