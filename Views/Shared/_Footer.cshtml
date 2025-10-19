@@ -129,6 +129,17 @@
 </footer>
 
 <style>
+/* Reset global margins que afectan el footer */
+body, html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 /* Modern Footer Styles */
 .modern-footer {
     background: linear-gradient(135deg,
@@ -137,7 +148,8 @@
     backdrop-filter: blur(20px);
     border-top: 1px solid rgba(148, 163, 184, 0.1);
     color: rgba(226, 232, 240, 0.9);
-    padding: 3rem 0 1rem;
+    padding: 3rem 0 0;
+    margin: 0;
     margin-top: auto;
     position: relative;
     overflow: hidden;
@@ -271,7 +283,8 @@
 /* Footer Bottom */
 .footer-bottom {
     border-top: 1px solid rgba(148, 163, 184, 0.1);
-    padding-top: 1.5rem;
+    padding: 1.5rem 0 1rem 0;
+    margin-bottom: 0;
 }
 
 .footer-bottom-content {
@@ -381,7 +394,13 @@
 
 @@media (max-width: 63.9375em) {
     .modern-footer {
-        padding: 2rem 0 1.5rem;
+        padding: 2rem 0 0;
+        margin-bottom: 0;
+    }
+
+    .footer-bottom {
+        padding: 1.5rem 0 0.75rem 0;
+        margin-bottom: 0;
     }
 
     .footer-grid {
@@ -425,8 +444,18 @@
 }
 
 @@media (max-width: 480px) {
+    .modern-footer {
+        padding: 1.5rem 0 0;
+        margin-bottom: 0;
+    }
+
     .footer-container {
         padding: 0 1rem;
+    }
+
+    .footer-bottom {
+        padding: 1rem 0 0.5rem 0;
+        margin-bottom: 0;
     }
 
     .footer-meta {
@@ -437,6 +466,15 @@
     .footer-copyright {
         flex-direction: column;
         gap: 0.25rem;
+    }
+}
+
+/* Fix para mobile navbar que pueda interferir */
+@@media (max-width: 768px) {
+    .modern-footer {
+        /* Si hay mobile navbar de 4rem, asegurar que el footer no agregue espacio */
+        padding-bottom: 0;
+        margin-bottom: 0;
     }
 }
 </style>

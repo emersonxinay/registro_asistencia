@@ -6,7 +6,7 @@
 <div class="scan-container">
     <div class="scan-card">
         <div class="scan-header">
-            <div class="qr-success-icon">✅</div>
+            <div class="qr-success-icon">[OK]</div>
             <h2>¡QR Escaneado Correctamente!</h2>
             <p class="clase-info">Clase ID: <strong>@ViewBag.ClaseId</strong></p>
             <div class="loading-info" id="loadingClaseInfo">
@@ -77,11 +77,11 @@
                 mostrarInfoClase();
             } else {
                 document.getElementById('loadingClaseInfo').innerHTML = 
-                    '<span style="color: #dc2626;">⚠️ No se pudo cargar la información de la clase</span>';
+                    '<span style="color: #dc2626;">[WARNING] No se pudo cargar la información de la clase</span>';
             }
         } catch (error) {
             document.getElementById('loadingClaseInfo').innerHTML = 
-                '<span style="color: #dc2626;">⚠️ Error de conexión</span>';
+                '<span style="color: #dc2626;">[WARNING] Error de conexión</span>';
         }
     }
 
@@ -114,7 +114,7 @@
             console.log('🔄 Nonce renovado:', currentNonce);
             return data;
         } catch (error) {
-            console.error('❌ Error renovando nonce:', error);
+            console.error('[ERROR] Error renovando nonce:', error);
             throw error;
         }
     }
@@ -162,7 +162,7 @@
                 document.getElementById('asistenciaForm').reset();
                 
                 // Animar el éxito
-                submitBtn.innerHTML = '✅ ¡Registrado!';
+                submitBtn.innerHTML = '[OK] ¡Registrado!';
                 setTimeout(() => {
                     submitBtn.innerHTML = '<span class="btn-text">Registrar Mi Asistencia</span>';
                     btnText.style.display = 'inline';
@@ -203,9 +203,9 @@
     function mostrarMensaje(mensaje, tipo) {
         const mensajeDiv = document.getElementById('mensaje');
         const iconos = {
-            success: '✅',
-            error: '❌',
-            warning: '⚠️'
+            success: '[OK]',
+            error: '[ERROR]',
+            warning: '[WARNING]'
         };
         
         mensajeDiv.innerHTML = `
@@ -242,7 +242,7 @@
             try {
                 await renovarNonce();
             } catch (error) {
-                console.warn('⚠️ No se pudo renovar nonce preventivamente:', error);
+                console.warn('[WARNING] No se pudo renovar nonce preventivamente:', error);
             }
         }, 1000);
     });

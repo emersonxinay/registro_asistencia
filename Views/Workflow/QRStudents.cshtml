@@ -679,7 +679,7 @@ function showNotification(message, type = 'info') {
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <div class="notification-content">
-            <span class="notification-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+            <span class="notification-icon">${type === 'success' ? '[OK]' : type === 'error' ? '[ERROR]' : 'ℹ️'}</span>
             <span class="notification-message">${message}</span>
         </div>
     `;

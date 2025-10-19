@@ -239,7 +239,7 @@
 
                     const studentName = alumno ? `${alumno.nombre} (${alumno.codigo})` : `Alumno ID: ${alumnoId}`;
                     
-                    showMessage(`✅ ${result.mensaje} - ${studentName}`, 'success');
+                    showMessage(`[OK] ${result.mensaje} - ${studentName}`, 'success');
                     
                     // Agregar al historial
                     addToHistory(studentName, alumnoId);
@@ -255,7 +255,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                showMessage(`❌ Error: ${error.message}`, 'error');
+                showMessage(`[ERROR] Error: ${error.message}`, 'error');
                 
                 // Vibrar error si es móvil
                 if (navigator.vibrate) {

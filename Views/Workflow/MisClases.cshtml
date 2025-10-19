@@ -17,12 +17,12 @@
             align-items: center;
             margin-bottom: var(--space-8);
             padding-bottom: var(--space-4);
-            border-bottom: 2px solid var(--gray-200);
+            border-bottom: 2px solid var(--border);
         }
 
         .classes-title {
             margin: 0;
-            color: var(--gray-800);
+            color: var(--text-primary);
             font-size: 2rem;
             font-weight: 700;
         }
@@ -31,7 +31,7 @@
             display: flex;
             gap: var(--space-4);
             align-items: center;
-            color: var(--gray-600);
+            color: var(--text-secondary);
             font-size: 0.875rem;
         }
 
@@ -48,12 +48,12 @@
         }
 
         .class-card {
-            background: white;
-            border: 1px solid var(--gray-200);
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
             overflow: hidden;
             transition: var(--transition);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow);
         }
 
         .class-card:hover {
@@ -63,8 +63,8 @@
 
         .class-header {
             padding: var(--space-5);
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
+            background: var(--primary-gradient);
+            color: var(--text-on-primary);
             position: relative;
         }
 
@@ -79,11 +79,11 @@
         }
 
         .class-status.active {
-            background: var(--success-color);
+            background: var(--success);
         }
 
         .class-status.closed {
-            background: var(--gray-400);
+            background: var(--text-muted);
         }
 
         .class-title {
@@ -113,12 +113,12 @@
             display: flex;
             align-items: center;
             gap: var(--space-2);
-            color: var(--gray-600);
+            color: var(--text-secondary);
             font-size: 0.875rem;
         }
 
         .info-item i {
-            color: var(--primary-color);
+            color: var(--primary);
             width: 16px;
         }
 
@@ -137,54 +137,54 @@
             justify-content: center;
             gap: var(--space-2);
             padding: var(--space-3);
-            border: 1px solid var(--gray-300);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
             text-decoration: none;
             font-size: 0.875rem;
             font-weight: 500;
             transition: var(--transition);
-            color: var(--gray-700);
+            color: var(--text-primary);
         }
 
         .btn-action:hover {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-            background: var(--gray-50);
+            color: var(--primary);
+            border-color: var(--primary);
+            background: var(--bg-hover);
         }
 
         .btn-primary {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: var(--primary);
+            color: var(--text-on-primary);
+            border-color: var(--primary);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
-            color: white;
+            background: var(--primary-darker);
+            color: var(--text-on-primary);
         }
 
         .btn-qr {
-            background: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
+            background: var(--success);
+            color: var(--text-on-primary);
+            border-color: var(--success);
         }
 
         .btn-qr:hover {
-            background: var(--success-color);
+            background: var(--success);
             opacity: 0.9;
-            color: white;
+            color: var(--text-on-primary);
         }
 
         .empty-state {
             text-align: center;
             padding: var(--space-20);
-            color: var(--gray-500);
+            color: var(--text-muted);
         }
 
         .empty-state i {
             font-size: 4rem;
             margin-bottom: var(--space-4);
-            color: var(--gray-300);
+            color: var(--border-light);
         }
 
         .filters {
@@ -196,24 +196,24 @@
 
         .filter-btn {
             padding: var(--space-2) var(--space-4);
-            border: 1px solid var(--gray-300);
+            border: 1px solid var(--border);
             border-radius: var(--radius-lg);
-            background: white;
-            color: var(--gray-600);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
             font-size: 0.875rem;
             cursor: pointer;
             transition: var(--transition);
         }
 
         .filter-btn.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: var(--primary);
+            color: var(--text-on-primary);
+            border-color: var(--primary);
         }
 
         .filter-btn:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         @@media (max-width: 768px) {
@@ -333,7 +333,7 @@
                         @if (!string.IsNullOrEmpty(clase.Descripcion))
                         {
                             <div class="class-description">
-                                <p style="color: var(--gray-600); font-size: 0.875rem; margin: 0;">@clase.Descripcion</p>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0;">@clase.Descripcion</p>
                             </div>
                         }
 

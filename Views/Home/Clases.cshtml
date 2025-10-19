@@ -186,7 +186,7 @@ class ClassesManager {
             lucide.createIcons();
         }
         
-        console.log('✅ Classes Manager initialized');
+        console.log('[OK] Classes Manager initialized');
     }
 
     async loadClasses() {
@@ -490,7 +490,7 @@ class ClassesManager {
             status.innerHTML = `
                 <div class="quantum-alert alert-success">
                     <i data-lucide="check-circle"></i>
-                    <span>✅ Clase ${isEditing ? 'actualizada' : 'creada'} exitosamente</span>
+                    <span>[OK] Clase ${isEditing ? 'actualizada' : 'creada'} exitosamente</span>
                 </div>
             `;
             
@@ -515,7 +515,7 @@ class ClassesManager {
             status.innerHTML = `
                 <div class="quantum-alert alert-danger">
                     <i data-lucide="alert-circle"></i>
-                    <span>❌ ${error.message}</span>
+                    <span>[ERROR] ${error.message}</span>
                 </div>
             `;
         } finally {

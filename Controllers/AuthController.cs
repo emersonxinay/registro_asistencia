@@ -158,6 +158,182 @@ public class AuthController : Controller
         return View();
     }
 
+    [HttpGet]
+    [Route("perfil/editar")]
+    [Authorize]
+    public async Task<IActionResult> EditarPerfil()
+    {
+        ViewData["Title"] = "Editar Perfil";
+
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+        var usuario = await _authService.GetUsuarioByIdAsync(userId);
+
+        if (usuario == null)
+        {
+            return NotFound();
+        }
+
+        var model = new EditarPerfilViewModel
+        {
+            Nombre = usuario.Nombre,
+            Email = usuario.Email,
+            CodigoDocente = usuario.CodigoDocente,
+            Departamento = usuario.Departamento
+        };
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [Route("perfil/editar")]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditarPerfil(EditarPerfilViewModel model, string? PasswordActual, string? PasswordNuevo, string? ConfirmarPasswordNuevo)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewData["Title"] = "Editar Perfil";
+            return View(model);
+        }
+
+        try
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+
+            // Actualizar información básica del perfil
+            await _authService.UpdateUsuarioAsync(userId, model.Nombre, model.Email, model.Departamento);
+
+            // Si el usuario está intentando cambiar la contraseña
+            if (!string.IsNullOrEmpty(PasswordActual) || !string.IsNullOrEmpty(PasswordNuevo) || !string.IsNullOrEmpty(ConfirmarPasswordNuevo))
+            {
+                // Validar que todos los campos de contraseña estén completos
+                if (string.IsNullOrEmpty(PasswordActual))
+                {
+                    ModelState.AddModelError("", "Debes ingresar tu contraseña actual");
+                    ViewData["Title"] = "Editar Perfil";
+                    return View(model);
+                }
+
+                if (string.IsNullOrEmpty(PasswordNuevo))
+                {
+                    ModelState.AddModelError("", "Debes ingresar una nueva contraseña");
+                    ViewData["Title"] = "Editar Perfil";
+                    return View(model);
+                }
+
+                if (PasswordNuevo.Length < 6)
+                {
+                    ModelState.AddModelError("", "La nueva contraseña debe tener al menos 6 caracteres");
+                    ViewData["Title"] = "Editar Perfil";
+                    return View(model);
+                }
+
+                if (PasswordNuevo != ConfirmarPasswordNuevo)
+                {
+                    ModelState.AddModelError("", "Las contraseñas no coinciden");
+                    ViewData["Title"] = "Editar Perfil";
+                    return View(model);
+                }
+
+                // Intentar cambiar la contraseña
+                var passwordCambiado = await _authService.CambiarPasswordAsync(userId, PasswordActual, PasswordNuevo);
+
+                if (!passwordCambiado)
+                {
+                    ModelState.AddModelError("", "La contraseña actual es incorrecta");
+                    ViewData["Title"] = "Editar Perfil";
+                    return View(model);
+                }
+
+                TempData["SuccessMessage"] = "Perfil y contraseña actualizados exitosamente. Por favor, inicia sesión nuevamente.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Perfil actualizado exitosamente. Por favor, inicia sesión nuevamente para ver los cambios.";
+            }
+
+            // Cerrar sesión para actualizar claims
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login");
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", $"Error al actualizar perfil: {ex.Message}");
+            ViewData["Title"] = "Editar Perfil";
+            return View(model);
+        }
+    }
+
+    [HttpPost]
+    [Route("perfil/cambiar-password")]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CambiarPassword(CambiarPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Datos inválidos";
+            return RedirectToAction("Perfil");
+        }
+
+        try
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+            var success = await _authService.CambiarPasswordAsync(userId, model.PasswordActual, model.PasswordNuevo);
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = "Contraseña cambiada exitosamente";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "La contraseña actual es incorrecta";
+            }
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error al cambiar contraseña: {ex.Message}";
+        }
+
+        return RedirectToAction("Perfil");
+    }
+
+    // ADMIN: Gestión de Usuarios
+    [HttpGet]
+    [Route("admin/usuarios")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> GestionarUsuarios()
+    {
+        ViewData["Title"] = "Gestión de Usuarios";
+        var usuarios = await _authService.GetAllUsuariosAsync();
+        return View(usuarios);
+    }
+
+    [HttpPost]
+    [Route("admin/usuarios/{id}/cambiar-password")]
+    [Authorize(Roles = "Administrador")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CambiarPasswordUsuario(int id, string nuevaPassword)
+    {
+        if (string.IsNullOrEmpty(nuevaPassword) || nuevaPassword.Length < 6)
+        {
+            TempData["ErrorMessage"] = "La contraseña debe tener al menos 6 caracteres";
+            return RedirectToAction("GestionarUsuarios");
+        }
+
+        try
+        {
+            await _authService.CambiarPasswordAdminAsync(id, nuevaPassword);
+            TempData["SuccessMessage"] = "Contraseña actualizada exitosamente";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Error al cambiar contraseña: {ex.Message}";
+        }
+
+        return RedirectToAction("GestionarUsuarios");
+    }
+
     // API endpoints for AJAX validation
     [HttpGet]
     [Route("api/auth/check-email")]
@@ -230,4 +406,42 @@ public class RegisterViewModel
 
     [StringLength(255, ErrorMessage = "El departamento no puede exceder 255 caracteres")]
     public string? Departamento { get; set; }
+}
+
+public class EditarPerfilViewModel
+{
+    [Required(ErrorMessage = "El nombre es requerido")]
+    [StringLength(100, ErrorMessage = "El nombre no puede exceder 100 caracteres")]
+    public string Nombre { get; set; } = "";
+
+    [Required(ErrorMessage = "El email es requerido")]
+    [EmailAddress(ErrorMessage = "Formato de email inválido")]
+    [StringLength(255, ErrorMessage = "El email no puede exceder 255 caracteres")]
+    public string Email { get; set; } = "";
+
+    [Display(Name = "Código de Docente")]
+    public string CodigoDocente { get; set; } = "";
+
+    [StringLength(255, ErrorMessage = "El departamento no puede exceder 255 caracteres")]
+    public string? Departamento { get; set; }
+}
+
+public class CambiarPasswordViewModel
+{
+    [Required(ErrorMessage = "La contraseña actual es requerida")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Contraseña Actual")]
+    public string PasswordActual { get; set; } = "";
+
+    [Required(ErrorMessage = "La nueva contraseña es requerida")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Nueva Contraseña")]
+    public string PasswordNuevo { get; set; } = "";
+
+    [Required(ErrorMessage = "Confirme la nueva contraseña")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Confirmar Nueva Contraseña")]
+    [Compare("PasswordNuevo", ErrorMessage = "Las contraseñas no coinciden")]
+    public string ConfirmarPasswordNuevo { get; set; } = "";
 }

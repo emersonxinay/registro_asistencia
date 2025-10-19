@@ -64,22 +64,6 @@
 .icon-ausente { color: var(--danger); }
 .icon-justificado { color: var(--info); }
 
-/* Dark mode adjustments */
-[data-theme="dark"] .icon-success,
-[data-theme="dark"] .icon-check {
-    color: hsl(142, 71%, 55%);
-}
-
-[data-theme="dark"] .icon-error,
-[data-theme="dark"] .icon-times {
-    color: hsl(0, 84%, 70%);
-}
-
-[data-theme="dark"] .icon-warning,
-[data-theme="dark"] .icon-exclamation {
-    color: hsl(38, 92%, 60%);
-}
-
-[data-theme="dark"] .icon-info {
-    color: hsl(204, 94%, 70%);
-}
+/* Dark mode adjustments - Ahora usa variables del sistema */
+/* Los colores de estado ya se ajustan automáticamente en variables.css */
+/* No necesitamos overrides específicos porque las variables se adaptan */

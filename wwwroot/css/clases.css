@@ -64,9 +64,8 @@
 }
 
 .stat-card {
-    background: var(--glass-gradient);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 1.5rem;
     display: flex;
@@ -75,6 +74,7 @@
     transition: var(--transition);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .stat-card::before {
@@ -391,7 +391,7 @@
 }
 
 .dropdown-menu button:hover {
-    background: var(--glass-gradient);
+    background: var(--bg-hover);
     color: var(--primary);
 }
 
@@ -539,7 +539,8 @@
     width: 4rem;
     height: 4rem;
     border-radius: 50%;
-    background: var(--glass-gradient);
+    background: var(--bg-tertiary);
+    border: 2px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;

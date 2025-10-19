@@ -1068,13 +1068,13 @@
 
             // Validar formato EST123456
             if (!/^EST\d{6}$/.test(codigoAlumno)) {
-                showMessage('❌ Formato inválido. Debe ser EST seguido de 6 dígitos (Ej: EST123456)', 'error');
+                showMessage('[ERROR] Formato inválido. Debe ser EST seguido de 6 dígitos (Ej: EST123456)', 'error');
                 return;
             }
 
             // Verificar cache local primero
             if (yaSeRegistro(codigoAlumno)) {
-                showMessage(`✅ Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
+                showMessage(`[OK] Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
                 return;
             }
 
@@ -1179,7 +1179,7 @@
             // Verificar cache (usando username como código)
             const username = '@User.Identity?.Name';
             if (yaSeRegistro(username)) {
-                showMessage(`✅ Ya registraste tu asistencia en esta sesión`, 'success');
+                showMessage(`[OK] Ya registraste tu asistencia en esta sesión`, 'success');
                 return;
             }
 
@@ -1211,8 +1211,8 @@
                     guardarEnCache(username);
 
                     const estado = data.estudiante?.estado || 'Registrado';
-                    const icon = estado === 'Presente' ? '✅' :
-                                 estado === 'Tardanza' ? '⏰' : '❌';
+                    const icon = estado === 'Presente' ? '[OK]' :
+                                 estado === 'Tardanza' ? '[TIME]' : '[ERROR]';
 
                     showMessage(
                         `${icon} <strong>¡Asistencia registrada automáticamente!</strong><br>` +
@@ -1228,11 +1228,11 @@
                 let type = 'error';
 
                 if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
-                    msg = '✅ Tu asistencia ya fue registrada anteriormente';
+                    msg = '[OK] Tu asistencia ya fue registrada anteriormente';
                     type = 'success';
                     guardarEnCache(username);
                 } else if (msg.includes('no activa')) {
-                    msg = '⚠️ Esta clase no está activa en este momento';
+                    msg = '[WARNING] Esta clase no está activa en este momento';
                     type = 'warning';
                 } else if (msg.includes('expirado')) {
                     msg = '⏱️ El código QR ha expirado. Solicita uno nuevo al profesor';
@@ -1250,7 +1250,7 @@
                           '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
                     type = 'warning';
                 } else {
-                    msg = `❌ ${msg}`;
+                    msg = `[ERROR] ${msg}`;
                 }
 
                 showMessage(msg, type);
@@ -1275,7 +1275,7 @@
                 modal.classList.add('active');
                 startScanning();
             } catch (error) {
-                showMessage('❌ No se pudo acceder a la cámara. Verifica los permisos.', 'error');
+                showMessage('[ERROR] No se pudo acceder a la cámara. Verifica los permisos.', 'error');
             }
         });
 
@@ -1341,13 +1341,13 @@
             const codigoAlumno = extractCodigo(data);
 
             if (!codigoAlumno) {
-                showMessage('⚠️ Código QR no válido. Asegúrate de escanear tu QR de estudiante (formato EST123456)', 'warning');
+                showMessage('[WARNING] Código QR no válido. Asegúrate de escanear tu QR de estudiante (formato EST123456)', 'warning');
                 return;
             }
 
             // Verificar cache inmediatamente
             if (yaSeRegistro(codigoAlumno)) {
-                showMessage(`✅ Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
+                showMessage(`[OK] Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
                 return;
             }
 
@@ -1387,8 +1387,8 @@
 
                     const estado = result.estudiante?.estado || 'Registrado';
                     const nombre = result.estudiante?.nombre || '';
-                    const icon = estado === 'Presente' ? '✅' :
-                                 estado === 'Tardanza' ? '⏰' : '❌';
+                    const icon = estado === 'Presente' ? '[OK]' :
+                                 estado === 'Tardanza' ? '[TIME]' : '[ERROR]';
 
                     showMessage(
                         `${icon} <strong>¡Asistencia registrada por QR!</strong><br>` +
@@ -1411,13 +1411,13 @@
 
                 // Mensajes optimizados y específicos
                 if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
-                    msg = `✅ Tu asistencia ya fue registrada con ${codigoAlumno}`;
+                    msg = `[OK] Tu asistencia ya fue registrada con ${codigoAlumno}`;
                     type = 'success';
                     guardarEnCache(codigoAlumno);
                 } else if (msg.includes('no encontrado')) {
-                    msg = `❌ El código ${codigoAlumno} no existe en el sistema`;
+                    msg = `[ERROR] El código ${codigoAlumno} no existe en el sistema`;
                 } else if (msg.includes('no activa')) {
-                    msg = '⚠️ Esta clase no está activa actualmente';
+                    msg = '[WARNING] Esta clase no está activa actualmente';
                     type = 'warning';
                 } else if (msg.includes('expirado') || msg.includes('vencido')) {
                     msg = '⏱️ El código QR ha expirado. Pide uno nuevo al profesor';
@@ -1437,7 +1437,7 @@
                           '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
                     type = 'warning';
                 } else {
-                    msg = `❌ ${msg}`;
+                    msg = `[ERROR] ${msg}`;
                 }
 
                 showMessage(msg, type);

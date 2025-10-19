@@ -1,0 +1,353 @@
+@model List<Usuario>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gestión de Usuarios";
+}
+
+@section Styles {
+    <link href="~/css/perfil.css" rel="stylesheet" />
+    <style>
+        .usuarios-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-5);
+        }
+
+        .usuarios-header {
+            background: var(--primary-gradient);
+            color: var(--text-on-primary);
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+        }
+
+        .header-info h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-on-primary);
+        }
+
+        .usuarios-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .usuario-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .usuario-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .usuario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--space-4);
+            gap: var(--space-4);
+        }
+
+        .usuario-info {
+            flex: 1;
+        }
+
+        .usuario-nombre {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-2) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .usuario-email {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .usuario-detalles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--border);
+        }
+
+        .detalle-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .detalle-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .detalle-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-admin {
+            background: var(--danger);
+            color: var(--text-on-primary);
+        }
+
+        .badge-docente {
+            background: var(--primary);
+            color: var(--text-on-primary);
+        }
+
+        .badge-activo {
+            background: var(--success);
+            color: var(--text-on-primary);
+        }
+
+        .badge-inactivo {
+            background: var(--text-muted);
+            color: var(--text-on-primary);
+        }
+
+        .password-form {
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: var(--space-3);
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group-inline {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group-inline label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .form-group-inline label i {
+            color: var(--primary);
+        }
+
+        .btn-cambiar-password {
+            padding: var(--space-3) var(--space-5);
+            background: var(--primary);
+            color: var(--text-on-primary);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .btn-cambiar-password:hover {
+            background: var(--primary-darker);
+            transform: translateY(-2px);
+        }
+
+        @@media (max-width: 768px) {
+            .usuario-detalles {
+                grid-template-columns: 1fr;
+            }
+
+            .password-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-group-inline {
+                width: 100%;
+            }
+
+            .btn-cambiar-password {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+<div class="usuarios-container">
+    <div class="usuarios-header">
+        <div class="header-content">
+            <div class="header-info">
+                <h1><i class="fas fa-users-cog"></i> Gestión de Usuarios</h1>
+                <p style="margin: var(--space-2) 0 0 0; opacity: 0.9;">Administra los usuarios del sistema</p>
+            </div>
+            <div>
+                <a href="/register" class="btn btn-secondary" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.3);">
+                    <i class="fas fa-user-plus"></i>
+                    Crear Usuario
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" id="successAlert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" id="errorAlert">
+            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="usuarios-grid">
+        @foreach (var usuario in Model)
+        {
+            <div class="usuario-card">
+                <div class="usuario-header">
+                    <div class="usuario-info">
+                        <h3 class="usuario-nombre">
+                            <i class="fas fa-user"></i>
+                            @usuario.Nombre
+                        </h3>
+                        <div class="usuario-email">
+                            <i class="fas fa-envelope"></i>
+                            @usuario.Email
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2); align-items: end;">
+                        <span class="badge @(usuario.EsAdministrador ? "badge-admin" : "badge-docente")">
+                            <i class="fas fa-@(usuario.EsAdministrador ? "shield-alt" : "chalkboard-teacher")"></i>
+                            @(usuario.EsAdministrador ? "Admin" : "Docente")
+                        </span>
+                        <span class="badge @(usuario.Activo ? "badge-activo" : "badge-inactivo")">
+                            @(usuario.Activo ? "Activo" : "Inactivo")
+                        </span>
+                    </div>
+                </div>
+
+                <div class="usuario-detalles">
+                    <div class="detalle-item">
+                        <span class="detalle-label">Código Docente</span>
+                        <span class="detalle-value">@usuario.CodigoDocente</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="detalle-label">Departamento</span>
+                        <span class="detalle-value">@(usuario.Departamento ?? "No especificado")</span>
+                    </div>
+                    <div class="detalle-item">
+                        <span class="detalle-label">Registrado</span>
+                        <span class="detalle-value">@usuario.CreadoUtc.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                    </div>
+                    @if (usuario.UltimoAccesoUtc.HasValue)
+                    {
+                        <div class="detalle-item">
+                            <span class="detalle-label">Último Acceso</span>
+                            <span class="detalle-value">@usuario.UltimoAccesoUtc.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    }
+                </div>
+
+                <form method="post" action="/admin/usuarios/@usuario.Id/cambiar-password" class="password-form">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group-inline">
+                        <label for="password_@usuario.Id">
+                            <i class="fas fa-key"></i>
+                            Nueva Contraseña
+                        </label>
+                        <input type="password"
+                               id="password_@usuario.Id"
+                               name="nuevaPassword"
+                               class="form-input"
+                               placeholder="Mínimo 6 caracteres"
+                               minlength="6"
+                               required />
+                    </div>
+                    <button type="submit" class="btn-cambiar-password">
+                        <i class="fas fa-save"></i>
+                        Cambiar Contraseña
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-ocultar alertas después de 5 segundos
+            setTimeout(function() {
+                const successAlert = document.getElementById('successAlert');
+                const errorAlert = document.getElementById('errorAlert');
+                if (successAlert) successAlert.remove();
+                if (errorAlert) errorAlert.remove();
+            }, 5000);
+
+            // Confirmación antes de cambiar contraseña
+            const forms = document.querySelectorAll('.password-form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const input = this.querySelector('input[name="nuevaPassword"]');
+                    if (input.value.length < 6) {
+                        e.preventDefault();
+                        alert('La contraseña debe tener al menos 6 caracteres');
+                        return false;
+                    }
+
+                    const confirmacion = confirm('¿Estás seguro de cambiar la contraseña de este usuario?');
+                    if (!confirmacion) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            });
+        });
+    </script>
+}

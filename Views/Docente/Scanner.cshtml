@@ -766,7 +766,7 @@ function startQRDetection() {
 
 async function processQRCode(qrData) {
     if (!selectedClassId) {
-        showError('❌ Selecciona una clase primero');
+        showError('[ERROR] Selecciona una clase primero');
         return;
     }
 
@@ -800,7 +800,7 @@ async function processQRCode(qrData) {
             };
 
             addScanResult(scanResult);
-            showSuccess(`✅ ${result.asistencia.alumnoNombre} (${result.asistencia.alumnoCodigo}) registrado correctamente`);
+            showSuccess(`[OK] ${result.asistencia.alumnoNombre} (${result.asistencia.alumnoCodigo}) registrado correctamente`);
 
             // Sonido de éxito (opcional)
             playSuccessSound();
@@ -814,7 +814,7 @@ async function processQRCode(qrData) {
             };
 
             addScanResult(errorResult);
-            showError(`❌ ${result.message || 'Error procesando QR'}`);
+            showError(`[ERROR] ${result.message || 'Error procesando QR'}`);
 
             // Sonido de error (opcional)
             playErrorSound();
@@ -831,7 +831,7 @@ async function processQRCode(qrData) {
         };
 
         addScanResult(errorResult);
-        showError('❌ Error de conexión al procesar QR');
+        showError('[ERROR] Error de conexión al procesar QR');
         playErrorSound();
     }
 }
@@ -920,7 +920,7 @@ async function registerManual() {
                 message: `Registrado manualmente: ${justification || 'Sin justificación'}`
             };
             addScanResult(scanResult);
-            showSuccess(`✅ ${alumno.nombre} (${alumno.codigo}) registrado manualmente`);
+            showSuccess(`[OK] ${alumno.nombre} (${alumno.codigo}) registrado manualmente`);
             closeModal();
         } else {
             const errorMsg = result.message || 'Error en el registro manual';
@@ -931,7 +931,7 @@ async function registerManual() {
                 message: errorMsg
             };
             addScanResult(errorResult);
-            showError(`❌ ${errorMsg}`);
+            showError(`[ERROR] ${errorMsg}`);
         }
         
     } catch (error) {
@@ -963,12 +963,12 @@ async function loadExistingAttendance() {
 }
 
 function showSuccess(message) {
-    console.log('✅', message);
+    console.log('[OK]', message);
     showNotification(message, 'success');
 }
 
 function showError(message) {
-    console.log('❌', message);
+    console.log('[ERROR]', message);
     showNotification(message, 'error');
 }
 
@@ -978,7 +978,7 @@ function showNotification(message, type) {
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <div class="notification-content">
-            <span class="notification-icon">${type === 'success' ? '✅' : '❌'}</span>
+            <span class="notification-icon">${type === 'success' ? '[OK]' : '[ERROR]'}</span>
             <span class="notification-message">${message}</span>
         </div>
     `;

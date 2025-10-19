@@ -931,9 +931,9 @@ async function procesarInscripcionMasiva(ids) {
 
     // Mostrar resultado
     if (errores === 0) {
-        showNotification(`✅ ${exitosos} estudiante(s) inscrito(s) exitosamente`, 'success');
+        showNotification(`[OK] ${exitosos} estudiante(s) inscrito(s) exitosamente`, 'success');
     } else {
-        showNotification(`⚠️ ${exitosos} inscrito(s), ${errores} error(es)`, 'error');
+        showNotification(`[WARNING] ${exitosos} inscrito(s), ${errores} error(es)`, 'error');
     }
 
     // Recargar después de 2 segundos

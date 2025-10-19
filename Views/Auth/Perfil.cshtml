@@ -3,6 +3,10 @@
     ViewData["Title"] = "Mi Perfil";
 }
 
+@section Styles {
+    <link href="~/css/perfil.css" rel="stylesheet" />
+}
+
 <div class="perfil-container">
     <div class="perfil-header">
         <div class="header-content">
@@ -20,6 +24,9 @@
         <div class="perfil-card">
             <div class="card-header">
                 <h3><i class="fas fa-id-card"></i> Información Personal</h3>
+                <a href="/perfil/editar" class="btn-edit">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
             </div>
             <div class="card-body">
                 <div class="info-row">
@@ -38,7 +45,7 @@
                         <span>Email</span>
                     </div>
                     <div class="info-value">
-                        @User.FindFirst("Email")?.Value
+                        @User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
                     </div>
                 </div>
 
@@ -91,7 +98,7 @@
                             <i class="fas fa-graduation-cap"></i>
                             Mis Cursos
                         </a>
-                        <form method="post" action="@Url.Action("Logout", "Auth")" style="display: inline;">
+                        <form method="post" action="@Url.Action("Logout", "Auth")" style="margin: 0;">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-danger">
                                 <i class="fas fa-sign-out-alt"></i>
@@ -105,217 +112,30 @@
     </div>
 </div>
 
-<style>
-.perfil-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" id="successAlert">
+        <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+    </div>
 }
 
-.perfil-header {
-    background: linear-gradient(135deg, var(--primary-color, #4CAF50) 0%, var(--secondary-color, #45a049) 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 12px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" id="errorAlert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+    </div>
 }
 
-.header-content {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-ocultar alertas después de 5 segundos
+            setTimeout(function() {
+                const successAlert = document.getElementById('successAlert');
+                const errorAlert = document.getElementById('errorAlert');
+                if (successAlert) successAlert.remove();
+                if (errorAlert) errorAlert.remove();
+            }, 5000);
+        });
+    </script>
 }
-
-.icon-container i {
-    font-size: 4rem;
-    opacity: 0.9;
-}
-
-.header-info h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 600;
-}
-
-.header-info .subtitle {
-    margin: 0.5rem 0 0 0;
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
-.perfil-content {
-    display: grid;
-    gap: 2rem;
-    grid-template-columns: 1fr;
-}
-
-.perfil-card, .action-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.card-header {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.card-header h3 {
-    margin: 0;
-    color: #495057;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.3rem;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 0;
-    border-bottom: 1px solid #f1f3f4;
-}
-
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: #495057;
-    min-width: 150px;
-}
-
-.info-label i {
-    color: var(--primary-color, #4CAF50);
-    width: 20px;
-}
-
-.info-value {
-    color: #212529;
-    flex: 1;
-    text-align: right;
-}
-
-.role-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.role-badge.admin {
-    background-color: #dc3545;
-    color: white;
-}
-
-.role-badge.docente {
-    background-color: #007bff;
-    color: white;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.btn-primary {
-    background-color: var(--primary-color, #4CAF50);
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: var(--primary-hover, #45a049);
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #5a6268;
-    transform: translateY(-1px);
-}
-
-.btn-danger {
-    background-color: #dc3545;
-    color: white;
-}
-
-.btn-danger:hover {
-    background-color: #c82333;
-    transform: translateY(-1px);
-}
-
-@@media (max-width: 768px) {
-    .perfil-container {
-        padding: 10px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
-
-    .icon-container i {
-        font-size: 3rem;
-    }
-
-    .header-info h1 {
-        font-size: 2rem;
-    }
-
-    .info-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-
-    .info-label {
-        min-width: auto;
-    }
-
-    .info-value {
-        text-align: left;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .btn {
-        justify-content: center;
-        width: 100%;
-    }
-}
-</style>

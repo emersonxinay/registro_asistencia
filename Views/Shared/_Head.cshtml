@@ -15,9 +15,16 @@
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- Styles -->
+<!-- Styles - Orden de carga optimizado -->
+<!-- 1. Variables base (colores, espaciado, tipografía) -->
+<link href="~/css/variables.css" rel="stylesheet" />
+<!-- 2. Sistema de temas (toggle, transiciones) -->
 <link href="~/css/theme-system.css" rel="stylesheet" />
+<!-- 3. Utilidades (helpers, components safe) -->
+<link href="~/css/utilities.css" rel="stylesheet" />
+<!-- 4. Iconos -->
 <link href="~/css/icon-utilities.css" rel="stylesheet" />
+<!-- 5. Estilos específicos (se refactorizarán después) -->
 <link href="~/css/styles.css" rel="stylesheet" />
 <link href="~/css/modern-ui.css" rel="stylesheet" />
 <link href="~/css/responsive-nav.css" rel="stylesheet" />

@@ -1017,7 +1017,7 @@
                     lucide.createIcons();
                 }
 
-                console.log('✅ Students Manager inicializado');
+                console.log('[OK] Students Manager inicializado');
             }
 
             async loadStudents() {
@@ -1046,7 +1046,7 @@
                     this.updateStats();
 
                 } catch (error) {
-                    console.error('❌ Error cargando estudiantes:', error);
+                    console.error('[ERROR] Error cargando estudiantes:', error);
                     this.showError('Error al cargar los estudiantes. Por favor intenta nuevamente.');
                 }
             }
@@ -1339,7 +1339,7 @@
                     setTimeout(() => this.showQR(id), 500);
 
                 } catch (error) {
-                    console.error('❌ Error generando QR:', error);
+                    console.error('[ERROR] Error generando QR:', error);
                     this.showError('Error al generar el código QR');
                 }
             }
@@ -1545,7 +1545,7 @@
                     }, 500);
 
                 } catch (error) {
-                    console.error('❌ Error updating student:', error);
+                    console.error('[ERROR] Error updating student:', error);
                     this.showError('Error al actualizar estudiante: ' + error.message);
                 } finally {
                     // Restore save button
@@ -1595,7 +1595,7 @@
                     this.showSuccess('Estudiante eliminado exitosamente');
 
                 } catch (error) {
-                    console.error('❌ Error eliminando estudiante:', error);
+                    console.error('[ERROR] Error eliminando estudiante:', error);
                     this.showError('Error al eliminar el estudiante');
                 }
             }
@@ -1654,7 +1654,7 @@
                     this.showSuccess('Estudiante creado exitosamente');
 
                 } catch (error) {
-                    console.error('❌ Error creando estudiante:', error);
+                    console.error('[ERROR] Error creando estudiante:', error);
                     this.showError(error.message);
                 } finally {
                     submitBtn.disabled = false;
@@ -1956,7 +1956,7 @@
                     this.showSuccess(message);
 
                 } catch (error) {
-                    console.error('❌ Error uploading CSV:', error);
+                    console.error('[ERROR] Error uploading CSV:', error);
                     this.showError(error.message);
                 } finally {
                     uploadBtn.disabled = false;

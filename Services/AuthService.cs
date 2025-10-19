@@ -16,6 +16,11 @@ public interface IAuthService
     string HashPassword(string password);
     bool VerifyPassword(string password, string hash);
     ClaimsPrincipal CreateClaimsPrincipal(Usuario usuario);
+    Task<Usuario?> GetUsuarioByIdAsync(int id);
+    Task UpdateUsuarioAsync(int id, string nombre, string email, string? departamento);
+    Task<bool> CambiarPasswordAsync(int id, string passwordActual, string passwordNuevo);
+    Task<List<Usuario>> GetAllUsuariosAsync();
+    Task CambiarPasswordAdminAsync(int usuarioId, string nuevaPassword);
 }
 
 public class AuthService : IAuthService
@@ -111,5 +116,69 @@ public class AuthService : IAuthService
 
         var identity = new ClaimsIdentity(claims, "QuantumAttend");
         return new ClaimsPrincipal(identity);
+    }
+
+    public async Task<Usuario?> GetUsuarioByIdAsync(int id)
+    {
+        return await _context.Usuarios.FindAsync(id);
+    }
+
+    public async Task UpdateUsuarioAsync(int id, string nombre, string email, string? departamento)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+        {
+            throw new InvalidOperationException("Usuario no encontrado");
+        }
+
+        // Verificar si el email cambió y ya existe
+        if (usuario.Email != email && await _context.Usuarios.AnyAsync(u => u.Email == email && u.Id != id))
+        {
+            throw new InvalidOperationException("El email ya está registrado");
+        }
+
+        usuario.Nombre = nombre;
+        usuario.Email = email;
+        usuario.Departamento = departamento;
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> CambiarPasswordAsync(int id, string passwordActual, string passwordNuevo)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+        if (usuario == null)
+        {
+            throw new InvalidOperationException("Usuario no encontrado");
+        }
+
+        if (!VerifyPassword(passwordActual, usuario.PasswordHash))
+        {
+            return false;
+        }
+
+        usuario.PasswordHash = HashPassword(passwordNuevo);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<List<Usuario>> GetAllUsuariosAsync()
+    {
+        return await _context.Usuarios
+            .OrderByDescending(u => u.CreadoUtc)
+            .ToListAsync();
+    }
+
+    public async Task CambiarPasswordAdminAsync(int usuarioId, string nuevaPassword)
+    {
+        var usuario = await _context.Usuarios.FindAsync(usuarioId);
+        if (usuario == null)
+        {
+            throw new InvalidOperationException("Usuario no encontrado");
+        }
+
+        usuario.PasswordHash = HashPassword(nuevaPassword);
+        await _context.SaveChangesAsync();
     }
 }

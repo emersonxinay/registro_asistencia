@@ -1036,9 +1036,9 @@ function updateStats(asistencias = []) {
 
 function getStatusIcon(estado) {
     switch (estado.toLowerCase()) {
-        case 'presente': return '✅';
-        case 'tardanza': return '⚠️';
-        case 'ausente': return '❌';
+        case 'presente': return '[OK]';
+        case 'tardanza': return '[WARNING]';
+        case 'ausente': return '[ERROR]';
         case 'excusado': return '📝';
         case 'pendiente': return '⏱️';
         default: return '❓';
@@ -1221,7 +1221,7 @@ function disableAttendanceControls() {
     const scannerPlaceholder = document.getElementById('scanner-placeholder');
     if (scannerPlaceholder && scannerPlaceholder.style.display !== 'none') {
         scannerPlaceholder.innerHTML = `
-            <div class="scanner-icon">⏰</div>
+            <div class="scanner-icon">[TIME]</div>
             <h3>Clase Finalizada</h3>
             <p>El tiempo de clase ha terminado. Ya no se pueden registrar más asistencias.</p>
         `;

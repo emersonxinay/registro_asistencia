@@ -1,0 +1,234 @@
+@model EditarPerfilViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Editar Perfil";
+}
+
+@section Styles {
+    <link href="~/css/perfil.css" rel="stylesheet" />
+}
+
+<div class="perfil-container">
+    <div class="perfil-header">
+        <div class="header-content">
+            <div class="icon-container">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <div class="header-info">
+                <h1>Editar Perfil</h1>
+                <p class="subtitle">Actualiza tu información personal</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="perfil-content">
+        <div class="perfil-card">
+            <div class="card-header">
+                <h3><i class="fas fa-edit"></i> Información Personal</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/perfil/editar" id="editarPerfilForm">
+                    @Html.AntiForgeryToken()
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger" style="position: static; margin-bottom: var(--space-4);">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <div>
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <div>@error.ErrorMessage</div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label for="Nombre">
+                            <i class="fas fa-user"></i> Nombre Completo *
+                        </label>
+                        <input type="text"
+                               id="Nombre"
+                               name="Nombre"
+                               class="form-input"
+                               value="@Model.Nombre"
+                               required
+                               maxlength="100" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Email">
+                            <i class="fas fa-envelope"></i> Email *
+                        </label>
+                        <input type="email"
+                               id="Email"
+                               name="Email"
+                               class="form-input"
+                               value="@Model.Email"
+                               required
+                               maxlength="255" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="CodigoDocente">
+                            <i class="fas fa-id-badge"></i> Código Docente
+                        </label>
+                        <input type="text"
+                               id="CodigoDocente"
+                               name="CodigoDocente"
+                               class="form-input"
+                               value="@Model.CodigoDocente"
+                               readonly
+                               disabled
+                               style="background: var(--bg-secondary); cursor: not-allowed;" />
+                        <small>El código de docente no se puede modificar</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Departamento">
+                            <i class="fas fa-building"></i> Departamento
+                        </label>
+                        <input type="text"
+                               id="Departamento"
+                               name="Departamento"
+                               class="form-input"
+                               value="@Model.Departamento"
+                               maxlength="255" />
+                        <small>Opcional - Ejemplo: Matemáticas, Ciencias, etc.</small>
+                    </div>
+
+                    <hr style="margin: var(--space-8) 0; border: none; border-top: 2px solid var(--border);" />
+
+                    <div style="margin-bottom: var(--space-4);">
+                        <h4 style="color: var(--text-primary); display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-2) 0;">
+                            <i class="fas fa-key" style="color: var(--primary);"></i>
+                            Cambiar Contraseña
+                        </h4>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; margin: 0;">
+                            Si deseas cambiar tu contraseña, completa los siguientes campos. De lo contrario, déjalos vacíos.
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="PasswordActual">
+                            <i class="fas fa-lock"></i> Contraseña Actual
+                        </label>
+                        <input type="password"
+                               id="PasswordActual"
+                               name="PasswordActual"
+                               class="form-input"
+                               placeholder="Ingresa tu contraseña actual"
+                               autocomplete="current-password" />
+                        <small>Requerido solo si deseas cambiar tu contraseña</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="PasswordNuevo">
+                            <i class="fas fa-lock"></i> Nueva Contraseña
+                        </label>
+                        <input type="password"
+                               id="PasswordNuevo"
+                               name="PasswordNuevo"
+                               class="form-input"
+                               placeholder="Mínimo 6 caracteres"
+                               minlength="6"
+                               autocomplete="new-password" />
+                        <small>Mínimo 6 caracteres</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ConfirmarPasswordNuevo">
+                            <i class="fas fa-lock"></i> Confirmar Nueva Contraseña
+                        </label>
+                        <input type="password"
+                               id="ConfirmarPasswordNuevo"
+                               name="ConfirmarPasswordNuevo"
+                               class="form-input"
+                               placeholder="Repite la nueva contraseña"
+                               autocomplete="new-password" />
+                        <small>Debe coincidir con la nueva contraseña</small>
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: var(--space-6);">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Guardar Cambios
+                        </button>
+                        <a href="/perfil" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="action-card">
+            <div class="card-header">
+                <h3><i class="fas fa-info-circle"></i> Información Importante</h3>
+            </div>
+            <div class="card-body">
+                <p style="color: var(--text-secondary); margin: 0;">
+                    Al actualizar tu perfil, deberás iniciar sesión nuevamente para que los cambios se reflejen correctamente en el sistema.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editarPerfilForm');
+            const passwordActual = document.getElementById('PasswordActual');
+            const passwordNuevo = document.getElementById('PasswordNuevo');
+            const confirmarPassword = document.getElementById('ConfirmarPasswordNuevo');
+
+            form.addEventListener('submit', function(e) {
+                // Verificar si el usuario está intentando cambiar la contraseña
+                const intentaCambiarPassword = passwordActual.value || passwordNuevo.value || confirmarPassword.value;
+
+                if (intentaCambiarPassword) {
+                    // Si ingresó algún campo de contraseña, validar que estén todos completos
+                    if (!passwordActual.value) {
+                        e.preventDefault();
+                        alert('Debes ingresar tu contraseña actual para cambiarla');
+                        passwordActual.focus();
+                        return false;
+                    }
+
+                    if (!passwordNuevo.value) {
+                        e.preventDefault();
+                        alert('Debes ingresar una nueva contraseña');
+                        passwordNuevo.focus();
+                        return false;
+                    }
+
+                    if (passwordNuevo.value.length < 6) {
+                        e.preventDefault();
+                        alert('La nueva contraseña debe tener al menos 6 caracteres');
+                        passwordNuevo.focus();
+                        return false;
+                    }
+
+                    if (!confirmarPassword.value) {
+                        e.preventDefault();
+                        alert('Debes confirmar la nueva contraseña');
+                        confirmarPassword.focus();
+                        return false;
+                    }
+
+                    if (passwordNuevo.value !== confirmarPassword.value) {
+                        e.preventDefault();
+                        alert('Las contraseñas no coinciden');
+                        confirmarPassword.focus();
+                        return false;
+                    }
+                }
+
+                // Si llegamos aquí, el formulario es válido
+                return true;
+            });
+        });
+    </script>
+}

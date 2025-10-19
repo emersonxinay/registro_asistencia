@@ -16,7 +16,7 @@
     }
 
     .page-header h1 {
-        color: #1a202c;
+        color: var(--text-primary);
         font-size: 2rem;
         font-weight: 700;
         margin-bottom: 8px;
@@ -46,12 +46,12 @@
         cursor: pointer;
         transition: all 0.3s ease;
         background: rgba(255, 255, 255, 0.2);
-        color: white;
+        color: var(--text-on-primary);
         backdrop-filter: blur(10px);
     }
 
     .tab-btn.active {
-        background: white;
+        background: var(--bg-primary);
         color: #667eea;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
@@ -75,7 +75,7 @@
 
     .form-group label {
         display: block;
-        color: white;
+        color: var(--text-on-primary);
         font-weight: 600;
         margin-bottom: 8px;
         font-size: 14px;
@@ -89,7 +89,7 @@
         border-radius: 10px;
         font-size: 15px;
         background: rgba(255, 255, 255, 0.95);
-        color: #2d3748;
+        color: var(--text-primary);
         transition: all 0.3s ease;
         cursor: pointer;
     }
@@ -125,7 +125,7 @@
     }
 
     .btn-primary {
-        background: white;
+        background: var(--bg-primary);
         color: #667eea;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
@@ -137,7 +137,7 @@
 
     .btn-success {
         background: #10b981;
-        color: white;
+        color: var(--text-on-primary);
     }
 
     .btn-success:hover {
@@ -147,7 +147,7 @@
 
     .btn-warning {
         background: #f59e0b;
-        color: white;
+        color: var(--text-on-primary);
     }
 
     .btn-warning:hover {
@@ -169,7 +169,7 @@
     }
 
     .summary-card h3 {
-        color: #1a202c;
+        color: var(--text-primary);
         font-size: 1.25rem;
         font-weight: 700;
         margin-bottom: 16px;
@@ -177,7 +177,7 @@
 
     .class-info-box {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        color: var(--text-on-primary);
         padding: 16px;
         border-radius: 12px;
         margin-bottom: 20px;
@@ -192,7 +192,7 @@
     }
 
     .stat-item {
-        background: white;
+        background: var(--bg-primary);
         padding: 16px;
         border-radius: 12px;
         border-left: 4px solid;
@@ -220,11 +220,11 @@
     .stat-value {
         font-size: 24px;
         font-weight: 700;
-        color: #1a202c;
+        color: var(--text-primary);
     }
 
     .results-container {
-        background: white;
+        background: var(--bg-primary);
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -269,12 +269,12 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 14px;
-        background: white;
+        background: var(--bg-primary);
     }
 
     .attendance-table thead {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        color: var(--text-on-primary);
     }
 
     .attendance-table th {
@@ -328,7 +328,7 @@
 
     .name-cell {
         font-weight: 600;
-        color: #1a202c;
+        color: var(--text-primary);
         display: flex;
         align-items: center;
         gap: 10px;
@@ -367,7 +367,7 @@
     .btn-qr {
         padding: 6px 12px;
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
+        color: var(--text-on-primary);
         border: none;
         border-radius: 8px;
         cursor: pointer;
@@ -399,7 +399,7 @@
     }
 
     .qr-modal-content {
-        background: white;
+        background: var(--bg-primary);
         padding: 32px;
         border-radius: 20px;
         text-align: center;
@@ -413,7 +413,7 @@
         top: 12px;
         right: 12px;
         background: #ef4444;
-        color: white;
+        color: var(--text-on-primary);
         border: none;
         border-radius: 50%;
         width: 36px;
@@ -431,7 +431,7 @@
 
     .qr-modal h2 {
         margin-top: 0;
-        color: #1a202c;
+        color: var(--text-primary);
         font-size: 1.5rem;
         margin-bottom: 20px;
     }
@@ -457,7 +457,7 @@
     }
 
     .qr-code-box {
-        background: white;
+        background: var(--bg-primary);
         padding: 20px;
         border: 3px solid #10b981;
         border-radius: 12px;
@@ -534,10 +534,10 @@
         <!-- Tabs -->
         <div class="tabs-container">
             <button id="tabClasesLibres" class="tab-btn active" onclick="cambiarTipoClase('libres')">
-                📚 Clases Libres
+                <i class="fas fa-book"></i> Clases Libres
             </button>
             <button id="tabClasesCurso" class="tab-btn" onclick="cambiarTipoClase('curso')">
-                🎓 Clases con Curso
+                <i class="fas fa-graduation-cap"></i> Clases con Curso
             </button>
         </div>
 
@@ -578,13 +578,13 @@
         <!-- Botones de Acción -->
         <div class="actions-row">
             <button onclick="cargarAsistenciasPorClase()" class="btn btn-primary">
-                📊 CARGAR ASISTENCIAS
+                <i class="fas fa-chart-bar"></i> CARGAR ASISTENCIAS
             </button>
             <button onclick="refrescarDatos()" class="btn btn-success">
-                🔄 REFRESCAR
+                <i class="fas fa-sync-alt"></i> REFRESCAR
             </button>
             <button onclick="exportarCSV()" class="btn btn-warning">
-                📥 EXPORTAR CSV
+                <i class="fas fa-download"></i> EXPORTAR CSV
             </button>
         </div>
     </div>
@@ -595,27 +595,27 @@
         <div id="claseInfo" class="class-info-box"></div>
         <div class="stats-grid">
             <div class="stat-item total">
-                <div class="stat-label">📊 Total Estudiantes</div>
+                <div class="stat-label"><i class="fas fa-users"></i> Total Estudiantes</div>
                 <div class="stat-value" id="totalEstudiantes">0</div>
             </div>
             <div class="stat-item presente">
-                <div class="stat-label">✅ Presentes</div>
+                <div class="stat-label"><i class="fas fa-check-circle"></i> Presentes</div>
                 <div class="stat-value" id="totalPresentes">0</div>
             </div>
             <div class="stat-item tardanza">
-                <div class="stat-label">⏰ Tardanzas</div>
+                <div class="stat-label"><i class="fas fa-clock"></i> Tardanzas</div>
                 <div class="stat-value" id="totalTardanzas">0</div>
             </div>
             <div class="stat-item ausente">
-                <div class="stat-label">❌ Ausentes</div>
+                <div class="stat-label"><i class="fas fa-times-circle"></i> Ausentes</div>
                 <div class="stat-value" id="totalAusentes">0</div>
             </div>
             <div class="stat-item excusado">
-                <div class="stat-label">📝 Excusados</div>
+                <div class="stat-label"><i class="fas fa-file-alt"></i> Excusados</div>
                 <div class="stat-value" id="totalExcusados">0</div>
             </div>
             <div class="stat-item registraron">
-                <div class="stat-label">📈 Registraron</div>
+                <div class="stat-label"><i class="fas fa-user-check"></i> Registraron</div>
                 <div class="stat-value" id="totalConAsistencia">0</div>
             </div>
         </div>
@@ -686,14 +686,15 @@ async function cargarClasesLibres() {
             option.value = clase.id;
             const fecha = new Date(clase.inicioUtc).toLocaleDateString();
             const hora = new Date(clase.inicioUtc).toLocaleTimeString();
-            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
-            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+            const estado = clase.activa ? 'ACTIVA' : 'CERRADA';
+            const estadoIcon = clase.activa ? '●' : '●';
+            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estadoIcon} ${estado}`;
             selector.appendChild(option);
         });
 
-        console.log('✅ Clases libres cargadas:', clasesLibres.length);
+        console.log('[OK] Clases libres cargadas:', clasesLibres.length);
     } catch (error) {
-        console.error('❌ Error cargando clases libres:', error);
+        console.error('[ERROR] Error cargando clases libres:', error);
         selector.innerHTML = '<option value="">-- Error cargando clases --</option>';
     }
 }
@@ -714,9 +715,9 @@ async function cargarCursos() {
             selector.appendChild(option);
         });
 
-        console.log('✅ Cursos cargados:', cursos.length);
+        console.log('[OK] Cursos cargados:', cursos.length);
     } catch (error) {
-        console.error('❌ Error cargando cursos:', error);
+        console.error('[ERROR] Error cargando cursos:', error);
     }
 }
 
@@ -751,9 +752,9 @@ async function cargarRamosPorCurso() {
         });
 
         selectorRamo.disabled = false;
-        console.log('✅ Ramos cargados:', ramos.length);
+        console.log('[OK] Ramos cargados:', ramos.length);
     } catch (error) {
-        console.error('❌ Error cargando ramos:', error);
+        console.error('[ERROR] Error cargando ramos:', error);
         selectorRamo.innerHTML = '<option value="">-- Error cargando ramos --</option>';
     }
 }
@@ -784,15 +785,16 @@ async function cargarClasesPorRamo() {
             option.value = clase.id;
             const fecha = new Date(clase.inicioUtc).toLocaleDateString();
             const hora = new Date(clase.inicioUtc).toLocaleTimeString();
-            const estado = clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA';
-            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estado}`;
+            const estado = clase.activa ? 'ACTIVA' : 'CERRADA';
+            const estadoIcon = clase.activa ? '●' : '●';
+            option.textContent = `${fecha} ${hora} - ${clase.asignatura} ${estadoIcon} ${estado}`;
             selectorClase.appendChild(option);
         });
 
         selectorClase.disabled = false;
-        console.log('✅ Clases cargadas:', clases.length);
+        console.log('[OK] Clases cargadas:', clases.length);
     } catch (error) {
-        console.error('❌ Error cargando clases:', error);
+        console.error('[ERROR] Error cargando clases:', error);
         selectorClase.innerHTML = '<option value="">-- Error cargando clases --</option>';
     }
 }
@@ -816,7 +818,7 @@ async function cargarAsistenciasPorClase() {
     }
 
     const container = document.getElementById('asistenciasList');
-    container.innerHTML = '<div class="alert alert-loading">⏳ CARGANDO ASISTENCIAS DE LA CLASE...</div>';
+    container.innerHTML = '<div class="alert alert-loading"><i class="fas fa-spinner fa-spin"></i> CARGANDO ASISTENCIAS DE LA CLASE...</div>';
 
     try {
         console.log('📡 Fetching data for clase:', claseId);
@@ -829,13 +831,13 @@ async function cargarAsistenciasPorClase() {
 
         if (!claseResponse.ok) {
             const errorDetail = await claseResponse.text();
-            console.error('❌ Error response from /api/clases/' + claseId + ':', errorDetail);
+            console.error('[ERROR] Error response from /api/clases/' + claseId + ':', errorDetail);
             throw new Error(`Error al cargar clase: ${claseResponse.status} ${claseResponse.statusText}\nDetalle: ${errorDetail}`);
         }
 
         if (!asistenciasResponse.ok) {
             const errorDetail = await asistenciasResponse.text();
-            console.error('❌ Error response from /api/clases/' + claseId + '/asistencias:', errorDetail);
+            console.error('[ERROR] Error response from /api/clases/' + claseId + '/asistencias:', errorDetail);
             throw new Error(`Error al cargar asistencias: ${asistenciasResponse.status} ${asistenciasResponse.statusText}\nDetalle: ${errorDetail}`);
         }
 
@@ -1023,13 +1025,13 @@ async function cargarAsistenciasPorClase() {
         
         // Mostrar información de la clase
         const fechaClase = new Date(clase.inicioUtc);
-        const tipoClaseTexto = esClaseLibre ? '📚 CLASE LIBRE' : '🎓 CLASE CON CURSO';
+        const tipoClaseTexto = esClaseLibre ? '<i class="fas fa-book"></i> CLASE LIBRE' : '<i class="fas fa-graduation-cap"></i> CLASE CON CURSO';
         document.getElementById('claseInfo').innerHTML = `
-            ${tipoClaseTexto} | 🏫 ${clase.asignatura || clase.nombreCompleto} |
-            📅 ${fechaClase.toLocaleDateString()} |
-            🕐 ${fechaClase.toLocaleTimeString()} |
-            ${clase.activa ? '🟢 ACTIVA' : '🔴 CERRADA'}
-            ${esClaseLibre ? ' | ⚠️ Los estudiantes se registran escaneando QR' : ''}
+            ${tipoClaseTexto} | <i class="fas fa-school"></i> ${clase.asignatura || clase.nombreCompleto} |
+            <i class="fas fa-calendar-alt"></i> ${fechaClase.toLocaleDateString()} |
+            <i class="fas fa-clock"></i> ${fechaClase.toLocaleTimeString()} |
+            ${clase.activa ? '<i class="fas fa-circle" style="color: var(--success);"></i> ACTIVA' : '<i class="fas fa-circle" style="color: var(--danger);"></i> CERRADA'}
+            ${esClaseLibre ? ' | <i class="fas fa-exclamation-triangle"></i> Los estudiantes se registran escaneando QR' : ''}
         `;
 
         // Mostrar resumen
@@ -1058,7 +1060,7 @@ async function cargarAsistenciasPorClase() {
         // Generar tabla moderna
         let html = `
             <div class="alert alert-success">
-                ✅ LISTA COMPLETA DE LA CLASE: ${totalEstudiantes} estudiantes
+                [OK] LISTA COMPLETA DE LA CLASE: ${totalEstudiantes} estudiantes
             </div>
             <div class="table-wrapper">
                 <table class="attendance-table">
@@ -1094,7 +1096,7 @@ async function cargarAsistenciasPorClase() {
                             <button onclick="mostrarQREstudiante(${estudiante.id}, '${nombreDisplay.replace(/'/g, "\\'")}', '${codigoDisplay}')"
                                     class="btn-qr"
                                     title="Ver QR para escanear">
-                                📱 QR
+                                <i class="fas fa-qrcode"></i> QR
                             </button>
                         </div>
                     </td>
@@ -1117,11 +1119,11 @@ async function cargarAsistenciasPorClase() {
         `;
         container.innerHTML = html;
         
-        console.log('✅ LISTA COMPLETA RENDERIZADA');
+        console.log('[OK] LISTA COMPLETA RENDERIZADA');
         
     } catch (error) {
-        console.error('❌ ERROR:', error);
-        container.innerHTML = '<div class="alert alert-error">❌ ERROR: ' + error.message + '</div>';
+        console.error('[ERROR] ERROR:', error);
+        container.innerHTML = '<div class="alert alert-error">[ERROR] ERROR: ' + error.message + '</div>';
     }
 }
 
@@ -1221,7 +1223,7 @@ async function mostrarQREstudiante(estudianteId, nombre, codigo) {
         });
 
     } catch (error) {
-        console.error('❌ Error mostrando QR:', error);
+        console.error('[ERROR] Error mostrando QR:', error);
         alert('Error al cargar el código QR del estudiante');
     }
 }

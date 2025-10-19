@@ -35,35 +35,45 @@
             <span>Mis Clases</span>
         </a>
 
-        <a href="/alumnos" class="nav-item">
-            <i data-lucide="users"></i>
-            <span>Estudiantes</span>
-        </a>
-
-        <a href="/asistencias" class="nav-item">
-            <i data-lucide="clipboard-check"></i>
-            <span>Asistencias</span>
-        </a>
-
         <a href="/docente/scanner" class="nav-item scanner-highlight">
             <i data-lucide="scan"></i>
             <span>Escanear</span>
         </a>
+
+        <!-- Dropdown "Más" -->
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-toggle nav-item" type="button">
+                <i data-lucide="more-horizontal"></i>
+                <span>Más</span>
+                <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+            </button>
+            <div class="nav-dropdown-menu">
+                <a href="/alumnos" class="nav-dropdown-item">
+                    <i data-lucide="users"></i>
+                    <span>Estudiantes</span>
+                </a>
+                <a href="/asistencias" class="nav-dropdown-item">
+                    <i data-lucide="clipboard-check"></i>
+                    <span>Asistencias</span>
+                </a>
+                <a href="/docente/cursos" class="nav-dropdown-item">
+                    <i data-lucide="book-open"></i>
+                    <span>Mis Cursos</span>
+                </a>
+                @if (User.IsInRole("Administrador"))
+                {
+                    <div class="nav-dropdown-divider"></div>
+                    <a href="/admin/usuarios" class="nav-dropdown-item" style="color: var(--danger);">
+                        <i data-lucide="shield-check"></i>
+                        <span>Gestión de Usuarios</span>
+                    </a>
+                }
+            </div>
+        </div>
     </div>
 
     <div class="nav-group nav-secondary">
-        @if (User.IsInRole("Administrador"))
-        {
-            <a href="/usuarios" class="nav-item admin-highlight">
-                <i data-lucide="shield-check"></i>
-                <span>Admin</span>
-            </a>
-        }
-
-        <a href="/ayuda" class="nav-item">
-            <i data-lucide="help-circle"></i>
-            <span>Ayuda</span>
-        </a>
+        <!-- Se movió Ayuda al dropdown del usuario -->
     </div>
 </nav>
 
@@ -75,27 +85,58 @@
         <i data-lucide="sun" class="theme-toggle-icon icon-sun"></i>
     </button>
 
-    <!-- Desktop User Info Simple -->
-    <div class="desktop-user-info">
-        <div class="user-avatar">
-            <span>@userInitials.ToUpper()</span>
+    <!-- Desktop User Dropdown -->
+    <div class="user-dropdown">
+        <div class="desktop-user-info">
+            <div class="user-avatar">
+                <span>@userInitials.ToUpper()</span>
+            </div>
+            <div class="user-details">
+                <span class="user-role @(User.IsInRole("Administrador") ? "admin" : "docente")">
+                    @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
+                </span>
+                <span class="user-name">@(User.Identity?.Name ?? "Usuario")</span>
+            </div>
+            <i data-lucide="chevron-down" style="width: 16px; height: 16px; margin-left: 0.25rem; flex-shrink: 0;"></i>
         </div>
-        <div class="user-details">
-            <span class="user-role @(User.IsInRole("Administrador") ? "admin" : "docente")">
-                @(User.IsInRole("Administrador") ? "ADMIN" : "DOCENTE")
-            </span>
-            <span class="user-name">@User.Identity.Name</span>
+
+        <div class="user-dropdown-menu">
+            <div class="user-dropdown-header">
+                <div class="user-avatar-large">
+                    <span>@userInitials.ToUpper()</span>
+                </div>
+                <div class="user-info-detailed">
+                    <strong>@User.Identity.Name</strong>
+                    <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
+                    <span class="user-badge @(User.IsInRole("Administrador") ? "admin" : "docente")">
+                        @(User.IsInRole("Administrador") ? "Administrador" : "Docente")
+                    </span>
+                </div>
+            </div>
+
+            <div class="user-dropdown-divider"></div>
+
+            <a href="/perfil" class="user-dropdown-item">
+                <i data-lucide="user"></i>
+                <span>Mi Perfil</span>
+            </a>
+
+            <a href="/ayuda" class="user-dropdown-item">
+                <i data-lucide="help-circle"></i>
+                <span>Ayuda</span>
+            </a>
+
+            <div class="user-dropdown-divider"></div>
+
+            <form method="post" action="/logout" id="desktopLogoutForm" style="margin: 0;">
+                @Html.AntiForgeryToken()
+                <button type="button" class="user-dropdown-item logout" onclick="confirmLogout('desktop')">
+                    <i data-lucide="log-out"></i>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </form>
         </div>
     </div>
-
-    <!-- Desktop Logout Button -->
-    <form method="post" action="/logout" id="desktopLogoutForm" class="desktop-logout">
-        @Html.AntiForgeryToken()
-        <button type="button" class="desktop-logout-btn" onclick="confirmLogout('desktop')" title="Cerrar Sesión">
-            <i data-lucide="log-out"></i>
-            <span class="logout-text">Cerrar Sesión</span>
-        </button>
-    </form>
 
     <!-- Mobile Menu Button -->
     <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menú">
@@ -121,8 +162,8 @@
     </div>
 
     <div class="mobile-nav-content">
-        <!-- User Profile -->
-        <div class="mobile-user-profile">
+        <!-- User Profile - Clickeable -->
+        <a href="/perfil" class="mobile-user-profile">
             <div class="user-avatar">
                 <span>@userInitials.ToUpper()</span>
             </div>
@@ -130,7 +171,8 @@
                 <h3>@User.Identity.Name</h3>
                 <p>@(User.IsInRole("Administrador") ? "Administrador" : "Docente")</p>
             </div>
-        </div>
+            <i data-lucide="chevron-right" class="profile-chevron"></i>
+        </a>
 
         <!-- Menu Items Compacto -->
         <div class="mobile-menu-section">
@@ -164,10 +206,10 @@
         @if (User.IsInRole("Administrador"))
         {
             <div class="mobile-menu-section">
-                <h4>Admin</h4>
-                <a href="/usuarios" class="mobile-nav-item admin">
+                <h4>Administración</h4>
+                <a href="/admin/usuarios" class="mobile-nav-item admin">
                     <i data-lucide="shield-check"></i>
-                    <span>Gestión Usuarios</span>
+                    <span>Gestión de Usuarios</span>
                 </a>
             </div>
         }

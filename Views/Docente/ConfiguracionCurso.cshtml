@@ -189,7 +189,7 @@
 <div id="advancedModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h4>⚠️ Configuración Avanzada</h4>
+            <h4>[WARNING] Configuración Avanzada</h4>
             <button class="modal-close" onclick="hideAdvancedOptions()">&times;</button>
         </div>
         <div class="modal-body">
@@ -215,7 +215,7 @@
                 </div>
                 <div class="option-item danger">
                     <strong>Eliminar Curso</strong>
-                    <p class="danger-text">⚠️ Esta acción eliminará permanentemente el curso y todos sus datos.</p>
+                    <p class="danger-text">[WARNING] Esta acción eliminará permanentemente el curso y todos sus datos.</p>
                     <button class="btn btn-danger" onclick="confirmarEliminacion()">
                         <i class="fas fa-trash"></i>
                         Eliminar Curso
@@ -248,7 +248,7 @@ function archivarCurso() {
 }
 
 function confirmarEliminacion() {
-    if (confirm('⚠️ ADVERTENCIA: Esta acción eliminará permanentemente el curso y TODOS sus datos.\n\n¿Estás absolutamente seguro?')) {
+    if (confirm('[WARNING] ADVERTENCIA: Esta acción eliminará permanentemente el curso y TODOS sus datos.\n\n¿Estás absolutamente seguro?')) {
         if (confirm('Esta es la última confirmación. ¿Realmente quieres eliminar el curso "@Model.Nombre"?')) {
             alert('Función de eliminación en desarrollo');
             hideAdvancedOptions();
