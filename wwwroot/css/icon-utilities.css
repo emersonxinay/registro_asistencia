@@ -1,0 +1,85 @@
+/* ================================
+   UTILIDADES DE ICONOS
+   Reemplazo de emojis por Font Awesome
+   ================================ */
+
+/* Mapeo de iconos comunes */
+.icon-success,
+.icon-check {
+    color: var(--success);
+}
+
+.icon-error,
+.icon-times {
+    color: var(--danger);
+}
+
+.icon-warning,
+.icon-exclamation {
+    color: var(--warning);
+}
+
+.icon-info {
+    color: var(--info);
+}
+
+/* Tamaños de iconos */
+.icon-xs { font-size: 0.75rem; }
+.icon-sm { font-size: 0.875rem; }
+.icon-md { font-size: 1rem; }
+.icon-lg { font-size: 1.25rem; }
+.icon-xl { font-size: 1.5rem; }
+.icon-2xl { font-size: 2rem; }
+
+/* Iconos en mensajes */
+.message .icon {
+    flex-shrink: 0;
+    font-size: 1.375rem;
+    margin-top: 0.125rem;
+}
+
+/* Iconos en botones */
+.btn .icon {
+    flex-shrink: 0;
+}
+
+/* Iconos en badges */
+.badge .icon {
+    margin-right: 0.25rem;
+}
+
+/* Spinner/Loading */
+.icon-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Colores específicos por contexto */
+.icon-presente { color: var(--success); }
+.icon-tardanza { color: var(--warning); }
+.icon-ausente { color: var(--danger); }
+.icon-justificado { color: var(--info); }
+
+/* Dark mode adjustments */
+[data-theme="dark"] .icon-success,
+[data-theme="dark"] .icon-check {
+    color: hsl(142, 71%, 55%);
+}
+
+[data-theme="dark"] .icon-error,
+[data-theme="dark"] .icon-times {
+    color: hsl(0, 84%, 70%);
+}
+
+[data-theme="dark"] .icon-warning,
+[data-theme="dark"] .icon-exclamation {
+    color: hsl(38, 92%, 60%);
+}
+
+[data-theme="dark"] .icon-info {
+    color: hsl(204, 94%, 70%);
+}

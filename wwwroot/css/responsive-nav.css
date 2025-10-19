@@ -2,16 +2,16 @@
    SISTEMA DE NAVEGACIÓN RESPONSIVE - Compatible con styles.css
    ======================================================================== */
 
-/* Variables adicionales para navegación - MOBILE EXPERT */
+/* Variables adicionales para navegación - MOBILE EXPERT - EM/REM */
 :root {
-  --header-height: 64px;
-  --bottom-nav-height: 64px;
+  --header-height: 4rem;
+  --bottom-nav-height: 4rem;
   --z-header: 1000;
   --z-bottom-nav: 999;
   --z-overlay: 1100;
   --z-mobile-nav: 1200;
   --drawer-width: 85%;
-  --drawer-max-width: 360px;
+  --drawer-max-width: 22.5rem;
 }
 
 /* Utilidades responsive */
@@ -45,9 +45,9 @@
   right: 0;
   width: 100%;
   background: var(--bg-primary);
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.0625rem solid var(--border);
+  backdrop-filter: blur(1.25rem);
+  -webkit-backdrop-filter: blur(1.25rem);
   z-index: var(--z-header);
   transition: transform 0.3s ease;
   will-change: transform;
@@ -765,9 +765,17 @@ body {
   }
 }
 
+/* Ocultar botón hamburguesa en desktop */
 @media (min-width: 1024px) {
   .mobile-menu-btn {
     display: none;
+  }
+}
+
+/* Ocultar botón hamburguesa en móvil cuando bottom tabs están visibles */
+@media (max-width: 1023px) {
+  .mobile-menu-btn {
+    display: none !important;
   }
 }
 
@@ -1081,19 +1089,19 @@ body.mobile-nav-open {
    ======================================================================== */
 .bottom-tab-nav {
   display: none;
-  position: fixed;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
   background: var(--bg-primary);
-  border-top: 1px solid var(--border);
+  border-top: 0.0625rem solid var(--border);
   padding: 0.25rem 0;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
   z-index: var(--z-bottom-nav);
-  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -0.125rem 1rem rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(1.25rem);
+  -webkit-backdrop-filter: blur(1.25rem);
+  margin-top: auto;
 }
 
 @media (max-width: 1023px) {

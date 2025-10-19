@@ -326,13 +326,13 @@
     color: #0ea5e9;
 }
 
-/* Back to Top Button */
+/* Back to Top Button - SIN FIXED */
 .back-to-top {
-    position: fixed;
+    position: sticky;
     bottom: 2rem;
     right: 2rem;
-    width: 48px;
-    height: 48px;
+    width: 3rem;
+    height: 3rem;
     background: linear-gradient(135deg, #0ea5e9, #06b6d4);
     border: none;
     border-radius: 50%;
@@ -343,10 +343,12 @@
     justify-content: center;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(20px);
+    transform: translateY(1.25rem);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-    z-index: 1000;
+    box-shadow: 0 0.25rem 0.75rem rgba(14, 165, 233, 0.3);
+    z-index: 100;
+    margin-left: auto;
+    float: right;
 }
 
 .back-to-top.visible {
@@ -377,9 +379,9 @@
     }
 }
 
-@@media (max-width: 640px) {
+@@media (max-width: 63.9375em) {
     .modern-footer {
-        padding: 2rem 0 1rem;
+        padding: 2rem 0 1.5rem;
     }
 
     .footer-grid {
@@ -415,10 +417,10 @@
     }
 
     .back-to-top {
+        width: 2.75rem;
+        height: 2.75rem;
         bottom: 1rem;
         right: 1rem;
-        width: 44px;
-        height: 44px;
     }
 }
 

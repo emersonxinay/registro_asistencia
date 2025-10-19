@@ -5,79 +5,86 @@
 
 @section Styles {
     <style>
-        /* Page Container - MOBILE OPTIMIZED */
+        /* DISEÑO RESPONSIVE - 100% EM/REM - SIN FIXED - DARK MODE COMPATIBLE */
+
+        /* Variables adicionales para Scan (compatible con theme-system.css) */
+        :root {
+            --gradient-primary: linear-gradient(135deg,
+                hsl(199, 89%, 48%),
+                hsl(187, 95%, 43%));
+            --accent-color: hsl(173, 80%, 40%);
+            --focus-ring: hsla(173, 80%, 40%, 0.2);
+        }
+
+        [data-theme="dark"] {
+            --gradient-primary: linear-gradient(135deg,
+                hsl(199, 89%, 58%),
+                hsl(187, 95%, 53%));
+            --accent-color: hsl(173, 80%, 50%);
+            --focus-ring: hsla(173, 80%, 50%, 0.3);
+        }
+
+        /* Page Container */
         .scan-page {
-            min-height: calc(100vh - var(--header-height));
-            padding: 12px;
-            max-width: 100%;
+            width: 100%;
+            max-width: 50rem;
             margin: 0 auto;
-            padding-bottom: max(88px, calc(var(--bottom-nav-height, 0px) + 20px));
+            padding: 1rem;
+            padding-bottom: 2rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .scan-page {
-                padding: 16px;
-                max-width: 640px;
+                padding: 1.5rem;
+                padding-bottom: 2.5rem;
             }
         }
 
-        @@media (min-width: 768px) {
+        @@media(min-width: 64em) {
             .scan-page {
-                padding: 20px;
-                max-width: 720px;
+                padding: 2rem;
+                padding-bottom: 3rem;
             }
         }
 
-        @@media (min-width: 1024px) {
-            .scan-page {
-                padding: 24px;
-                max-width: 800px;
-                padding-bottom: 24px;
-            }
-        }
-
-        /* Class Info Badge - MOBILE OPTIMIZED */
+        /* Class Info Badge */
         .class-info-badge {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.08));
-            border: 2px solid var(--accent-color);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 16px;
+            border: 0.125rem solid var(--accent-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 0.125rem 0.5rem rgba(102, 126, 234, 0.15);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .class-info-badge {
-                border-radius: 16px;
-                padding: 14px 16px;
-                margin-bottom: 20px;
-                gap: 12px;
-                align-items: center;
+                padding: 1rem 1.25rem;
+                margin-bottom: 1.25rem;
             }
         }
 
         .class-info-icon {
-            width: 36px;
-            height: 36px;
+            width: 2.25rem;
+            height: 2.25rem;
             background: var(--gradient-primary);
-            border-radius: 10px;
+            border-radius: 0.625rem;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 16px;
+            font-size: 1.125rem;
             flex-shrink: 0;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .class-info-icon {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px;
-                font-size: 18px;
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1.25rem;
             }
         }
 
@@ -87,12 +94,11 @@
         }
 
         .class-info-title {
-            font-size: 14px;
+            font-size: 0.9375rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 4px;
+            margin-bottom: 0.25rem;
             line-height: 1.3;
-            /* Permitir que el texto se ajuste en dos líneas en móvil */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -100,215 +106,213 @@
             text-overflow: ellipsis;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .class-info-title {
-                font-size: 15px;
+                font-size: 1rem;
                 -webkit-line-clamp: 1;
                 white-space: nowrap;
             }
         }
 
         .class-info-name {
-            font-size: 11px;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .class-info-name {
-                font-size: 12px;
+                font-size: 0.8125rem;
             }
         }
 
         .class-id-badge {
             background: var(--accent-color);
             color: white;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 10px;
+            padding: 0.375rem 0.625rem;
+            border-radius: 0.625rem;
+            font-size: 0.6875rem;
             font-weight: 700;
             flex-shrink: 0;
             white-space: nowrap;
             align-self: flex-start;
-            margin-top: 2px;
+            margin-top: 0.125rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .class-id-badge {
-                padding: 6px 12px;
-                border-radius: 12px;
-                font-size: 11px;
+                padding: 0.5rem 0.875rem;
+                border-radius: 0.875rem;
+                font-size: 0.75rem;
                 align-self: center;
                 margin-top: 0;
             }
         }
 
-        /* Cards - MOBILE OPTIMIZED */
+        /* Cards */
         .card {
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
+            border: 0.0625rem solid var(--border-color);
+            border-radius: 0.875rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
             box-shadow: var(--shadow-sm);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .card {
-                border-radius: 16px;
-                padding: 16px;
-                margin-bottom: 14px;
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
             }
         }
 
         .card-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
+            gap: 0.625rem;
+            margin-bottom: 0.875rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 0.0625rem solid var(--border-color);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .card-header {
-                gap: 10px;
-                margin-bottom: 14px;
-                padding-bottom: 12px;
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.875rem;
             }
         }
 
         .card-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.75rem;
             background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 16px;
+            font-size: 1.125rem;
             flex-shrink: 0;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .card-icon {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px;
-                font-size: 18px;
+                width: 2.75rem;
+                height: 2.75rem;
+                border-radius: 0.875rem;
+                font-size: 1.25rem;
             }
         }
 
         .card-title {
             flex: 1;
-            font-size: 14px;
+            font-size: 0.9375rem;
             font-weight: 600;
             color: var(--text-primary);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .card-title {
-                font-size: 15px;
+                font-size: 1rem;
             }
         }
 
         .card-desc {
-            font-size: 12px;
+            font-size: 0.8125rem;
             color: var(--text-secondary);
-            margin-bottom: 10px;
+            margin-bottom: 0.875rem;
             line-height: 1.4;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .card-desc {
-                font-size: 13px;
-                margin-bottom: 12px;
+                font-size: 0.875rem;
+                margin-bottom: 1rem;
             }
         }
 
-        /* Instructions Card - MOBILE OPTIMIZED */
+        /* Instructions Card */
         .instructions-card {
             background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 16px;
+            border: 0.0625rem solid var(--border-color);
+            border-radius: 0.875rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .instructions-card {
-                border-radius: 16px;
-                padding: 20px;
-                margin-bottom: 24px;
+                padding: 1.25rem;
+                margin-bottom: 1.25rem;
             }
         }
 
         .instructions-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 0.625rem;
+            font-size: 0.9375rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 0.875rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 0.125rem solid var(--border-color);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instructions-header {
-                gap: 10px;
-                font-size: 16px;
-                margin-bottom: 16px;
-                padding-bottom: 12px;
+                gap: 0.75rem;
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                padding-bottom: 0.875rem;
             }
         }
 
         .instructions-header i {
             color: var(--accent-color);
-            font-size: 18px;
+            font-size: 1.25rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instructions-header i {
-                font-size: 20px;
+                font-size: 1.375rem;
             }
         }
 
         .instructions-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 0.75rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instructions-list {
-                gap: 12px;
+                gap: 0.875rem;
             }
         }
 
         .instruction-item {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            padding: 10px;
+            gap: 0.75rem;
+            padding: 0.75rem;
             background: var(--bg-primary);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            border: 0.0625rem solid var(--border-color);
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instruction-item {
-                gap: 12px;
-                padding: 12px;
-                border-radius: 12px;
+                gap: 0.875rem;
+                padding: 0.875rem;
+                border-radius: 0.875rem;
             }
         }
 
         .instruction-number {
-            width: 28px;
-            height: 28px;
+            width: 2rem;
+            height: 2rem;
             background: var(--gradient-primary);
             color: white;
             border-radius: 50%;
@@ -316,23 +320,23 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 0.875rem;
             flex-shrink: 0;
         }
 
         .instruction-number i {
-            font-size: 13px;
+            font-size: 0.9375rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instruction-number {
-                width: 32px;
-                height: 32px;
-                font-size: 14px;
+                width: 2.25rem;
+                height: 2.25rem;
+                font-size: 0.9375rem;
             }
 
             .instruction-number i {
-                font-size: 15px;
+                font-size: 1rem;
             }
         }
 
@@ -342,70 +346,70 @@
         }
 
         .instruction-title {
-            font-size: 13px;
+            font-size: 0.875rem;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 3px;
+            margin-bottom: 0.25rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instruction-title {
-                font-size: 14px;
-                margin-bottom: 4px;
+                font-size: 0.9375rem;
+                margin-bottom: 0.3125rem;
             }
         }
 
         .instruction-desc {
-            font-size: 11px;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             line-height: 1.5;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .instruction-desc {
-                font-size: 12px;
+                font-size: 0.8125rem;
             }
         }
 
-        /* Auth Badge - MOBILE OPTIMIZED */
+        /* Auth Badge */
         .auth-badge {
             background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.08));
-            border: 2px solid rgba(16, 185, 129, 0.3);
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 12px;
+            border: 0.125rem solid rgba(16, 185, 129, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.75rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .auth-badge {
-                border-radius: 12px;
-                padding: 12px;
-                margin-bottom: 14px;
-                gap: 12px;
+                border-radius: 0.875rem;
+                padding: 0.875rem;
+                margin-bottom: 1rem;
+                gap: 0.875rem;
             }
         }
 
         .auth-avatar {
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #10b981, #059669);
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, var(--success), hsl(142, 71%, 35%));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 18px;
+            font-size: 1.25rem;
             flex-shrink: 0;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .auth-avatar {
-                width: 48px;
-                height: 48px;
-                font-size: 20px;
+                width: 3.25rem;
+                height: 3.25rem;
+                font-size: 1.375rem;
             }
         }
 
@@ -415,62 +419,61 @@
         }
 
         .auth-name {
-            font-size: 13px;
+            font-size: 0.875rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 3px;
+            margin-bottom: 0.25rem;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .auth-name {
-                font-size: 14px;
-                margin-bottom: 4px;
+                font-size: 0.9375rem;
+                margin-bottom: 0.3125rem;
             }
         }
 
         .auth-status {
-            font-size: 11px;
-            color: #059669;
+            font-size: 0.75rem;
+            color: var(--success);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 0.3125rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .auth-status {
-                font-size: 12px;
+                font-size: 0.8125rem;
             }
         }
 
-        /* Buttons - MOBILE OPTIMIZED */
+        /* Buttons */
         .btn {
             width: 100%;
-            padding: 12px 16px;
+            padding: 0.875rem 1.125rem;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: 0.75rem;
+            font-size: 0.9375rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 0.625rem;
             transition: all 0.2s;
-            min-height: 48px;
+            min-height: 3.25rem;
             text-decoration: none;
-            position: relative;
-            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .btn {
-                padding: 14px 18px;
-                border-radius: 12px;
-                font-size: 15px;
-                min-height: 52px;
+                padding: 1rem 1.25rem;
+                font-size: 1rem;
+                min-height: 3.5rem;
             }
         }
 
@@ -479,33 +482,33 @@
         }
 
         .btn i {
-            font-size: 16px;
+            font-size: 1.125rem;
             flex-shrink: 0;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .btn i {
-                font-size: 18px;
+                font-size: 1.25rem;
             }
         }
 
         .btn-primary {
             background: var(--gradient-primary);
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 0.25rem 0.75rem rgba(102, 126, 234, 0.4);
         }
 
         .btn-secondary {
             background: var(--bg-tertiary);
             color: var(--text-primary);
-            border: 2px solid var(--border-color);
+            border: 0.125rem solid var(--border-color);
             box-shadow: var(--shadow-sm);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, var(--success), hsl(142, 71%, 35%));
             color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0.25rem 0.75rem hsla(142, 71%, 45%, 0.4);
         }
 
         .btn:disabled {
@@ -513,107 +516,152 @@
             cursor: not-allowed;
         }
 
-        /* Form - MOBILE OPTIMIZED */
+        /* Form */
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 0.875rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .form-group {
-                margin-bottom: 14px;
+                margin-bottom: 1rem;
             }
         }
 
         .form-label {
-            display: block;
-            font-size: 12px;
+            display: flex;
+            font-size: 0.875rem;
             font-weight: 600;
             color: var(--text-primary);
-            margin-bottom: 6px;
-            display: flex;
+            margin-bottom: 0.5rem;
             align-items: center;
-            gap: 6px;
+            gap: 0.5rem;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .form-label {
-                font-size: 13px;
-                margin-bottom: 8px;
+                font-size: 0.9375rem;
+                margin-bottom: 0.625rem;
             }
         }
 
         .form-input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 0.875rem;
+            border: 0.125rem solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 1rem;
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: all 0.2s;
         }
 
-        @@media (min-width: 640px) {
+        @@media(min-width: 48em) {
             .form-input {
-                padding: 14px;
-                border-radius: 12px;
+                padding: 1rem;
+                font-size: 1.0625rem;
             }
         }
 
         .form-input:focus {
             outline: none;
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px var(--focus-ring);
-        }
-
-        @@media (min-width: 640px) {
-            .form-input:focus {
-                box-shadow: 0 0 0 4px var(--focus-ring);
-            }
+            box-shadow: 0 0 0 0.25rem var(--focus-ring);
         }
 
         /* Messages */
         .message {
-            padding: 14px;
-            border-radius: 12px;
-            margin-top: 14px;
+            padding: 1rem;
+            border-radius: 0.875rem;
+            margin-top: 1rem;
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 0.75rem;
             animation: slideIn 0.3s ease-out;
-            border: 2px solid;
+            border: 0.125rem solid;
         }
 
         .message i {
-            font-size: 20px;
-            margin-top: 2px;
+            font-size: 1.375rem;
+            margin-top: 0.125rem;
             flex-shrink: 0;
         }
 
         .message-text {
             flex: 1;
-            font-size: 14px;
+            font-size: 0.9375rem;
             line-height: 1.5;
         }
 
+        .message-text small {
+            display: block;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+            font-size: 0.8125rem;
+        }
+
         .message-success {
-            background: rgba(16, 185, 129, 0.1);
-            border-color: rgba(16, 185, 129, 0.4);
-            color: #059669;
+            background: hsla(142, 71%, 45%, 0.1);
+            border-color: hsla(142, 71%, 45%, 0.4);
+            color: var(--success);
         }
 
         .message-error {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.4);
-            color: #dc2626;
+            background: hsla(0, 84%, 60%, 0.1);
+            border-color: hsla(0, 84%, 60%, 0.4);
+            color: var(--danger);
         }
 
         @@keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-0.625rem); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Camera Fullscreen */
+        @@keyframes slideOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-0.625rem); }
+        }
+
+        /* Estilos adicionales de mensajes */
+        .message-loading {
+            background: hsla(204, 94%, 60%, 0.1);
+            border-color: hsla(204, 94%, 60%, 0.4);
+            color: var(--info);
+        }
+
+        .message-warning {
+            background: hsla(38, 92%, 50%, 0.1);
+            border-color: hsla(38, 92%, 50%, 0.4);
+            color: var(--warning);
+        }
+
+        .message-info {
+            background: hsla(204, 94%, 60%, 0.1);
+            border-color: hsla(204, 94%, 60%, 0.4);
+            color: var(--info);
+        }
+
+        [data-theme="dark"] .message-loading,
+        [data-theme="dark"] .message-info {
+            color: hsl(204, 94%, 70%);
+        }
+
+        [data-theme="dark"] .message-warning {
+            color: hsl(38, 92%, 60%);
+        }
+
+        [data-theme="dark"] .message-success {
+            background: hsla(142, 71%, 45%, 0.15);
+            border-color: hsla(142, 71%, 45%, 0.5);
+            color: hsl(142, 71%, 55%);
+        }
+
+        [data-theme="dark"] .message-error {
+            background: hsla(0, 84%, 60%, 0.15);
+            border-color: hsla(0, 84%, 60%, 0.5);
+            color: hsl(0, 84%, 70%);
+        }
+
+        /* Camera Modal - Mantiene fixed porque es overlay full-screen */
         .camera-modal {
             display: none;
             position: fixed;
@@ -621,7 +669,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: #000;
+            background: hsl(0, 0%, 0%);
             z-index: 1000;
             flex-direction: column;
         }
@@ -631,7 +679,7 @@
         }
 
         .camera-header {
-            padding: 16px;
+            padding: 1rem;
             background: rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
@@ -640,16 +688,16 @@
         }
 
         .camera-title {
-            font-size: 18px;
+            font-size: 1.125rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 0.625rem;
         }
 
         .close-camera {
-            width: 40px;
-            height: 40px;
+            width: 2.75rem;
+            height: 2.75rem;
             border-radius: 50%;
             background: rgba(255,255,255,0.2);
             border: none;
@@ -658,7 +706,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 1.375rem;
         }
 
         .camera-viewport {
@@ -677,16 +725,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 260px;
-            height: 260px;
-            border: 3px solid #10b981;
-            border-radius: 24px;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.7);
+            width: 16.25rem;
+            height: 16.25rem;
+            border: 0.1875rem solid var(--success);
+            border-radius: 1.5rem;
+            box-shadow: 0 0 0 62.4375rem rgba(0,0,0,0.7);
             animation: scanPulse 2s infinite;
         }
 
         .scan-overlay.scanning {
-            border-color: #f59e0b;
+            border-color: var(--warning);
         }
 
         @@keyframes scanPulse {
@@ -696,20 +744,20 @@
 
         .scan-hint {
             position: absolute;
-            bottom: 40px;
+            bottom: 2.5rem;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             color: white;
-            padding: 12px 24px;
-            border-radius: 24px;
-            font-size: 14px;
+            padding: 0.875rem 1.5rem;
+            border-radius: 1.5rem;
+            font-size: 0.9375rem;
             max-width: 90%;
             text-align: center;
         }
 
         /* Responsive */
-        @@media (min-width: 640px) {
+        @@media(min-width: 40em) {
             .guest-buttons {
                 flex-direction: row;
             }
@@ -722,17 +770,17 @@
         /* iOS Safe Areas */
         @@supports (-webkit-touch-callout: none) {
             .header {
-                padding-top: max(12px, env(safe-area-inset-top));
+                padding-top: max(0.75rem, env(safe-area-inset-top));
             }
 
             .content {
-                padding-bottom: max(16px, env(safe-area-inset-bottom));
+                padding-bottom: max(1rem, env(safe-area-inset-bottom));
             }
 
             .card,
             .guest-card {
-                backdrop-filter: blur(15px) !important;
-                -webkit-backdrop-filter: blur(15px) !important;
+                backdrop-filter: blur(0.9375rem) !important;
+                -webkit-backdrop-filter: blur(0.9375rem) !important;
             }
         }
     </style>
@@ -786,8 +834,8 @@
                     @if (User.Identity?.IsAuthenticated == true) { <text>2</text> } else { <text>1</text> }
                 </div>
                 <div class="instruction-content">
-                    <div class="instruction-title">Escanear QR del Profesor</div>
-                    <div class="instruction-desc">Abre la cámara y escanea el código QR que muestra tu profesor en pantalla.</div>
+                    <div class="instruction-title">Escanear tu QR de Estudiante</div>
+                    <div class="instruction-desc">Abre la cámara y escanea TU código QR de estudiante (formato EST123456).</div>
                 </div>
             </div>
             <div class="instruction-item">
@@ -795,8 +843,8 @@
                     @if (User.Identity?.IsAuthenticated == true) { <text>3</text> } else { <text>2</text> }
                 </div>
                 <div class="instruction-content">
-                    <div class="instruction-title">Registro Manual</div>
-                    <div class="instruction-desc">Ingresa tu ID de estudiante manualmente en el formulario de abajo.</div>
+                    <div class="instruction-title">Registro Manual por Código</div>
+                    <div class="instruction-desc">Ingresa tu código de estudiante (EST123456) manualmente en el formulario de abajo.</div>
                 </div>
             </div>
         </div>
@@ -845,7 +893,7 @@
             <div class="card-title">Escanear Código QR</div>
         </div>
         <div class="card-desc">
-            <i class="fas fa-info-circle"></i> Abre la cámara y escanea el código QR de la clase mostrado por el profesor
+            <i class="fas fa-info-circle"></i> Abre la cámara y escanea TU código QR de estudiante para registrar tu asistencia
         </div>
         <button class="btn btn-primary" id="openCameraBtn">
             <i class="fas fa-qrcode"></i>
@@ -859,26 +907,26 @@
             <div class="card-icon">
                 <i class="fas fa-keyboard"></i>
             </div>
-            <div class="card-title">Registro Manual por ID</div>
+            <div class="card-title">Registro Manual por Código</div>
         </div>
         <div class="card-desc">
-            <i class="fas fa-info-circle"></i> Ingresa tu número de ID de estudiante para registrar tu asistencia manualmente
+            <i class="fas fa-info-circle"></i> Ingresa tu código de estudiante (EST123456) para registrar tu asistencia manualmente
         </div>
         <form id="manualForm">
             <div class="form-group">
                 <label class="form-label" for="studentId">
                     <i class="fas fa-id-card"></i>
-                    ID de Estudiante
+                    Código de Estudiante
                 </label>
                 <input
-                    type="number"
+                    type="text"
                     id="studentId"
                     class="form-input"
-                    placeholder="Ej: 12345678"
+                    placeholder="EST123456"
                     required
-                    min="1"
-                    pattern="[0-9]*"
-                    inputmode="numeric">
+                    maxlength="9"
+                    pattern="[Ee][Ss][Tt][0-9]{6}"
+                    style="text-transform: uppercase;">
             </div>
             <button type="submit" class="btn btn-primary">
                 <i class="fas fa-check-circle"></i>
@@ -917,6 +965,34 @@
         const claseId = @ViewBag.ClaseId;
         let currentNonce = "@ViewBag.Nonce";
         let qrScanner = null;
+        let isProcessing = false;
+        let lastRegisteredCode = null;
+
+        // Cache local para evitar duplicados en la misma sesión
+        const CACHE_KEY = `asistencia_${claseId}_${currentNonce}`;
+
+        // Verificar si ya se registró en esta sesión
+        function yaSeRegistro(codigo) {
+            const cached = sessionStorage.getItem(CACHE_KEY);
+            return cached === codigo;
+        }
+
+        // Guardar registro en cache
+        function guardarEnCache(codigo) {
+            sessionStorage.setItem(CACHE_KEY, codigo);
+            lastRegisteredCode = codigo;
+        }
+
+        // Helper para iconos de estado
+        function getEstadoIcon(estado) {
+            const icons = {
+                'Presente': '<i class="fas fa-check-circle icon-presente"></i>',
+                'Tardanza': '<i class="fas fa-clock icon-tardanza"></i>',
+                'Ausente': '<i class="fas fa-times-circle icon-ausente"></i>',
+                'Justificado': '<i class="fas fa-file-medical icon-justificado"></i>'
+            };
+            return icons[estado] || '<i class="fas fa-check-circle icon-success"></i>';
+        }
 
         // Cargar info clase
         async function loadClassInfo() {
@@ -932,51 +1008,192 @@
             }
         }
 
-        // Mostrar mensaje
-        function showMessage(text, type = 'error') {
+        // Mostrar mensaje con animación
+        function showMessage(text, type = 'error', autoHide = true, duration = null) {
             const area = document.getElementById('messageArea');
-            const icon = type === 'success' ? 'check-circle' : 'exclamation-circle';
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle',
+                loading: 'spinner fa-spin'
+            };
+
+            // Duración por defecto según tipo
+            if (!duration) {
+                duration = type === 'success' ? 8000 : // Éxito: 8 segundos
+                          type === 'error' ? 6000 :   // Error: 6 segundos
+                          type === 'warning' ? 7000 : // Warning: 7 segundos
+                          5000;                       // Otros: 5 segundos
+            }
+
             area.innerHTML = `
-                <div class="message message-${type}">
-                    <i class="fas fa-${icon}"></i>
+                <div class="message message-${type}" style="animation: slideIn 0.3s ease-out;">
+                    <i class="fas fa-${icons[type] || icons.info}"></i>
                     <div class="message-text">${text}</div>
                 </div>
             `;
-            setTimeout(() => area.innerHTML = '', 6000);
+
+            // Scroll suave al mensaje
+            area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Auto-ocultar después del tiempo especificado (excepto loading)
+            if (autoHide && type !== 'loading') {
+                setTimeout(() => {
+                    const msg = area.querySelector('.message');
+                    if (msg) {
+                        msg.style.animation = 'slideOut 0.3s ease-out';
+                        setTimeout(() => area.innerHTML = '', 300);
+                    }
+                }, duration);
+            }
         }
 
-        // Registro manual
+        // Limpiar mensajes
+        function clearMessages() {
+            document.getElementById('messageArea').innerHTML = '';
+        }
+
+        // Registro manual con optimizaciones
         document.getElementById('manualForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const studentId = document.getElementById('studentId').value;
+
+            // Evitar doble submit
+            if (isProcessing) {
+                showMessage('<i class="fas fa-hourglass-half icon-warning"></i> Procesando... por favor espera', 'warning');
+                return;
+            }
+
+            const codigoAlumno = document.getElementById('studentId').value.trim().toUpperCase();
+
+            // Validar formato EST123456
+            if (!/^EST\d{6}$/.test(codigoAlumno)) {
+                showMessage('❌ Formato inválido. Debe ser EST seguido de 6 dígitos (Ej: EST123456)', 'error');
+                return;
+            }
+
+            // Verificar cache local primero
+            if (yaSeRegistro(codigoAlumno)) {
+                showMessage(`✅ Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
+                return;
+            }
+
+            isProcessing = true;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Registrando...</span>';
+
+            // Mostrar mensaje de loading
+            showMessage('⏳ Registrando tu asistencia...', 'loading', false);
 
             try {
-                const res = await fetch('/api/asistencias/alumno-scan', {
+                const startTime = Date.now();
+
+                const res = await fetch('/api/asistencias/alumno-scan-codigo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        alumnoId: parseInt(studentId),
+                        codigoAlumno: codigoAlumno,
                         claseId,
                         nonce: currentNonce
                     })
                 });
 
                 const data = await res.json();
+                const elapsed = Date.now() - startTime;
+
+                // Mínimo de 500ms para que se vea el feedback
+                if (elapsed < 500) {
+                    await new Promise(resolve => setTimeout(resolve, 500 - elapsed));
+                }
 
                 if (res.ok) {
-                    showMessage(`✅ ${data.mensaje || 'Asistencia registrada correctamente'}`, 'success');
+                    // Guardar en cache
+                    guardarEnCache(codigoAlumno);
+
+                    const estado = data.estudiante?.estado || 'Registrado';
+                    const nombre = data.estudiante?.nombre || '';
+                    const icon = getEstadoIcon(estado);
+
+                    showMessage(
+                        `${icon} <strong>¡Asistencia registrada!</strong><br>` +
+                        `${nombre ? `Estudiante: ${nombre}<br>` : ''}` +
+                        `Código: ${codigoAlumno}<br>` +
+                        `Estado: <strong>${estado}</strong>`,
+                        'success'
+                    );
+
                     document.getElementById('manualForm').reset();
                 } else {
                     throw new Error(data.mensaje || 'Error al registrar asistencia');
                 }
             } catch (error) {
-                showMessage(`❌ ${error.message}`, 'error');
+                let msg = error.message;
+                let type = 'error';
+
+                // Mensajes optimizados
+                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
+                    msg = '<i class="fas fa-check-circle icon-success"></i> Tu asistencia ya fue registrada anteriormente';
+                    type = 'success';
+                    guardarEnCache(codigoAlumno); // Guardar en cache también
+                } else if (msg.includes('no encontrado')) {
+                    msg = '<i class="fas fa-times-circle icon-error"></i> Código no encontrado. Verifica que sea correcto (EST123456)';
+                } else if (msg.includes('no activa') || msg.includes('no está activa')) {
+                    msg = '<i class="fas fa-exclamation-triangle icon-warning"></i> Esta clase no está activa en este momento';
+                    type = 'warning';
+                } else if (msg.includes('expirado') || msg.includes('vencido')) {
+                    msg = '<i class="fas fa-hourglass-end icon-warning"></i> El código QR ha expirado. Solicita uno nuevo al profesor';
+                    type = 'warning';
+                } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
+                          msg.toLowerCase().includes('ya no se puede') ||
+                          msg.toLowerCase().includes('personal')) {
+                    msg = '<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          '<small><i class="fas fa-lightbulb"></i> Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
+                    msg = '<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          '<small><i class="fas fa-lightbulb"></i> Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else {
+                    msg = `<i class="fas fa-times-circle icon-error"></i> ${msg}`;
+                }
+
+                showMessage(msg, type);
+            } finally {
+                isProcessing = false;
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
             }
         });
 
-        // Registro automático
-        document.getElementById('autoRegisterBtn')?.addEventListener('click', async () => {
+        // Registro automático con optimizaciones
+        document.getElementById('autoRegisterBtn')?.addEventListener('click', async function() {
+            if (isProcessing) {
+                showMessage('⏳ Procesando... por favor espera', 'warning');
+                return;
+            }
+
+            // Verificar cache (usando username como código)
+            const username = '@User.Identity?.Name';
+            if (yaSeRegistro(username)) {
+                showMessage(`✅ Ya registraste tu asistencia en esta sesión`, 'success');
+                return;
+            }
+
+            isProcessing = true;
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Registrando...</span>';
+
+            showMessage('⏳ Registrando tu asistencia automáticamente...', 'loading', false);
+
             try {
+                const startTime = Date.now();
+
                 const res = await fetch('/api/asistencias/alumno-scan-auto', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -984,14 +1201,63 @@
                 });
 
                 const data = await res.json();
+                const elapsed = Date.now() - startTime;
+
+                if (elapsed < 500) {
+                    await new Promise(resolve => setTimeout(resolve, 500 - elapsed));
+                }
 
                 if (res.ok) {
-                    showMessage(`✅ ${data.mensaje || 'Asistencia registrada correctamente'}`, 'success');
+                    guardarEnCache(username);
+
+                    const estado = data.estudiante?.estado || 'Registrado';
+                    const icon = estado === 'Presente' ? '✅' :
+                                 estado === 'Tardanza' ? '⏰' : '❌';
+
+                    showMessage(
+                        `${icon} <strong>¡Asistencia registrada automáticamente!</strong><br>` +
+                        `Usuario: ${username}<br>` +
+                        `Estado: <strong>${estado}</strong>`,
+                        'success'
+                    );
                 } else {
                     throw new Error(data.mensaje || 'Error al registrar');
                 }
             } catch (error) {
-                showMessage(`❌ ${error.message}`, 'error');
+                let msg = error.message;
+                let type = 'error';
+
+                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
+                    msg = '✅ Tu asistencia ya fue registrada anteriormente';
+                    type = 'success';
+                    guardarEnCache(username);
+                } else if (msg.includes('no activa')) {
+                    msg = '⚠️ Esta clase no está activa en este momento';
+                    type = 'warning';
+                } else if (msg.includes('expirado')) {
+                    msg = '⏱️ El código QR ha expirado. Solicita uno nuevo al profesor';
+                    type = 'warning';
+                } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
+                          msg.toLowerCase().includes('ya no se puede') ||
+                          msg.toLowerCase().includes('personal')) {
+                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
+                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else {
+                    msg = `❌ ${msg}`;
+                }
+
+                showMessage(msg, type);
+            } finally {
+                isProcessing = false;
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         });
 
@@ -1044,38 +1310,169 @@
             qrScanner.start();
         }
 
-        async function handleQRCode(data) {
-            overlay.classList.remove('scanning');
-            closeCamera();
+        // Extraer código de estudiante del QR
+        function extractCodigo(qrData) {
+            // Formato directo EST123456
+            if (/^EST\d{6}$/i.test(qrData)) return qrData.toUpperCase();
 
-            const studentId = document.getElementById('studentId').value;
-            if (!studentId) {
-                showMessage('⚠️ Por favor ingresa tu ID de estudiante primero', 'error');
+            // Formato JSON
+            try {
+                if (qrData.startsWith('{')) {
+                    const data = JSON.parse(qrData);
+                    return data.studentCode || data.codigo || data.code;
+                }
+            } catch (e) {}
+
+            // Buscar patrón EST123456 en el texto
+            const match = qrData.match(/EST\d{6}/i);
+            return match ? match[0].toUpperCase() : null;
+        }
+
+        async function handleQRCode(data) {
+            // Evitar procesar si ya está procesando
+            if (isProcessing) {
                 return;
             }
 
+            overlay.classList.remove('scanning');
+            closeCamera();
+
+            // Extraer código de estudiante del QR escaneado
+            const codigoAlumno = extractCodigo(data);
+
+            if (!codigoAlumno) {
+                showMessage('⚠️ Código QR no válido. Asegúrate de escanear tu QR de estudiante (formato EST123456)', 'warning');
+                return;
+            }
+
+            // Verificar cache inmediatamente
+            if (yaSeRegistro(codigoAlumno)) {
+                showMessage(`✅ Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
+                return;
+            }
+
+            // Llenar el input con el código escaneado
+            document.getElementById('studentId').value = codigoAlumno;
+
+            isProcessing = true;
+
+            // Feedback inmediato - UI Optimista
+            showMessage(`⏳ Registrando ${codigoAlumno}...`, 'loading', false);
+
+            // Registrar asistencia con el código escaneado
             try {
-                const res = await fetch('/api/asistencias/alumno-scan', {
+                const startTime = Date.now();
+
+                const res = await fetch('/api/asistencias/alumno-scan-codigo', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        alumnoId: parseInt(studentId),
+                        codigoAlumno: codigoAlumno,
                         claseId,
                         nonce: currentNonce
                     })
                 });
 
                 const result = await res.json();
+                const elapsed = Date.now() - startTime;
+
+                // Mínimo 400ms para feedback visual
+                if (elapsed < 400) {
+                    await new Promise(resolve => setTimeout(resolve, 400 - elapsed));
+                }
 
                 if (res.ok) {
-                    showMessage(`✅ ${result.mensaje || 'Asistencia registrada'}`, 'success');
+                    // Guardar en cache
+                    guardarEnCache(codigoAlumno);
+
+                    const estado = result.estudiante?.estado || 'Registrado';
+                    const nombre = result.estudiante?.nombre || '';
+                    const icon = estado === 'Presente' ? '✅' :
+                                 estado === 'Tardanza' ? '⏰' : '❌';
+
+                    showMessage(
+                        `${icon} <strong>¡Asistencia registrada por QR!</strong><br>` +
+                        `${nombre ? `Estudiante: ${nombre}<br>` : ''}` +
+                        `Código: ${codigoAlumno}<br>` +
+                        `Estado: <strong>${estado}</strong>`,
+                        'success'
+                    );
+
+                    // Vibrar para feedback háptico (si está disponible)
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
                 } else {
                     throw new Error(result.mensaje || 'Error al registrar');
                 }
             } catch (error) {
-                showMessage(`❌ ${error.message}`, 'error');
+                let msg = error.message;
+                let type = 'error';
+
+                // Mensajes optimizados y específicos
+                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
+                    msg = `✅ Tu asistencia ya fue registrada con ${codigoAlumno}`;
+                    type = 'success';
+                    guardarEnCache(codigoAlumno);
+                } else if (msg.includes('no encontrado')) {
+                    msg = `❌ El código ${codigoAlumno} no existe en el sistema`;
+                } else if (msg.includes('no activa')) {
+                    msg = '⚠️ Esta clase no está activa actualmente';
+                    type = 'warning';
+                } else if (msg.includes('expirado') || msg.includes('vencido')) {
+                    msg = '⏱️ El código QR ha expirado. Pide uno nuevo al profesor';
+                    type = 'warning';
+                } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
+                          msg.toLowerCase().includes('ya no se puede') ||
+                          msg.toLowerCase().includes('personal')) {
+                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          `<small>Código escaneado: ${codigoAlumno}</small><br>` +
+                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
+                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
+                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
+                          `<small>Ya registrado: ${lastRegisteredCode} | Intentaste: ${codigoAlumno}</small><br>` +
+                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                    type = 'warning';
+                } else {
+                    msg = `❌ ${msg}`;
+                }
+
+                showMessage(msg, type);
+
+                // Vibrar error
+                if (navigator.vibrate && type === 'error') {
+                    navigator.vibrate(200);
+                }
+            } finally {
+                isProcessing = false;
             }
         }
+
+        // Validación en tiempo real del input
+        const studentIdInput = document.getElementById('studentId');
+        studentIdInput?.addEventListener('input', (e) => {
+            let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            e.target.value = value;
+
+            // Validar formato completo EST123456
+            const valid = /^EST\d{6}$/.test(value);
+            const partial = /^(E|ES|EST|EST\d{1,5})$/.test(value);
+
+            e.target.classList.remove('valid', 'invalid');
+            if (valid) {
+                e.target.style.borderColor = 'hsl(142, 71%, 45%)';
+                e.target.style.boxShadow = '0 0 0 0.25rem hsla(142, 71%, 45%, 0.15)';
+            } else if (value && !partial) {
+                e.target.style.borderColor = 'hsl(0, 84%, 60%)';
+                e.target.style.boxShadow = '0 0 0 0.25rem hsla(0, 84%, 60%, 0.15)';
+            } else {
+                e.target.style.borderColor = '';
+                e.target.style.boxShadow = '';
+            }
+        });
 
         // Inicializar
         loadClassInfo();

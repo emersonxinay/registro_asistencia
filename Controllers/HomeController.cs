@@ -36,25 +36,9 @@ public class HomeController : Controller
         ViewBag.ClaseId = claseId;
         ViewBag.Nonce = nonce;
 
-        // Detectar si es móvil basado en User-Agent
-        var userAgent = Request.Headers.UserAgent.ToString().ToLower();
-        bool isMobile = userAgent.Contains("mobile") ||
-                       userAgent.Contains("android") ||
-                       userAgent.Contains("iphone") ||
-                       userAgent.Contains("ipod") ||
-                       userAgent.Contains("blackberry") ||
-                       userAgent.Contains("windows phone");
-
-        // Usar vista optimizada para móviles
-        if (isMobile)
-        {
-            Console.WriteLine("📱 Dispositivo móvil detectado - usando vista ScanMobile");
-            return View("ScanMobile");
-        }
-
-        // Vista estándar para desktop
-        Console.WriteLine("💻 Dispositivo desktop detectado - usando vista ScanSimple");
-        return View("ScanSimple");
+        // Scan.cshtml es ahora completamente responsive - funciona para móvil y desktop
+        Console.WriteLine("📱 Usando vista Scan responsive (mobile & desktop)");
+        return View("Scan");
     }
 
     [Route("asistencias/{claseId:int?}")]
