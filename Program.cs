@@ -76,6 +76,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IDataService, EfDataService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IReportesService, ReportesService>();
 builder.Services.AddSingleton<IQrService, QrService>();
 builder.Services.AddSingleton<ICsvService, CsvService>();
 builder.Services.AddSingleton<ILoggingService, ConsoleLoggingService>();

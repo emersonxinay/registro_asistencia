@@ -1,0 +1,473 @@
+@{
+    ViewData["Title"] = "Reportes de Asistencia";
+}
+
+@section Styles {
+    <style>
+        .reportes-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--space-6);
+        }
+
+        .reportes-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .reportes-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .reportes-header p {
+            margin: var(--space-2) 0 0 0;
+            opacity: 0.9;
+        }
+
+        /* Filtros */
+        .filtros-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow);
+        }
+
+        .filtros-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0 0 var(--space-4) 0;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .filtros-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .form-input, .form-select {
+            padding: var(--space-3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-darker);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--success-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Resultados */
+        .resultados-container {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            box-shadow: var(--shadow);
+            min-height: 400px;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            color: var(--text-secondary);
+            gap: var(--space-4);
+        }
+
+        .loading i {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-8);
+            color: var(--text-muted);
+            gap: var(--space-3);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            opacity: 0.3;
+        }
+
+        /* Estadísticas Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .stat-card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-card-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--space-1);
+        }
+
+        /* Tablas */
+        .table-container {
+            overflow-x: auto;
+            margin-top: var(--space-4);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table thead {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .data-table th {
+            padding: var(--space-3);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: var(--space-3);
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .data-table tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            padding: var(--space-1) var(--space-3);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: var(--text-primary);
+        }
+
+        .badge-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .badge-info {
+            background: var(--info);
+            color: white;
+        }
+
+        /* Gráficas */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-6);
+            margin: var(--space-6) 0;
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+        }
+
+        .chart-card h4 {
+            margin: 0 0 var(--space-4) 0;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .reportes-container {
+                padding: var(--space-4);
+            }
+
+            .filtros-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+        }
+    </style>
+}
+
+<div class="reportes-container">
+    <!-- Header -->
+    <div class="reportes-header">
+        <h1>
+            <i data-lucide="bar-chart-3"></i>
+            Reportes de Asistencia
+        </h1>
+        <p>Genera reportes detallados por curso, materia o estudiante en cualquier rango de fechas</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-card">
+        <h2 class="filtros-title">
+            <i data-lucide="filter"></i>
+            Filtros de Búsqueda
+        </h2>
+
+        <div class="filtros-grid">
+            <!-- Tipo de Reporte -->
+            <div class="form-group">
+                <label for="tipoReporte">
+                    <i data-lucide="file-text"></i>
+                    Tipo de Reporte
+                </label>
+                <select id="tipoReporte" class="form-select">
+                    <option value="">-- Seleccionar --</option>
+                    <option value="curso">Reporte por Curso</option>
+                    <option value="ramo">Reporte por Materia/Ramo</option>
+                    <option value="alumno">Reporte por Estudiante</option>
+                </select>
+            </div>
+
+            <!-- Fecha Inicio -->
+            <div class="form-group">
+                <label for="fechaInicio">
+                    <i data-lucide="calendar"></i>
+                    Fecha Inicio
+                </label>
+                <input type="date" id="fechaInicio" class="form-input" />
+            </div>
+
+            <!-- Fecha Fin -->
+            <div class="form-group">
+                <label for="fechaFin">
+                    <i data-lucide="calendar"></i>
+                    Fecha Fin
+                </label>
+                <input type="date" id="fechaFin" class="form-input" />
+            </div>
+
+            <!-- Curso -->
+            <div class="form-group" id="grupoCurso" style="display: none;">
+                <label for="curso">
+                    <i data-lucide="users"></i>
+                    Curso
+                </label>
+                <select id="curso" class="form-select">
+                    <option value="">-- Seleccionar Curso --</option>
+                </select>
+            </div>
+
+            <!-- Ramo -->
+            <div class="form-group" id="grupoRamo" style="display: none;">
+                <label for="ramo">
+                    <i data-lucide="book"></i>
+                    Materia/Ramo
+                </label>
+                <select id="ramo" class="form-select">
+                    <option value="">-- Seleccionar Ramo --</option>
+                </select>
+            </div>
+
+            <!-- Alumno -->
+            <div class="form-group" id="grupoAlumno" style="display: none;">
+                <label for="alumno">
+                    <i data-lucide="user"></i>
+                    Estudiante
+                </label>
+                <select id="alumno" class="form-select">
+                    <option value="">-- Seleccionar Estudiante --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" id="btnGenerarReporte">
+                <i data-lucide="trending-up"></i>
+                Generar Reporte
+            </button>
+            <button class="btn btn-success" id="btnExportarCSV" style="display: none;">
+                <i data-lucide="download"></i>
+                Exportar a CSV
+            </button>
+            <button class="btn btn-secondary" id="btnLimpiar">
+                <i data-lucide="x-circle"></i>
+                Limpiar Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="resultados-container" id="resultados">
+        <div class="empty-state">
+            <i data-lucide="pie-chart"></i>
+            <h3>Selecciona los filtros y genera un reporte</h3>
+            <p>Elige el tipo de reporte, las fechas y los parámetros necesarios</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/reportes.js"></script>
+    <script src="~/js/chart-functions.js"></script>
+}
