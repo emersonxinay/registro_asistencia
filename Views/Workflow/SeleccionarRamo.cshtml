@@ -4,16 +4,16 @@
     <!-- Header del Workflow -->
     <div class="workflow-header">
         <div class="workflow-breadcrumb">
-            <span class="step completed">[OK] 1. Curso Elegido</span>
-            <span class="step active">🎯 2. Elegir Materia</span>
-            <span class="step">⚙️ 3. Configurar Clase</span>
-            <span class="step">🎉 4. ¡Clase Lista!</span>
+            <span class="step completed"><i class="fas fa-check"></i> 1. Curso Elegido</span>
+            <span class="step active"><i class="fas fa-bullseye"></i> 2. Elegir Materia</span>
+            <span class="step"><i class="fas fa-cog"></i> 3. Configurar Clase</span>
+            <span class="step"><i class="fas fa-flag-checkered"></i> 4. ¡Clase Lista!</span>
         </div>
-        <h1>🎯 Paso 2: Elige la Materia/Asignatura</h1>
+        <h1><i class="fas fa-bullseye"></i> Paso 2: Elige la Materia/Asignatura</h1>
         <p>Selecciona la <strong>materia específica</strong> del curso <strong>@Model.Curso.Nombre</strong> donde vas a crear tu nueva clase</p>
         <div class="workflow-explanation">
             <div class="explanation-card">
-                <div class="explanation-icon">💡</div>
+                <div class="explanation-icon"><i class="fas fa-lightbulb"></i></div>
                 <div class="explanation-text">
                     <strong>¿Qué viene después?</strong> Una vez que elijas la materia, podrás configurar los detalles de tu clase (fecha, hora, duración) y generar el código QR para que los estudiantes registren su asistencia.
                 </div>
@@ -24,7 +24,7 @@
     <!-- Información del Curso Seleccionado -->
     <div class="selected-course-info">
         <div class="course-summary">
-            <div class="course-icon">📚</div>
+            <div class="course-icon"><i class="fas fa-book"></i></div>
             <div class="course-details">
                 <h3>@Model.Curso.Nombre</h3>
                 <p class="course-code">@Model.Curso.Codigo</p>
@@ -62,13 +62,13 @@
         {
             <div class="no-ramos">
                 <div class="empty-state">
-                    <div class="empty-icon">📖</div>
-                    <h3>[ERROR] No puedes crear clases aún</h3>
+                    <div class="empty-icon"><i class="fas fa-book-open"></i></div>
+                    <h3><i class="fas fa-exclamation-triangle"></i> No puedes crear clases aún</h3>
                     <p><strong>Este curso no tiene materias/asignaturas configuradas.</strong></p>
                     <p>Para crear una clase, primero necesitas tener al menos una materia o asignatura en este curso. Las clases se crean dentro de materias específicas.</p>
                     <div class="empty-actions">
                         <a href="/docente/cursos/@Model.Curso.Id" class="btn-primary">
-                            📚 Gestionar Materias del Curso
+                            <i class="fas fa-book"></i> Gestionar Materias del Curso
                         </a>
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                 {
                     <div class="ramo-card" onclick="selectRamo(@ramo.Id, '@ramo.Nombre', @Model.Curso.Id)">
                         <div class="ramo-header">
-                            <div class="ramo-icon">📚</div>
+                            <div class="ramo-icon"><i class="fas fa-book"></i></div>
                             <div class="ramo-title">
                                 <h3>@ramo.Nombre</h3>
                                 <span class="ramo-code">@ramo.Codigo</span>
@@ -97,18 +97,18 @@
                         
                         <div class="ramo-stats">
                             <div class="stat-item">
-                                <span class="stat-icon">[TIME]</span>
+                                <span class="stat-icon"><i class="fas fa-clock"></i></span>
                                 <span class="stat-text">@ramo.HorasSemanales hrs/semana</span>
                             </div>
                             <div class="stat-item">
-                                <span class="stat-icon">📅</span>
+                                <span class="stat-icon"><i class="fas fa-calendar"></i></span>
                                 <span class="stat-text">@ramo.TotalClases clases creadas</span>
                             </div>
                         </div>
                         
                         <div class="ramo-actions">
                             <button class="btn-select" onclick="selectRamo(@ramo.Id, '@ramo.Nombre', @Model.Curso.Id)">
-                                <span>🎯 Crear Clase en @ramo.Nombre</span>
+                                <span><i class="fas fa-bullseye"></i> Crear Clase en @ramo.Nombre</span>
                                 <span class="arrow">→</span>
                             </button>
                         </div>
@@ -128,10 +128,10 @@
             @if (Model.Curso.EsPropietario)
             {
                 <a href="/workflow/curso/@Model.Curso.Id/asistencias" class="btn-outline">
-                    📊 Ver Asistencias del Curso
+                    <i class="fas fa-chart-bar"></i> Ver Asistencias del Curso
                 </a>
                 <a href="/docente/cursos/@Model.Curso.Id/ramos" class="btn-outline">
-                    ➕ Crear Nueva Materia
+                    <i class="fas fa-plus"></i> Crear Nueva Materia
                 </a>
             }
         </div>
@@ -146,7 +146,7 @@ function selectRamo(ramoId, ramoNombre, cursoId) {
     card.innerHTML = `
         <div class="loading-state">
             <div class="spinner"></div>
-            <p>🎯 Configurando nueva clase...</p>
+            <p><i class="fas fa-bullseye"></i> Configurando nueva clase...</p>
             <small>Te llevaremos al formulario de configuración</small>
         </div>
     `;

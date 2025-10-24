@@ -11,7 +11,7 @@
 
 body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #011620 0%, #161644 50%, #3a2174 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;

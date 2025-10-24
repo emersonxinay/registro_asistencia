@@ -55,7 +55,7 @@
                     <div class="form-grid">
                         <div class="form-group full-width">
                             <label for="nombre">
-                                <i data-lucide="tag"></i>
+                                <i class="fas fa-tag"></i>
                                 Nombre de la Clase *
                             </label>
                             <input 
@@ -70,7 +70,7 @@
                         
                         <div class="form-group full-width">
                             <label for="descripcion">
-                                <i data-lucide="file-text"></i>
+                                <i class="fas fa-file-alt"></i>
                                 Descripción (Opcional)
                             </label>
                             <textarea 
@@ -87,14 +87,14 @@
                 <!-- Programación de Tiempo -->
                 <div class="config-section">
                     <div class="section-header">
-                        <h3>[TIME] Programación de Tiempo</h3>
+                        <h3><i class="fas fa-clock"></i> Programación de Tiempo</h3>
                         <p>Configura cuándo se realizará la clase y su duración</p>
                     </div>
                     
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="fechaInicio">
-                                <i data-lucide="calendar"></i>
+                                <i class="fas fa-calendar"></i>
                                 Fecha de la Clase *
                             </label>
                             <input 
@@ -108,7 +108,7 @@
                         
                         <div class="form-group">
                             <label for="horaInicio">
-                                <i data-lucide="clock"></i>
+                                <i class="fas fa-clock"></i>
                                 Hora de Inicio *
                             </label>
                             <input 
@@ -121,7 +121,7 @@
                         
                         <div class="form-group">
                             <label for="duracionMinutos">
-                                <i data-lucide="timer"></i>
+                                <i class="fas fa-hourglass-half"></i>
                                 Duración (minutos) *
                             </label>
                             <select id="duracionMinutos" name="DuracionMinutos" required>
@@ -138,7 +138,7 @@
                         
                         <div class="form-group">
                             <label>
-                                <i data-lucide="calendar-check"></i>
+                                <i class="fas fa-calendar-check"></i>
                                 Hora de Finalización
                             </label>
                             <input 
@@ -154,14 +154,14 @@
                 <!-- Configuración de Asistencia -->
                 <div class="config-section">
                     <div class="section-header">
-                        <h3>[OK] Configuración de Asistencia</h3>
+                        <h3><i class="fas fa-check-circle"></i> Configuración de Asistencia</h3>
                         <p>Define las reglas para el registro de asistencia</p>
                     </div>
                     
                     <div class="attendance-config">
                         <div class="config-grid">
                             <div class="config-card">
-                                <div class="config-icon success">⏱️</div>
+                                <div class="config-icon success"><i class="fas fa-stopwatch"></i></div>
                                 <div class="config-content">
                                     <h4>Tiempo de Tolerancia</h4>
                                     <div class="tolerance-setting">
@@ -178,7 +178,7 @@
                             </div>
                             
                             <div class="config-card">
-                                <div class="config-icon warning">[WARNING]</div>
+                                <div class="config-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
                                 <div class="config-content">
                                     <h4>Después de la Tolerancia</h4>
                                     <p>Los estudiantes que lleguen después del tiempo de tolerancia serán marcados como "Tardanza"</p>
@@ -222,11 +222,11 @@
                     </div>
                     <div class="preview-stats">
                         <div class="stat-preview">
-                            <span class="stat-icon">[TIME]</span>
+                            <span class="stat-icon"><i class="fas fa-clock"></i></span>
                             <span id="previewDuracion">Duración por definir</span>
                         </div>
                         <div class="stat-preview">
-                            <span class="stat-icon">[OK]</span>
+                            <span class="stat-icon"><i class="fas fa-check-circle"></i></span>
                             <span id="previewTolerancia">Tolerancia por definir</span>
                         </div>
                     </div>
@@ -241,11 +241,11 @@
                 
                 <div class="primary-actions">
                     <button type="button" class="btn-outline" onclick="guardarBorrador()">
-                        <i data-lucide="save"></i>
+                        <i class="fas fa-save"></i>
                         Guardar Borrador
                     </button>
                     <button type="submit" class="btn-primary">
-                        <i data-lucide="play"></i>
+                        <i class="fas fa-play"></i>
                         Crear y Activar Clase
                     </button>
                 </div>
@@ -745,10 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById('toleranciaMinutos').addEventListener('change', updateToleranceDisplay);
     
-    // Inicializar iconos
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+    // Los iconos de FontAwesome se cargan automáticamente
 });
 
 function updatePreview() {

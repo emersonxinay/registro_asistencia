@@ -44,6 +44,7 @@
   --text-secondary: #64748b;
   --text-muted: #94a3b8;
   --text-inverse: #ffffff;
+  --text-label: rgb(0, 183, 255);
   
   --border: #e2e8f0;
   --border-light: #f1f5f9;
@@ -87,6 +88,11 @@
   --ease-in-back: cubic-bezier(0.6, -0.28, 0.735, 0.045);
   --ease-out-back: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* nuevos colores */
+.text_label{
+  background-color: var(--text-label);
 }
 
 /* Dark Theme Override */

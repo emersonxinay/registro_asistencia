@@ -9,7 +9,7 @@
             <span class="step">3. Configurar Clase</span>
             <span class="step">4. Clase Creada</span>
         </div>
-        <h1>📚 Paso 1: Selecciona un Curso</h1>
+        <h1><i class="fas fa-book"></i> Paso 1: Selecciona un Curso</h1>
         <p>Elige el curso para el cual deseas crear una nueva clase</p>
     </div>
 
@@ -19,7 +19,7 @@
         {
             <div class="no-courses">
                 <div class="empty-state">
-                    <div class="empty-icon">📚</div>
+                    <div class="empty-icon"><i class="fas fa-book"></i></div>
                     <h3>No tienes cursos asignados</h3>
                     <p>Solicita a un administrador que te asigne cursos o crea uno nuevo.</p>
                     <a href="/docente/cursos/crear" class="btn-primary">Crear Nuevo Curso</a>
@@ -37,7 +37,7 @@
                             <span class="course-code">@curso.Codigo</span>
                             @if (curso.EsPropietario)
                             {
-                                <span class="owner-badge">👑</span>
+                                <span class="owner-badge"><i class="fas fa-crown"></i></span>
                             }
                         </div>
                         
@@ -50,7 +50,7 @@
                         
                         <div class="course-stats">
                             <div class="stat-item">
-                                <span class="stat-icon">📖</span>
+                                <span class="stat-icon"><i class="fas fa-book-open"></i></span>
                                 <span class="stat-text">@curso.TotalRamos @(curso.TotalRamos == 1 ? "ramo" : "ramos")</span>
                             </div>
                         </div>

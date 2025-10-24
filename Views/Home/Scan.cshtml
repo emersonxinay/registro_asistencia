@@ -795,7 +795,7 @@
         </div>
         <div class="class-info-text">
             <div class="class-info-title" id="claseNombre">Cargando clase...</div>
-            <div class="class-info-name">Registro de Asistencia</div>
+            <div class="class-info-name" id="claseHorario">Registro de Asistencia</div>
         </div>
         <div class="class-id-badge">#@ViewBag.ClaseId</div>
     </div>
@@ -1000,11 +1000,68 @@
                 const res = await fetch(`/api/clases/${claseId}`);
                 if (res.ok) {
                     const data = await res.json();
-                    const name = data.nombreCompleto || `${data.asignatura || ''} - ${data.curso || ''}`.trim() || `Clase ${claseId}`;
+                    // Construir nombre completo: Nombre de Clase - Ramo (Curso)
+                    let name = '';
+
+                    if (data.asignatura) {
+                        name = data.asignatura;
+                    }
+
+                    // Agregar información del ramo si existe
+                    if (data.ramo && data.ramo.nombre) {
+                        if (name) name += ' - ';
+                        name += data.ramo.nombre;
+
+                        // Agregar curso si existe
+                        if (data.ramo.curso && data.ramo.curso.nombre) {
+                            name += ` (${data.ramo.curso.nombre})`;
+                        }
+                    }
+
+                    // Fallback si no hay información
+                    if (!name) {
+                        name = `Clase ${claseId}`;
+                    }
+
                     document.getElementById('claseNombre').textContent = name;
+
+                    // Mostrar horario de la clase
+                    if (data.inicioUtc) {
+                        const inicio = new Date(data.inicioUtc);
+                        const horaInicio = inicio.toLocaleTimeString('es-CL', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
+
+                        let horarioText = `<i class="fas fa-clock"></i> ${horaInicio}`;
+
+                        if (data.finUtc) {
+                            const fin = new Date(data.finUtc);
+                            const horaFin = fin.toLocaleTimeString('es-CL', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            });
+                            horarioText += ` - ${horaFin}`;
+
+                            // Verificar si la clase está activa o ya terminó
+                            const ahora = new Date();
+                            if (ahora < fin) {
+                                horarioText += ' <span style="color: var(--success); font-weight: 600;">(Activa)</span>';
+                            } else {
+                                horarioText += ' <span style="color: var(--text-muted); font-weight: 600;">(Finalizada)</span>';
+                            }
+                        } else {
+                            horarioText += ' - <span style="color: var(--success); font-weight: 600;">En curso</span>';
+                        }
+
+                        document.getElementById('claseHorario').innerHTML = horarioText;
+                    }
                 }
             } catch (e) {
                 document.getElementById('claseNombre').textContent = `Clase ${claseId}`;
+                document.getElementById('claseHorario').textContent = 'Registro de Asistencia';
             }
         }
 

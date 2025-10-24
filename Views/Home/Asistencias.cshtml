@@ -544,7 +544,7 @@
         <!-- Panel Clases Libres -->
         <div id="panelClasesLibres" class="panel active">
             <div class="form-group">
-                <label for="selectorClaseLibre">Seleccionar Clase Libre:</label>
+                <label for="selectorClaseLibre" class="text_label">Seleccionar Clase Libre:</label>
                 <select id="selectorClaseLibre" class="form-select">
                     <option value="">-- Cargando clases libres... --</option>
                 </select>
@@ -554,21 +554,21 @@
         <!-- Panel Clases con Curso -->
         <div id="panelClasesCurso" class="panel">
             <div class="form-group">
-                <label for="selectorCurso">1. Seleccionar Curso:</label>
+                <label for="selectorCurso" class="text_label">1. Seleccionar Curso:</label>
                 <select id="selectorCurso" class="form-select" onchange="cargarRamosPorCurso()">
                     <option value="">-- Seleccionar Curso --</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="selectorRamo">2. Seleccionar Ramo/Asignatura:</label>
+                <label for="selectorRamo" class="text_label">2. Seleccionar Ramo/Asignatura:</label>
                 <select id="selectorRamo" class="form-select" onchange="cargarClasesPorRamo()" disabled>
                     <option value="">-- Primero selecciona un curso --</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="selectorClase">3. Seleccionar Clase:</label>
+                <label for="selectorClase" class="text_label">3. Seleccionar Clase:</label>
                 <select id="selectorClase" class="form-select" disabled>
                     <option value="">-- Primero selecciona un ramo --</option>
                 </select>
@@ -624,7 +624,7 @@
     <!-- Resultados -->
     <div id="asistenciasList" class="results-container">
         <div class="alert alert-info">
-            <h3>Selecciona una clase para ver las asistencias</h3>
+            <h3 >Selecciona una clase para ver las asistencias</h3>
         </div>
     </div>
 </div>

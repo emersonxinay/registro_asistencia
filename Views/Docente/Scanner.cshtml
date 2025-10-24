@@ -6,12 +6,12 @@
 <div class="scanner-container">
     <div class="scanner-header">
         <div class="header-content">
-            <h1>📱 Escáner QR Docente</h1>
+            <h1><i class="fas fa-mobile-alt"></i> Escáner QR Docente</h1>
             <p>Escanea los códigos QR de los estudiantes para registrar asistencia</p>
         </div>
         <div class="header-actions">
             <button class="btn-secondary" onclick="toggleCamera()">
-                <i data-lucide="camera"></i>
+                <i class="fas fa-camera"></i>
                 <span id="cameraToggleText">Activar Cámara</span>
             </button>
         </div>
@@ -20,7 +20,7 @@
     @if (!Model.Any())
     {
         <div class="empty-state">
-            <div class="empty-icon">📚</div>
+            <div class="empty-icon"><i class="fas fa-book"></i></div>
             <h3>No tienes clases activas</h3>
             <p>Necesitas tener al menos una clase activa para usar el escáner de asistencia.</p>
             <div class="empty-actions">
@@ -32,7 +32,7 @@
     {
         <!-- Selección de Clase -->
         <div class="class-selection">
-            <h2>📖 Selecciona la Clase</h2>
+            <h2><i class="fas fa-book-open"></i> Selecciona la Clase</h2>
             <div class="classes-grid">
                 @foreach (var clase in Model)
                 {
@@ -76,11 +76,11 @@
 
                     <div class="scanner-controls">
                         <button class="btn-secondary" onclick="switchCamera()">
-                            <i data-lucide="refresh-cw"></i>
+                            <i class="fas fa-sync-alt"></i>
                             Cambiar Cámara
                         </button>
                         <button class="btn-outline" onclick="manualEntry()">
-                            <i data-lucide="keyboard"></i>
+                            <i class="fas fa-keyboard"></i>
                             Entrada Manual
                         </button>
                     </div>
@@ -88,7 +88,7 @@
 
                 <!-- Resultados de Escaneo -->
                 <div class="scan-results" id="scanResults">
-                    <h3>📋 Asistencias Registradas</h3>
+                    <h3><i class="fas fa-clipboard-list"></i> Asistencias Registradas</h3>
                     <div class="results-list" id="resultsList">
                         <!-- Se llenará dinámicamente -->
                     </div>
@@ -100,7 +100,7 @@
         <div class="modal" id="manualEntryModal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>✏️ Registro Manual de Asistencia</h3>
+                    <h3><i class="fas fa-edit"></i> Registro Manual de Asistencia</h3>
                     <button class="modal-close" onclick="closeModal()">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -642,23 +642,18 @@ function selectClass(classId, className) {
     // Mostrar información de clase seleccionada
     const selectedClassInfo = document.getElementById('selectedClassInfo');
     selectedClassInfo.innerHTML = `
-        <h3>📖 Clase Seleccionada: ${className}</h3>
+        <h3><i class="fas fa-book-open"></i> Clase Seleccionada: ${className}</h3>
         <p>Los estudiantes que escanees serán registrados para esta clase.</p>
         <div class="class-actions">
             <button class="btn-primary" onclick="startScanning()">
-                <i data-lucide="scan"></i>
+                <i class="fas fa-qrcode"></i>
                 Iniciar Escaneo
             </button>
         </div>
     `;
-    
+
     // Mostrar escáner
     document.getElementById('qrScanner').style.display = 'block';
-    
-    // Recargar iconos
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
 }
 
 function startScanning() {
@@ -743,7 +738,7 @@ function startQRDetection() {
             if (typeof jsQR !== 'undefined') {
                 const qrCode = jsQR(imageData.data, canvas.width, canvas.height);
                 if (qrCode) {
-                    console.log('🎯 QR Detectado:', qrCode.data);
+                    console.log('✓ QR Detectado:', qrCode.data);
                     processQRCode(qrCode.data);
                     return; // Parar el escaneo momentáneamente después de detectar
                 }
@@ -805,7 +800,7 @@ async function processQRCode(qrData) {
             };
 
             addScanResult(scanResult);
-            showSuccess(`[OK] ${result.asistencia.alumnoNombre} (${result.asistencia.alumnoCodigo}) registrado correctamente`);
+            showSuccess(`✓ ${result.asistencia.alumnoNombre} (${result.asistencia.alumnoCodigo}) registrado correctamente`);
 
             // Sonido de éxito (opcional)
             playSuccessSound();
@@ -819,7 +814,7 @@ async function processQRCode(qrData) {
             };
 
             addScanResult(errorResult);
-            showError(`[ERROR] ${result.message || 'Error procesando QR'}`);
+            showError(`✗ ${result.message || 'Error procesando QR'}`);
 
             // Sonido de error (opcional)
             playErrorSound();
@@ -836,7 +831,7 @@ async function processQRCode(qrData) {
         };
 
         addScanResult(errorResult);
-        showError('[ERROR] Error de conexión al procesar QR');
+        showError('✗ Error de conexión al procesar QR');
         playErrorSound();
     }
 }
@@ -925,7 +920,7 @@ async function registerManual() {
                 message: `Registrado manualmente: ${justification || 'Sin justificación'}`
             };
             addScanResult(scanResult);
-            showSuccess(`[OK] ${alumno.nombre} (${alumno.codigo}) registrado manualmente`);
+            showSuccess(`✓ ${alumno.nombre} (${alumno.codigo}) registrado manualmente`);
             closeModal();
         } else {
             const errorMsg = result.message || 'Error en el registro manual';
@@ -936,7 +931,7 @@ async function registerManual() {
                 message: errorMsg
             };
             addScanResult(errorResult);
-            showError(`[ERROR] ${errorMsg}`);
+            showError(`✗ ${errorMsg}`);
         }
         
     } catch (error) {
@@ -968,12 +963,12 @@ async function loadExistingAttendance() {
 }
 
 function showSuccess(message) {
-    console.log('[OK]', message);
+    console.log('✓', message);
     showNotification(message, 'success');
 }
 
 function showError(message) {
-    console.log('[ERROR]', message);
+    console.log('✗', message);
     showNotification(message, 'error');
 }
 
@@ -983,7 +978,7 @@ function showNotification(message, type) {
     notification.className = `notification ${type}`;
     notification.innerHTML = `
         <div class="notification-content">
-            <span class="notification-icon">${type === 'success' ? '[OK]' : '[ERROR]'}</span>
+            <span class="notification-icon"><i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i></span>
             <span class="notification-message">${message}</span>
         </div>
     `;
@@ -1083,12 +1078,8 @@ document.getElementById('manualEntryModal').addEventListener('click', (e) => {
     }
 });
 
-// Inicializar iconos cuando carga la página
+// Inicializar cuando carga la página
 document.addEventListener('DOMContentLoaded', function() {
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-
     // Agregar validación en tiempo real para el input de código de estudiante
     const studentCodeInput = document.getElementById('studentCode');
     if (studentCodeInput) {
