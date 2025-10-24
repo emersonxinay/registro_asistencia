@@ -288,6 +288,51 @@ public class ClasesController : ControllerBase
         return File(bytes, "image/png", $"qr-clase-{id}.png");
     }
 
+    /// <summary>
+    /// Endpoint público para obtener información básica de una clase (sin autenticación)
+    /// Usado por la página de scan para mostrar información a estudiantes no logueados
+    /// </summary>
+    [HttpGet("public/{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublicClassInfo(int id)
+    {
+        try
+        {
+            var clase = await _dataService.GetClaseAsync(id);
+            if (clase == null)
+                return NotFound(new { message = $"Clase con ID {id} no encontrada" });
+
+            // Retornar solo información pública de la clase
+            var publicInfo = new
+            {
+                id = clase.Id,
+                asignatura = clase.Asignatura,
+                inicioUtc = clase.InicioUtc,
+                finUtc = clase.FinUtc,
+                activa = clase.Activa,
+                descripcion = clase.Descripcion,
+                ramo = clase.Ramo != null ? new
+                {
+                    id = clase.Ramo.Id,
+                    nombre = clase.Ramo.Nombre,
+                    codigo = clase.Ramo.Codigo,
+                    curso = clase.Ramo.Curso != null ? new
+                    {
+                        id = clase.Ramo.Curso.Id,
+                        nombre = clase.Ramo.Curso.Nombre,
+                        codigo = clase.Ramo.Curso.Codigo
+                    } : null
+                } : null
+            };
+
+            return Ok(publicInfo);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener información de la clase: " + ex.Message });
+        }
+    }
+
     // Método helper para obtener el ID del usuario actual
     private int GetCurrentUserId()
     {

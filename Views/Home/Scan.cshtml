@@ -997,7 +997,8 @@
         // Cargar info clase
         async function loadClassInfo() {
             try {
-                const res = await fetch(`/api/clases/${claseId}`);
+                // Usar endpoint público que no requiere autenticación
+                const res = await fetch(`/api/clases/public/${claseId}`);
                 if (res.ok) {
                     const data = await res.json();
                     // Construir nombre completo: Nombre de Clase - Ramo (Curso)
