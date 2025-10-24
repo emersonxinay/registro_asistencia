@@ -112,7 +112,7 @@
                     <span>@userInitials.ToUpper()</span>
                 </div>
                 <div class="user-info-detailed">
-                    <strong>@User.Identity.Name</strong>
+                    <strong>@User.Identity?.Name</strong>
                     <small>@User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value</small>
                     <span class="user-badge @(User.IsInRole("Administrador") ? "admin" : "docente")">
                         @(User.IsInRole("Administrador") ? "Administrador" : "Docente")

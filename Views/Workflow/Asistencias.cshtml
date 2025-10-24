@@ -303,20 +303,33 @@
         <div class="asistencias-header">
             <div class="clase-info">
                 <div class="clase-details">
-                    <h1>@clase.NombreCompleto</h1>
+                    <h1>
+                        @{
+                            var nombreClase = clase.Asignatura ?? "Clase sin nombre";
+                            if (clase.Ramo != null)
+                            {
+                                nombreClase = clase.Ramo.Nombre;
+                                if (clase.Ramo.Curso != null)
+                                {
+                                    nombreClase += $" ({clase.Ramo.Curso.Nombre})";
+                                }
+                            }
+                        }
+                        @nombreClase
+                    </h1>
                     <div class="clase-meta">
                         <div class="meta-item">
-                            <i data-lucide="calendar"></i>
+                            <i class="fas fa-calendar"></i>
                             <span>@clase.InicioUtc.ToString("dd/MM/yyyy")</span>
                         </div>
                         <div class="meta-item">
-                            <i data-lucide="clock"></i>
+                            <i class="fas fa-clock"></i>
                             <span>@clase.InicioUtc.ToString("HH:mm")</span>
                         </div>
                         @if (clase.Ramo?.Curso != null)
                         {
                             <div class="meta-item">
-                                <i data-lucide="book"></i>
+                                <i class="fas fa-book"></i>
                                 <span>@clase.Ramo.Curso.Nombre</span>
                             </div>
                         }
