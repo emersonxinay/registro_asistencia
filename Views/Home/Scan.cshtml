@@ -1130,10 +1130,62 @@
                 return;
             }
 
-            // Verificar cache local primero
-            if (yaSeRegistro(codigoAlumno)) {
-                showMessage(`[OK] Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
-                return;
+            // Verificar si YA se usó este dispositivo/enlace para registrar
+            if (lastRegisteredCode) {
+                // Ya se registró alguien desde este dispositivo
+                if (lastRegisteredCode === codigoAlumno) {
+                    showMessage(
+                        `<i class="fas fa-check-circle icon-success"></i> <strong>Ya registraste tu asistencia</strong><br>` +
+                        `Código: ${codigoAlumno}<br>` +
+                        `<small>Tu asistencia ya está guardada en el sistema.</small>`,
+                        'success'
+                    );
+                    return;
+                } else {
+                    // Intentando registrar un código diferente
+                    // Verificar si el nuevo código ya está registrado en la clase
+                    showMessage('⏳ Verificando estado del estudiante...', 'loading', false);
+
+                    try {
+                        const checkRes = await fetch('/api/asistencias/alumno-scan-codigo', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                codigoAlumno: codigoAlumno,
+                                claseId,
+                                nonce: currentNonce
+                            })
+                        });
+
+                        const checkData = await checkRes.json();
+
+                        if (checkData.yaRegistrado) {
+                            showMessage(
+                                `<i class="fas fa-info-circle icon-info"></i> <strong>Este estudiante ya registró su asistencia</strong><br>` +
+                                `Código: ${codigoAlumno}<br>` +
+                                `<small><i class="fas fa-lightbulb"></i> Este enlace ya se usó para registrar a: ${lastRegisteredCode}</small>`,
+                                'info'
+                            );
+                        } else {
+                            showMessage(
+                                `<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este enlace</strong><br>` +
+                                `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                                `Intentas registrar: <strong>${codigoAlumno}</strong> (aún no registrado)<br>` +
+                                `<small><i class="fas fa-lightbulb"></i> <strong>Este estudiante NO está registrado aún.</strong> Pide al docente que escanee su QR físico para registrarlo.</small>`,
+                                'warning'
+                            );
+                        }
+                    } catch (error) {
+                        showMessage(
+                            `<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este enlace</strong><br>` +
+                            `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                            `Intentas registrar: <strong>${codigoAlumno}</strong><br>` +
+                            `<small><i class="fas fa-lightbulb"></i> Si este estudiante no está registrado, pide al docente que escanee su QR físico.</small>`,
+                            'warning'
+                        );
+                    }
+                    return;
+                }
             }
 
             isProcessing = true;
@@ -1403,10 +1455,61 @@
                 return;
             }
 
-            // Verificar cache inmediatamente
-            if (yaSeRegistro(codigoAlumno)) {
-                showMessage(`[OK] Ya registraste tu asistencia con el código ${codigoAlumno} en esta sesión`, 'success');
-                return;
+            // Verificar si YA se usó este dispositivo/enlace para registrar
+            if (lastRegisteredCode) {
+                // Ya se registró alguien desde este dispositivo
+                if (lastRegisteredCode === codigoAlumno) {
+                    showMessage(
+                        `<i class="fas fa-check-circle icon-success"></i> <strong>Ya registraste tu asistencia</strong><br>` +
+                        `Código: ${codigoAlumno}<br>` +
+                        `<small>Tu asistencia ya está guardada en el sistema.</small>`,
+                        'success'
+                    );
+                    return;
+                } else {
+                    // Intentando registrar un código diferente
+                    showMessage('⏳ Verificando estado del estudiante...', 'loading', false);
+
+                    try {
+                        const checkRes = await fetch('/api/asistencias/alumno-scan-codigo', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                codigoAlumno: codigoAlumno,
+                                claseId,
+                                nonce: currentNonce
+                            })
+                        });
+
+                        const checkData = await checkRes.json();
+
+                        if (checkData.yaRegistrado) {
+                            showMessage(
+                                `<i class="fas fa-info-circle icon-info"></i> <strong>Este estudiante ya registró su asistencia</strong><br>` +
+                                `Código: ${codigoAlumno}<br>` +
+                                `<small><i class="fas fa-lightbulb"></i> Este enlace ya se usó para registrar a: ${lastRegisteredCode}</small>`,
+                                'info'
+                            );
+                        } else {
+                            showMessage(
+                                `<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este enlace</strong><br>` +
+                                `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                                `QR escaneado: <strong>${codigoAlumno}</strong> (aún no registrado)<br>` +
+                                `<small><i class="fas fa-lightbulb"></i> <strong>Este estudiante NO está registrado aún.</strong> Pide al docente que escanee su QR físico para registrarlo.</small>`,
+                                'warning'
+                            );
+                        }
+                    } catch (error) {
+                        showMessage(
+                            `<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este enlace</strong><br>` +
+                            `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                            `QR escaneado: <strong>${codigoAlumno}</strong><br>` +
+                            `<small><i class="fas fa-lightbulb"></i> Si este estudiante no está registrado, pide al docente que escanee su QR físico.</small>`,
+                            'warning'
+                        );
+                    }
+                    return;
+                }
             }
 
             // Llenar el input con el código escaneado
