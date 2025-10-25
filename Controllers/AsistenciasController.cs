@@ -7,7 +7,6 @@ namespace registroAsistencia.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class AsistenciasController : ControllerBase
 {
     private readonly IDataService _dataService;
@@ -20,6 +19,7 @@ public class AsistenciasController : ControllerBase
     }
 
     [HttpPost("profesor-scan")]
+    [Authorize]
     public async Task<IActionResult> ProfesorScan([FromBody] ProfesorScanDto dto)
     {
         // Verificar acceso a la clase
@@ -53,34 +53,73 @@ public class AsistenciasController : ControllerBase
     {
         try
         {
+            // Validar clase
             var clase = await _dataService.GetClaseAsync(dto.ClaseId);
             if (clase == null)
-                return BadRequest(new { message = $"La clase {dto.ClaseId} no existe" });
+                return BadRequest(new {
+                    success = false,
+                    message = "La clase no existe. Verifica el código QR escaneado."
+                });
 
             if (!clase.Activa)
-                return BadRequest(new { message = "La clase no está activa" });
+                return BadRequest(new {
+                    success = false,
+                    message = $"La clase '{clase.Asignatura}' ya fue cerrada. No se pueden registrar más asistencias."
+                });
 
+            // Validar alumno
             var alumno = await _dataService.GetAlumnoAsync(dto.AlumnoId);
             if (alumno == null)
-                return BadRequest(new { message = $"El alumno con ID {dto.AlumnoId} no existe. Verifica tu ID de alumno." });
+                return BadRequest(new {
+                    success = false,
+                    message = $"Estudiante no encontrado (ID: {dto.AlumnoId}). Verifica tu código QR personal."
+                });
 
+            // Validar token (pero NO consumir aún)
             if (!await _dataService.ValidarTokenAsync(dto.Nonce, dto.ClaseId))
-                return BadRequest(new { message = "Token QR inválido o expirado. Escanea nuevamente el código QR." });
+                return BadRequest(new {
+                    success = false,
+                    message = "El código QR ha expirado o es inválido. Solicita un nuevo código QR al profesor."
+                });
 
+            // Verificar si ya está registrado
+            if (await _dataService.ExisteAsistenciaAsync(dto.AlumnoId, dto.ClaseId))
+            {
+                // Consumir token después de confirmar que todo está OK
+                await _dataService.ConsumeTokenAsync(dto.Nonce);
+
+                return Ok(new {
+                    success = true,
+                    yaRegistrado = true,
+                    mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente en esta clase."
+                });
+            }
+
+            // Intentar registrar asistencia
+            var registroExitoso = await _dataService.RegistrarAsistenciaAsync(dto.AlumnoId, dto.ClaseId, "ALUMNO_ESCANEA");
+
+            if (!registroExitoso)
+                return BadRequest(new {
+                    success = false,
+                    message = "No se pudo registrar la asistencia. Por favor intenta nuevamente o contacta al profesor."
+                });
+
+            // Solo consumir token después de registro exitoso
             await _dataService.ConsumeTokenAsync(dto.Nonce);
 
-            if (await _dataService.ExisteAsistenciaAsync(dto.AlumnoId, dto.ClaseId))
-                return Ok(new { mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente." });
-
-            var registroExitoso = await _dataService.RegistrarAsistenciaAsync(dto.AlumnoId, dto.ClaseId, "ALUMNO_ESCANEA");
-            if (!registroExitoso)
-                return BadRequest(new { message = "No se pudo registrar la asistencia. Por favor intenta nuevamente." });
-
-            return Ok(new { mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente." });
+            return Ok(new {
+                success = true,
+                yaRegistrado = false,
+                mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente en '{clase.Asignatura}'."
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = $"Error al procesar la solicitud: {ex.Message}" });
+            return StatusCode(500, new {
+                success = false,
+                message = "Error del servidor al procesar tu registro. Por favor intenta nuevamente.",
+                detalle = ex.Message
+            });
         }
     }
 
@@ -90,34 +129,51 @@ public class AsistenciasController : ControllerBase
     {
         try
         {
+            // Validar clase
             var clase = await _dataService.GetClaseAsync(dto.ClaseId);
             if (clase == null)
-                return BadRequest(new { message = $"La clase {dto.ClaseId} no existe" });
+                return BadRequest(new {
+                    success = false,
+                    message = "La clase no existe. Verifica el código QR escaneado."
+                });
 
             if (!clase.Activa)
-                return BadRequest(new { message = "La clase no está activa" });
+                return BadRequest(new {
+                    success = false,
+                    message = $"La clase '{clase.Asignatura}' ya fue cerrada. No se pueden registrar más asistencias."
+                });
 
+            // Validar alumno por código
             var alumno = await _dataService.GetAlumnoByCodigoAsync(dto.CodigoAlumno);
             if (alumno == null)
-                return BadRequest(new { message = $"El alumno con código '{dto.CodigoAlumno}' no existe. Verifica tu código de estudiante." });
+                return BadRequest(new {
+                    success = false,
+                    message = $"Estudiante con código '{dto.CodigoAlumno}' no encontrado. Verifica tu código de estudiante."
+                });
 
+            // Validar token (pero NO consumir aún)
             if (!await _dataService.ValidarTokenAsync(dto.Nonce, dto.ClaseId))
-                return BadRequest(new { message = "Token QR inválido o expirado. Escanea nuevamente el código QR." });
-
-            await _dataService.ConsumeTokenAsync(dto.Nonce);
+                return BadRequest(new {
+                    success = false,
+                    message = "El código QR ha expirado o es inválido. Solicita un nuevo código QR al profesor."
+                });
 
             // Verificar si ya existe asistencia
             var yaRegistrado = await _dataService.ExisteAsistenciaAsync(alumno.Id, dto.ClaseId);
 
             if (yaRegistrado)
             {
+                // Consumir token después de confirmar que todo está OK
+                await _dataService.ConsumeTokenAsync(dto.Nonce);
+
                 // Obtener la asistencia existente para mostrar el estado
                 var asistencias = await _dataService.GetAsistenciasPorClaseAsync(dto.ClaseId);
                 var miAsistencia = asistencias.FirstOrDefault(a => a.AlumnoId == alumno.Id);
 
                 return Ok(new {
+                    success = true,
                     yaRegistrado = true,
-                    mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente.",
+                    mensaje = $"¡Hola {alumno.Nombre}! Tu asistencia ya fue registrada anteriormente en esta clase.",
                     estudiante = new {
                         codigo = alumno.Codigo,
                         nombre = alumno.Nombre,
@@ -127,17 +183,25 @@ public class AsistenciasController : ControllerBase
                 });
             }
 
+            // Intentar registrar asistencia
             var registroExitoso = await _dataService.RegistrarAsistenciaAsync(alumno.Id, dto.ClaseId, "ALUMNO_ESCANEA");
             if (!registroExitoso)
-                return BadRequest(new { message = "No se pudo registrar la asistencia. Por favor intenta nuevamente." });
+                return BadRequest(new {
+                    success = false,
+                    message = "No se pudo registrar la asistencia. Por favor intenta nuevamente o contacta al profesor."
+                });
+
+            // Solo consumir token después de registro exitoso
+            await _dataService.ConsumeTokenAsync(dto.Nonce);
 
             // Obtener la asistencia recién creada para devolver el estado
             var asistenciasActualizadas = await _dataService.GetAsistenciasPorClaseAsync(dto.ClaseId);
             var asistenciaRegistrada = asistenciasActualizadas.FirstOrDefault(a => a.AlumnoId == alumno.Id);
 
             return Ok(new {
+                success = true,
                 yaRegistrado = false,
-                mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente.",
+                mensaje = $"¡Perfecto {alumno.Nombre}! Tu asistencia ha sido registrada exitosamente en '{clase.Asignatura}'.",
                 estudiante = new {
                     codigo = alumno.Codigo,
                     nombre = alumno.Nombre,
@@ -148,7 +212,11 @@ public class AsistenciasController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = $"Error al procesar la solicitud: {ex.Message}" });
+            return StatusCode(500, new {
+                success = false,
+                message = "Error del servidor al procesar tu registro. Por favor intenta nuevamente.",
+                detalle = ex.Message
+            });
         }
     }
 
@@ -208,6 +276,7 @@ public class AsistenciasController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAll()
     {
         var asistencias = await _dataService.GetAsistenciasAsync();
@@ -229,6 +298,7 @@ public class AsistenciasController : ControllerBase
 
     [HttpGet("clase/{claseId}")]
     [HttpGet("/api/clases/{claseId}/asistencias")] // Ruta alternativa para compatibilidad
+    [Authorize]
     public async Task<IActionResult> GetByClase(int claseId)
     {
         try
@@ -313,6 +383,7 @@ public class AsistenciasController : ControllerBase
     }
 
     [HttpGet("csv")]
+    [Authorize]
     public async Task<IActionResult> ExportCsv()
     {
         var asistencias = await _dataService.GetAsistenciasAsync();
@@ -336,6 +407,7 @@ public class AsistenciasController : ControllerBase
 
     [HttpGet("clase/{claseId}/csv")]
     [HttpGet("/api/clases/{claseId}/asistencias.csv")] // Ruta alternativa para compatibilidad
+    [Authorize]
     public async Task<IActionResult> ExportCsvByClase(int claseId)
     {
         // Verificar acceso a la clase
@@ -351,6 +423,7 @@ public class AsistenciasController : ControllerBase
     }
 
     [HttpGet("clase/{claseId}/csv-completo")]
+    [Authorize]
     public async Task<IActionResult> ExportCsvCompletoByClase(int claseId)
     {
         // Verificar acceso a la clase

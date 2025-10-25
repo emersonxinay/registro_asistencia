@@ -265,34 +265,81 @@ public class EfDataService : IDataService
 
     public async Task<bool> RegistrarAsistenciaAsync(int alumnoId, int claseId, string metodo)
     {
-        var existeAsistencia = await ExisteAsistenciaAsync(alumnoId, claseId);
-        if (existeAsistencia)
-            return false;
-
-        var clase = await _context.Clases.FindAsync(claseId);
-        if (clase == null) return false;
-
-        var ahora = DateTime.UtcNow;
-        var minutosRetraso = (int)(ahora - clase.InicioUtc).TotalMinutes;
-        var estado = minutosRetraso <= 20 ? EstadoAsistencia.Presente : 
-                    (clase.FinUtc == null || ahora <= clase.FinUtc) ? EstadoAsistencia.Tardanza : EstadoAsistencia.Ausente;
-
-        var asistencia = new Asistencia
+        try
         {
-            AlumnoId = alumnoId,
-            ClaseId = claseId,
-            MarcadaUtc = ahora,
-            ClaseInicioUtc = clase.InicioUtc,
-            ClaseFinUtc = clase.FinUtc,
-            MinutosRetraso = Math.Max(0, minutosRetraso),
-            Estado = estado,
-            Metodo = MetodoRegistro.QrEstudiante,
-            EsRegistroManual = false
-        };
+            // Verificación rápida para evitar trabajo innecesario (pero no confiamos 100% debido a concurrencia)
+            var existeAsistencia = await ExisteAsistenciaAsync(alumnoId, claseId);
+            if (existeAsistencia)
+            {
+                _logger.LogInformation("Asistencia ya existe para alumno {AlumnoId} en clase {ClaseId}", alumnoId, claseId);
+                return true; // Ya registrado, no es error
+            }
 
-        _context.Asistencias.Add(asistencia);
-        await _context.SaveChangesAsync();
-        return true;
+            var clase = await _context.Clases.FindAsync(claseId);
+            if (clase == null)
+            {
+                _logger.LogWarning("Clase {ClaseId} no encontrada al registrar asistencia", claseId);
+                return false;
+            }
+
+            var ahora = DateTime.UtcNow;
+            var minutosRetraso = (int)(ahora - clase.InicioUtc).TotalMinutes;
+            var estado = minutosRetraso <= 20 ? EstadoAsistencia.Presente :
+                        (clase.FinUtc == null || ahora <= clase.FinUtc) ? EstadoAsistencia.Tardanza : EstadoAsistencia.Ausente;
+
+            var asistencia = new Asistencia
+            {
+                AlumnoId = alumnoId,
+                ClaseId = claseId,
+                MarcadaUtc = ahora,
+                ClaseInicioUtc = clase.InicioUtc,
+                ClaseFinUtc = clase.FinUtc,
+                MinutosRetraso = Math.Max(0, minutosRetraso),
+                Estado = estado,
+                Metodo = MetodoRegistro.QrEstudiante,
+                EsRegistroManual = false
+            };
+
+            _context.Asistencias.Add(asistencia);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Asistencia registrada exitosamente para alumno {AlumnoId} en clase {ClaseId} - Estado: {Estado}",
+                alumnoId, claseId, estado);
+
+            return true;
+        }
+        catch (DbUpdateException ex) when (IsDuplicateKeyException(ex))
+        {
+            // Race condition: otro request registró la asistencia primero
+            // Esto NO es un error - el estudiante está registrado
+            _logger.LogInformation("Asistencia duplicada detectada (race condition) para alumno {AlumnoId} en clase {ClaseId} - Ignorando",
+                alumnoId, claseId);
+            return true; // Ya registrado por otro request concurrente
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Error de base de datos al registrar asistencia para alumno {AlumnoId} en clase {ClaseId}",
+                alumnoId, claseId);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error inesperado al registrar asistencia para alumno {AlumnoId} en clase {ClaseId}",
+                alumnoId, claseId);
+            throw;
+        }
+    }
+
+    private bool IsDuplicateKeyException(DbUpdateException ex)
+    {
+        // PostgreSQL: 23505 = unique_violation
+        // SQL Server: 2627 = unique constraint violation
+        var message = ex.InnerException?.Message ?? ex.Message;
+        return message.Contains("23505") || // PostgreSQL
+               message.Contains("2627") ||  // SQL Server
+               message.Contains("duplicate key") ||
+               message.Contains("unique constraint") ||
+               message.Contains("IX_Asistencias_AlumnoId_ClaseId");
     }
 
     public async Task<IEnumerable<dynamic>> GetAsistenciasPorClaseAsync(int claseId)
