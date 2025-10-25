@@ -118,11 +118,30 @@ public class AlumnosController : ControllerBase
             {
                 return BadRequest(new { message = "Nombre es requerido" });
             }
-            
+
+            // SEGURIDAD: Obtener alumno actual para validar que el código no cambió
+            var alumnoActual = await _dataService.GetAlumnoAsync(id);
+            if (alumnoActual == null)
+                return NotFound(new { message = "Alumno no encontrado" });
+
+            // IMPORTANTE: Prevenir cambio de código (seguridad)
+            // Ignorar el código enviado desde el frontend y usar el existente
+            if (!string.IsNullOrEmpty(dto.Codigo) && dto.Codigo != alumnoActual.Codigo)
+            {
+                return BadRequest(new {
+                    message = "No se permite cambiar el código del estudiante por seguridad",
+                    codigoActual = alumnoActual.Codigo,
+                    codigoIntentado = dto.Codigo
+                });
+            }
+
+            // Forzar que el código sea el actual (prevenir manipulación desde inspector)
+            dto.Codigo = alumnoActual.Codigo;
+
             var updated = await _dataService.UpdateAlumnoAsync(id, dto);
             if (!updated)
-                return NotFound(new { message = "Alumno no encontrado" });
-            
+                return NotFound(new { message = "Error al actualizar alumno" });
+
             var alumno = await _dataService.GetAlumnoAsync(id);
             return Ok(alumno);
         }

@@ -217,7 +217,11 @@ public class CsvService : ICsvService
                 throw new Exception($"Línea {lineNumber}: El nombre no puede estar vacío");
             }
 
-            var alumno = new Models.AlumnoCreateDto(null, nombre);
+            var alumno = new Models.AlumnoCreateDto
+            {
+                Codigo = null,
+                Nombre = nombre
+            };
 
             // El código se ignora si existe, se generará automáticamente
             alumnos.Add(alumno);

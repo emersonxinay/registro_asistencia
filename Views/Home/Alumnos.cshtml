@@ -1449,10 +1449,11 @@
 
                 const originalStudent = this.students.find(s => s.id === id);
                 const nameChanged = originalStudent.nombre !== nombre;
+                const regenerateQR = regenerateQRCheckbox.checked;
 
-                // Note: Los códigos no se pueden cambiar (readonly)
-                if (!nameChanged) {
-                    this.showInfo('No hay cambios para guardar');
+                // Verificar si hay cambios (nombre o regenerar QR)
+                if (!nameChanged && !regenerateQR) {
+                    this.showInfo('No hay cambios para guardar. Modifica el nombre o marca "Regenerar código QR"');
                     return;
                 }
 
@@ -1463,36 +1464,38 @@
                 saveBtn.innerHTML = '<i data-lucide="loader-2" class="spinning"></i><span>Guardando...</span>';
 
                 try {
-                    // Update student data
-                    const response = await fetch(`/api/alumnos/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            codigo: codigo,
-                            nombre: nombre
-                        })
-                    });
+                    // Update student data only if name changed
+                    if (nameChanged) {
+                        const response = await fetch(`/api/alumnos/${id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                codigo: codigo,
+                                nombre: nombre
+                            })
+                        });
 
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Error al actualizar estudiante');
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.message || 'Error al actualizar estudiante');
+                        }
+
+                        const updatedStudent = await response.json();
+
+                        // Update local data
+                        originalStudent.codigo = updatedStudent.codigo;
+                        originalStudent.nombre = updatedStudent.nombre;
                     }
 
-                    const updatedStudent = await response.json();
-
-                    // Update local data
-                    originalStudent.codigo = updatedStudent.codigo;
-                    originalStudent.nombre = updatedStudent.nombre;
-
                     // Regenerate QR if requested
-                    if (regenerateQRCheckbox.checked) {
+                    if (regenerateQR) {
                         try {
                             await this.generateQRForStudent(id);
                         } catch (qrError) {
                             console.warn('Error regenerando QR:', qrError);
-                            // Don't fail the whole operation for QR issues
+                            throw new Error('Error al regenerar código QR: ' + qrError.message);
                         }
                     }
 
@@ -1505,10 +1508,10 @@
 
                     // Show success message
                     const changes = [];
-                    if (nameChanged) changes.push('nombre');
-                    if (regenerateQRCheckbox.checked) changes.push('QR');
+                    if (nameChanged) changes.push('nombre actualizado');
+                    if (regenerateQR) changes.push('código QR regenerado');
 
-                    this.showSuccess(`Estudiante actualizado: ${changes.join(', ')}`);
+                    this.showSuccess(`Estudiante actualizado exitosamente: ${changes.join(', ')}`);
 
                     // Highlight updated student
                     setTimeout(() => {
@@ -2371,6 +2374,8 @@
                 border: 1px solid var(--border);
                 transform: scale(0.9) translateY(20px);
                 transition: all 0.3s ease;
+                display: flex;
+                flex-direction: column;
             }
 
             .modal-overlay.show .edit-modal-content {
@@ -2385,6 +2390,7 @@
                 border-bottom: 1px solid var(--border);
                 background: linear-gradient(135deg, var(--warning), #f59e0b);
                 color: white;
+                flex-shrink: 0;
             }
 
             .edit-modal-title {
@@ -2438,6 +2444,10 @@
 
             .edit-modal-body {
                 padding: 2rem;
+                overflow-y: auto;
+                overflow-x: hidden;
+                flex: 1 1 auto;
+                min-height: 0;
             }
 
             .edit-form-grid {
@@ -2534,6 +2544,8 @@
                 padding: 1.5rem 2rem 2rem 2rem;
                 background: var(--bg-secondary);
                 justify-content: flex-end;
+                flex-shrink: 0;
+                border-top: 1px solid var(--border);
             }
 
             .edit-action-btn {
@@ -2595,25 +2607,61 @@
             /* Responsive Edit Modal */
             @@media (max-width: 768px) {
                 .edit-modal-content {
-                    margin: 1rem;
-                    max-width: calc(100% - 2rem);
+                    margin: 0.5rem;
+                    max-width: calc(100% - 1rem);
+                    max-height: 95vh;
                 }
 
                 .edit-modal-header {
-                    padding: 1.5rem;
+                    padding: 1.25rem;
                 }
 
                 .edit-modal-body {
-                    padding: 1.5rem;
+                    padding: 1.25rem;
+                    max-height: calc(95vh - 200px);
                 }
 
                 .edit-modal-footer {
                     flex-direction: column;
-                    padding: 1.5rem;
+                    padding: 1.25rem;
                 }
 
                 .edit-action-btn {
                     width: 100%;
+                }
+
+                .edit-form-grid {
+                    gap: 1.25rem;
+                }
+            }
+
+            @@media (max-width: 480px) {
+                .edit-modal-content {
+                    margin: 0.25rem;
+                    max-width: calc(100% - 0.5rem);
+                    max-height: 98vh;
+                    border-radius: var(--radius-lg);
+                }
+
+                .edit-modal-header {
+                    padding: 1rem;
+                }
+
+                .edit-modal-body {
+                    padding: 1rem;
+                    max-height: calc(98vh - 180px);
+                }
+
+                .edit-modal-footer {
+                    padding: 1rem;
+                }
+
+                .edit-modal-title h3 {
+                    font-size: 1.125rem;
+                }
+
+                .edit-modal-title p {
+                    font-size: 0.75rem;
                 }
             }
 
