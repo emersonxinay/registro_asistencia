@@ -53,6 +53,7 @@ public interface IDataService
     Task<IEnumerable<dynamic>> GetAsistenciasPorClaseAsync(int claseId);
     Task<IEnumerable<dynamic>> GetAsistenciasAsync();
     Task<bool> ExisteAsistenciaAsync(int alumnoId, int claseId);
+    Task<bool> AlumnoPuedeRegistrarEnClaseAsync(int alumnoId, int claseId);
     
     // Tokens QR
     Task<string> GenerarTokenClaseAsync(int claseId);
@@ -437,5 +438,10 @@ public class InMemoryDataService : IDataService
     public Task<bool> ValidarLimiteInscripcionAsync(int alumnoId)
     {
         throw new NotImplementedException("Use EfDataService for AlumnoCurso operations");
+    }
+
+    public Task<bool> AlumnoPuedeRegistrarEnClaseAsync(int alumnoId, int claseId)
+    {
+        throw new NotImplementedException("Use EfDataService for AlumnoPuedeRegistrarEnClaseAsync");
     }
 }

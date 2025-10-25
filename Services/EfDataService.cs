@@ -705,6 +705,26 @@ public class EfDataService : IDataService
         return cursosActuales < 2;
     }
 
+    public async Task<bool> AlumnoPuedeRegistrarEnClaseAsync(int alumnoId, int claseId)
+    {
+        // Obtener la clase con su ramo y curso
+        var clase = await _context.Clases
+            .Include(c => c.Ramo)
+            .ThenInclude(r => r.Curso)
+            .FirstOrDefaultAsync(c => c.Id == claseId);
+
+        if (clase == null)
+            return false;
+
+        // Si la clase no tiene ramo asociado (clases antiguas), permitir registro
+        if (clase.RamoId == null || clase.Ramo == null)
+            return true;
+
+        // Verificar que el alumno esté inscrito en el curso del ramo
+        var cursoId = clase.Ramo.CursoId;
+        return await AlumnoPerteneceCursoAsync(alumnoId, cursoId);
+    }
+
     /// <summary>
     /// Genera código automático con formato EST######
     /// </summary>

@@ -82,6 +82,16 @@ public class AsistenciasController : ControllerBase
                     message = "El código QR ha expirado o es inválido. Solicita un nuevo código QR al profesor."
                 });
 
+            // Validar que el alumno pertenezca al curso de la clase
+            var puedeRegistrar = await _dataService.AlumnoPuedeRegistrarEnClaseAsync(dto.AlumnoId, dto.ClaseId);
+            if (!puedeRegistrar)
+            {
+                return BadRequest(new {
+                    success = false,
+                    message = $"El estudiante {alumno.Nombre} ({alumno.Codigo}) no está inscrito en el curso de esta clase. Solo los estudiantes inscritos pueden registrar asistencia."
+                });
+            }
+
             // Verificar si ya está registrado
             if (await _dataService.ExisteAsistenciaAsync(dto.AlumnoId, dto.ClaseId))
             {
@@ -157,6 +167,16 @@ public class AsistenciasController : ControllerBase
                     success = false,
                     message = "El código QR ha expirado o es inválido. Solicita un nuevo código QR al profesor."
                 });
+
+            // Validar que el alumno pertenezca al curso de la clase
+            var puedeRegistrar = await _dataService.AlumnoPuedeRegistrarEnClaseAsync(alumno.Id, dto.ClaseId);
+            if (!puedeRegistrar)
+            {
+                return BadRequest(new {
+                    success = false,
+                    message = $"El estudiante {alumno.Nombre} ({alumno.Codigo}) no está inscrito en el curso de esta clase. Solo los estudiantes inscritos pueden registrar asistencia."
+                });
+            }
 
             // Verificar si ya existe asistencia
             var yaRegistrado = await _dataService.ExisteAsistenciaAsync(alumno.Id, dto.ClaseId);
@@ -248,6 +268,15 @@ public class AsistenciasController : ControllerBase
             var alumno = await _dataService.GetAlumnoAsync(alumnoIdFromAuth.Value);
             if (alumno == null)
                 return BadRequest(new { message = "Estudiante no encontrado en el sistema" });
+
+            // Validar que el alumno pertenezca al curso de la clase
+            var puedeRegistrar = await _dataService.AlumnoPuedeRegistrarEnClaseAsync(alumnoIdFromAuth.Value, dto.ClaseId);
+            if (!puedeRegistrar)
+            {
+                return BadRequest(new {
+                    mensaje = $"No estás inscrito en el curso de esta clase. Solo los estudiantes inscritos pueden registrar asistencia."
+                });
+            }
 
             if (await _dataService.ExisteAsistenciaAsync(alumnoIdFromAuth.Value, dto.ClaseId))
                 return Ok(new {

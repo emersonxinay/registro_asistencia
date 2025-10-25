@@ -966,18 +966,19 @@
         let currentNonce = "@ViewBag.Nonce";
         let qrScanner = null;
         let isProcessing = false;
-        let lastRegisteredCode = null;
 
-        // Cache local para evitar duplicados en la misma sesión
-        const CACHE_KEY = `asistencia_${claseId}_${currentNonce}`;
+        // Persistir en sessionStorage para que sobreviva a recargas de página
+        const CACHE_KEY = `asistencia_registrada_${claseId}_${currentNonce}`;
+
+        // Recuperar último código registrado (si existe después de recargar)
+        let lastRegisteredCode = sessionStorage.getItem(CACHE_KEY);
 
         // Verificar si ya se registró en esta sesión
         function yaSeRegistro(codigo) {
-            const cached = sessionStorage.getItem(CACHE_KEY);
-            return cached === codigo;
+            return lastRegisteredCode === codigo;
         }
 
-        // Guardar registro en cache
+        // Guardar registro en cache persistente
         function guardarEnCache(codigo) {
             sessionStorage.setItem(CACHE_KEY, codigo);
             lastRegisteredCode = codigo;
@@ -1144,7 +1145,7 @@
                 } else {
                     // Intentando registrar un código diferente
                     // Verificar si el nuevo código ya está registrado en la clase
-                    showMessage('⏳ Verificando estado del estudiante...', 'loading', false);
+                    showMessage('<i class="fas fa-spinner fa-spin"></i> Verificando estado del estudiante...', 'loading', false);
 
                     try {
                         const checkRes = await fetch('/api/asistencias/alumno-scan-codigo', {
@@ -1195,7 +1196,7 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Registrando...</span>';
 
             // Mostrar mensaje de loading
-            showMessage('⏳ Registrando tu asistencia...', 'loading', false);
+            showMessage('<i class="fas fa-spinner fa-spin"></i> Registrando tu asistencia...', 'loading', false);
 
             try {
                 const startTime = Date.now();
@@ -1236,39 +1237,61 @@
 
                     document.getElementById('manualForm').reset();
                 } else {
-                    throw new Error(data.mensaje || 'Error al registrar asistencia');
+                    throw new Error(data.message || data.mensaje || 'Error al registrar asistencia');
                 }
             } catch (error) {
                 let msg = error.message;
                 let type = 'error';
 
-                // Mensajes optimizados
-                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
-                    msg = '<i class="fas fa-check-circle icon-success"></i> Tu asistencia ya fue registrada anteriormente';
+                // Mensajes optimizados y específicos
+                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada') || msg.includes('ya fue registrada')) {
+                    msg = '<i class="fas fa-check-circle icon-success"></i> <strong>Tu asistencia ya fue registrada anteriormente</strong><br>' +
+                          `Código: ${codigoAlumno}`;
                     type = 'success';
                     guardarEnCache(codigoAlumno); // Guardar en cache también
-                } else if (msg.includes('no encontrado')) {
-                    msg = '<i class="fas fa-times-circle icon-error"></i> Código no encontrado. Verifica que sea correcto (EST123456)';
-                } else if (msg.includes('no activa') || msg.includes('no está activa')) {
-                    msg = '<i class="fas fa-exclamation-triangle icon-warning"></i> Esta clase no está activa en este momento';
+                } else if (msg.includes('no encontrado') || msg.includes('no existe')) {
+                    msg = `<i class="fas fa-times-circle icon-error"></i> <strong>Código no encontrado</strong><br>` +
+                          `El código ${codigoAlumno} no existe en el sistema.<br>` +
+                          `<small>Verifica que sea correcto (formato: EST123456)</small>`;
+                } else if (msg.includes('no está inscrito') || msg.includes('no estás inscrito') || msg.includes('inscritos pueden registrar')) {
+                    msg = '<i class="fas fa-user-slash icon-warning"></i> <strong>No inscrito en el curso</strong><br>' +
+                          `El estudiante no está inscrito en el curso de esta clase.<br>` +
+                          `<small><i class="fas fa-info-circle"></i> Contacta al profesor para que te inscriba en el curso correspondiente.</small>`;
                     type = 'warning';
-                } else if (msg.includes('expirado') || msg.includes('vencido')) {
-                    msg = '<i class="fas fa-hourglass-end icon-warning"></i> El código QR ha expirado. Solicita uno nuevo al profesor';
+                } else if (msg.includes('no activa') || msg.includes('no está activa') || msg.includes('cerrada')) {
+                    msg = '<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Clase no activa</strong><br>' +
+                          'Esta clase ya fue cerrada. No se pueden registrar más asistencias.';
                     type = 'warning';
-                } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
-                          msg.toLowerCase().includes('ya no se puede') ||
-                          msg.toLowerCase().includes('personal')) {
-                    msg = '<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          '<small><i class="fas fa-lightbulb"></i> Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                } else if (msg.includes('expirado') || msg.includes('vencido') || msg.includes('inválido')) {
+                    msg = '<i class="fas fa-hourglass-end icon-warning"></i> <strong>Código QR expirado</strong><br>' +
+                          'El enlace ha expirado. Solicita un nuevo código QR al profesor.';
                     type = 'warning';
-                } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
-                    msg = '<i class="fas fa-ban icon-warning"></i> <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          '<small><i class="fas fa-lightbulb"></i> Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
-                    type = 'warning';
+                } else if (msg.toLowerCase().includes('error al registrar') || msg.toLowerCase().includes('no se pudo')) {
+                    // Error genérico cuando ya hay un registro previo
+                    if (lastRegisteredCode) {
+                        if (lastRegisteredCode === codigoAlumno) {
+                            msg = '<i class="fas fa-check-circle icon-success"></i> <strong>Ya registraste tu asistencia anteriormente</strong><br>' +
+                                  `Código: ${codigoAlumno}<br>` +
+                                  '<small><i class="fas fa-info-circle"></i> Tu asistencia ya está guardada en el sistema. No necesitas hacer nada más.</small>';
+                            type = 'success';
+                        } else {
+                            msg = '<i class="fas fa-info-circle icon-info"></i> <strong>Este enlace ya fue utilizado</strong><br>' +
+                                  `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                                  `Código ingresado: <strong>${codigoAlumno}</strong><br>` +
+                                  '<small><i class="fas fa-lightbulb"></i> <strong>Importante:</strong> Cada enlace QR solo puede registrar UN estudiante. Si <strong>${codigoAlumno}</strong> necesita registrarse, debe usar su propio enlace QR o pedirle al docente que escanee su QR físico de estudiante.</small>';
+                            type = 'info';
+                        }
+                    } else {
+                        msg = `<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>No se pudo completar el registro</strong><br>` +
+                              `Razón: ${msg}<br>` +
+                              `<small><i class="fas fa-redo"></i> Intenta nuevamente o contacta al profesor si el problema persiste.</small>`;
+                        type = 'warning';
+                    }
                 } else {
-                    msg = `<i class="fas fa-times-circle icon-error"></i> ${msg}`;
+                    msg = `<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Error inesperado</strong><br>` +
+                          `${msg}<br>` +
+                          `<small><i class="fas fa-redo"></i> Por favor intenta nuevamente. Si el error continúa, contacta al profesor.</small>`;
+                    type = 'warning';
                 }
 
                 showMessage(msg, type);
@@ -1282,7 +1305,7 @@
         // Registro automático con optimizaciones
         document.getElementById('autoRegisterBtn')?.addEventListener('click', async function() {
             if (isProcessing) {
-                showMessage('⏳ Procesando... por favor espera', 'warning');
+                showMessage('<i class="fas fa-spinner fa-spin"></i> Procesando... por favor espera', 'warning');
                 return;
             }
 
@@ -1299,7 +1322,7 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Registrando...</span>';
 
-            showMessage('⏳ Registrando tu asistencia automáticamente...', 'loading', false);
+            showMessage('<i class="fas fa-spinner fa-spin"></i> Registrando tu asistencia automáticamente...', 'loading', false);
 
             try {
                 const startTime = Date.now();
@@ -1338,29 +1361,41 @@
                 let type = 'error';
 
                 if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
-                    msg = '[OK] Tu asistencia ya fue registrada anteriormente';
+                    msg = '<i class="fas fa-check-circle icon-success"></i> <strong>Ya registraste tu asistencia anteriormente</strong><br>' +
+                          `Usuario: ${username}<br>` +
+                          '<small><i class="fas fa-info-circle"></i> Tu asistencia ya está guardada en el sistema.</small>';
                     type = 'success';
                     guardarEnCache(username);
+                } else if (msg.includes('no está inscrito') || msg.includes('no estás inscrito') || msg.includes('inscritos pueden registrar')) {
+                    msg = '<i class="fas fa-user-slash icon-warning"></i> <strong>No inscrito en el curso</strong><br>' +
+                          'No estás inscrito en el curso de esta clase.<br>' +
+                          '<small><i class="fas fa-info-circle"></i> Contacta al profesor para que te inscriba en el curso correspondiente.</small>';
+                    type = 'warning';
                 } else if (msg.includes('no activa')) {
-                    msg = '[WARNING] Esta clase no está activa en este momento';
+                    msg = '<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Clase no activa</strong><br>' +
+                          'Esta clase ya fue cerrada. No se pueden registrar más asistencias.';
                     type = 'warning';
                 } else if (msg.includes('expirado')) {
-                    msg = '⏱️ El código QR ha expirado. Solicita uno nuevo al profesor';
+                    msg = '<i class="fas fa-hourglass-end icon-warning"></i> <strong>Código QR expirado</strong><br>' +
+                          'El enlace ha expirado. Solicita un nuevo código QR al profesor.';
                     type = 'warning';
                 } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
                           msg.toLowerCase().includes('ya no se puede') ||
                           msg.toLowerCase().includes('personal')) {
-                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
-                    type = 'warning';
+                    msg = '<i class="fas fa-info-circle icon-info"></i> <strong>Este enlace ya fue utilizado</strong><br>' +
+                          'El registro es personal. Cada enlace solo puede registrar a un estudiante.<br>' +
+                          '<small><i class="fas fa-lightbulb"></i> Si necesitas registrarte, usa tu propio enlace QR o pide al docente que escanee tu QR físico de estudiante.</small>';
+                    type = 'info';
                 } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
-                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
-                    type = 'warning';
+                    msg = '<i class="fas fa-info-circle icon-info"></i> <strong>Este enlace ya fue utilizado</strong><br>' +
+                          'El registro es personal. Cada enlace solo puede registrar a un estudiante.<br>' +
+                          '<small><i class="fas fa-lightbulb"></i> Si necesitas registrarte, usa tu propio enlace QR o pide al docente que escanee tu QR físico de estudiante.</small>';
+                    type = 'info';
                 } else {
-                    msg = `[ERROR] ${msg}`;
+                    msg = `<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Error inesperado</strong><br>` +
+                          `${msg}<br>` +
+                          `<small><i class="fas fa-redo"></i> Por favor intenta nuevamente. Si el error continúa, contacta al profesor.</small>`;
+                    type = 'warning';
                 }
 
                 showMessage(msg, type);
@@ -1468,7 +1503,7 @@
                     return;
                 } else {
                     // Intentando registrar un código diferente
-                    showMessage('⏳ Verificando estado del estudiante...', 'loading', false);
+                    showMessage('<i class="fas fa-spinner fa-spin"></i> Verificando estado del estudiante...', 'loading', false);
 
                     try {
                         const checkRes = await fetch('/api/asistencias/alumno-scan-codigo', {
@@ -1518,7 +1553,7 @@
             isProcessing = true;
 
             // Feedback inmediato - UI Optimista
-            showMessage(`⏳ Registrando ${codigoAlumno}...`, 'loading', false);
+            showMessage(`<i class="fas fa-spinner fa-spin"></i> Registrando ${codigoAlumno}...`, 'loading', false);
 
             // Registrar asistencia con el código escaneado
             try {
@@ -1564,41 +1599,60 @@
                         navigator.vibrate([100, 50, 100]);
                     }
                 } else {
-                    throw new Error(result.mensaje || 'Error al registrar');
+                    throw new Error(result.message || result.mensaje || 'Error al registrar');
                 }
             } catch (error) {
                 let msg = error.message;
                 let type = 'error';
 
                 // Mensajes optimizados y específicos
-                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada')) {
-                    msg = `[OK] Tu asistencia ya fue registrada con ${codigoAlumno}`;
+                if (msg.includes('ya ha sido registrada') || msg.includes('ya registrada') || msg.includes('ya fue registrada')) {
+                    msg = '<i class="fas fa-check-circle icon-success"></i> <strong>Tu asistencia ya fue registrada</strong><br>' +
+                          `Código: ${codigoAlumno}`;
                     type = 'success';
                     guardarEnCache(codigoAlumno);
-                } else if (msg.includes('no encontrado')) {
-                    msg = `[ERROR] El código ${codigoAlumno} no existe en el sistema`;
-                } else if (msg.includes('no activa')) {
-                    msg = '[WARNING] Esta clase no está activa actualmente';
+                } else if (msg.includes('no encontrado') || msg.includes('no existe')) {
+                    msg = `<i class="fas fa-times-circle icon-error"></i> <strong>Código no encontrado</strong><br>` +
+                          `El código ${codigoAlumno} no existe en el sistema.`;
+                } else if (msg.includes('no está inscrito') || msg.includes('no estás inscrito') || msg.includes('inscritos pueden registrar')) {
+                    msg = '<i class="fas fa-user-slash icon-warning"></i> <strong>No inscrito en el curso</strong><br>' +
+                          `El estudiante no está inscrito en el curso de esta clase.<br>` +
+                          `<small><i class="fas fa-info-circle"></i> Contacta al profesor para que te inscriba en el curso correspondiente.</small>`;
                     type = 'warning';
-                } else if (msg.includes('expirado') || msg.includes('vencido')) {
-                    msg = '⏱️ El código QR ha expirado. Pide uno nuevo al profesor';
+                } else if (msg.includes('no activa') || msg.includes('no está activa') || msg.includes('cerrada')) {
+                    msg = '<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Clase no activa</strong><br>' +
+                          'Esta clase ya fue cerrada.';
                     type = 'warning';
-                } else if (msg.includes('dispositivo') || msg.includes('ya se registró') ||
-                          msg.toLowerCase().includes('ya no se puede') ||
-                          msg.toLowerCase().includes('personal')) {
-                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          `<small>Código escaneado: ${codigoAlumno}</small><br>` +
-                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
+                } else if (msg.includes('expirado') || msg.includes('vencido') || msg.includes('inválido')) {
+                    msg = '<i class="fas fa-hourglass-end icon-warning"></i> <strong>Código QR expirado</strong><br>' +
+                          'Solicita un nuevo código QR al profesor.';
                     type = 'warning';
-                } else if (msg.toLowerCase().includes('error al registrar') && lastRegisteredCode) {
-                    msg = '🚫 <strong>Ya se registró una asistencia desde este dispositivo</strong><br>' +
-                          'El registro es personal. No puedes registrar a otro estudiante desde aquí.<br>' +
-                          `<small>Ya registrado: ${lastRegisteredCode} | Intentaste: ${codigoAlumno}</small><br>` +
-                          '<small>💡 Si eres tú, pide al docente que escanee tu QR físico para registrarte.</small>';
-                    type = 'warning';
+                } else if (msg.toLowerCase().includes('error al registrar') || msg.toLowerCase().includes('no se pudo')) {
+                    // Error genérico cuando ya hay un registro previo
+                    if (lastRegisteredCode) {
+                        if (lastRegisteredCode === codigoAlumno) {
+                            msg = '<i class="fas fa-check-circle icon-success"></i> <strong>Ya registraste tu asistencia anteriormente</strong><br>' +
+                                  `Código: ${codigoAlumno}<br>` +
+                                  '<small><i class="fas fa-info-circle"></i> Tu asistencia ya está guardada en el sistema. No necesitas hacer nada más.</small>';
+                            type = 'success';
+                        } else {
+                            msg = '<i class="fas fa-info-circle icon-info"></i> <strong>Este enlace ya fue utilizado</strong><br>' +
+                                  `Ya registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                                  `QR escaneado: <strong>${codigoAlumno}</strong><br>` +
+                                  '<small><i class="fas fa-lightbulb"></i> <strong>Importante:</strong> Cada enlace QR solo puede registrar UN estudiante. Si <strong>${codigoAlumno}</strong> necesita registrarse, debe usar su propio enlace QR o pedirle al docente que escanee su QR físico de estudiante.</small>';
+                            type = 'info';
+                        }
+                    } else {
+                        msg = `<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>No se pudo completar el registro</strong><br>` +
+                              `Razón: ${msg}<br>` +
+                              `<small><i class="fas fa-redo"></i> Intenta nuevamente o contacta al profesor si el problema persiste.</small>`;
+                        type = 'warning';
+                    }
                 } else {
-                    msg = `[ERROR] ${msg}`;
+                    msg = `<i class="fas fa-exclamation-triangle icon-warning"></i> <strong>Error inesperado</strong><br>` +
+                          `${msg}<br>` +
+                          `<small><i class="fas fa-redo"></i> Por favor intenta nuevamente. Si el error continúa, contacta al profesor.</small>`;
+                    type = 'warning';
                 }
 
                 showMessage(msg, type);
@@ -1635,7 +1689,28 @@
             }
         });
 
-        // Inicializar
-        loadClassInfo();
+        // Función para inicializar la página al cargar/refrescar
+        function initPage() {
+            // IMPORTANTE: Limpiar cualquier mensaje previo del DOM
+            clearMessages();
+
+            // Verificar si ya se registró una asistencia en esta sesión (enlace)
+            if (lastRegisteredCode) {
+                // Mostrar mensaje informativo persistente (NO de error)
+                showMessage(
+                    `<i class="fas fa-check-circle"></i> <strong>Asistencia ya registrada</strong><br>` +
+                    `Código registrado: <strong>${lastRegisteredCode}</strong><br>` +
+                    `<small><i class="fas fa-info-circle"></i> Tu asistencia está guardada en el sistema. Si refrescas la página, esta confirmación permanecerá visible.</small>`,
+                    'success',
+                    false  // No auto-ocultar para que sea persistente
+                );
+            }
+
+            // Cargar información de la clase
+            loadClassInfo();
+        }
+
+        // Ejecutar inicialización al cargar la página
+        initPage();
     </script>
 }
